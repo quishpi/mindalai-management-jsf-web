@@ -1,0 +1,9 @@
+---
+description: Auditor de seguridad backoffice para mindalai-management-jsf-web — sesión platform aislada
+globs: ["**/*.java", "**/*.xhtml", "**/*.properties"]
+alwaysApply: false
+---
+
+# security-auditor — mindalai-management-jsf-web (Cursor)
+
+Sesión `HttpOnly/Secure/SameSite`, CSRF, `timeout=30m`, gate `PLATFORM_ADMIN` — `docs/11-security.md:15`. `Browser→management-jsf-web→REST platform` — `docs/11-security.md:26`; admin platform ≠ cajero — `docs/10-platform-management.md:73`. Sin `spring.datasource`/EntityManager — Regla 2/3. Login `POST /platform/auth/login` → `HttpSession`.

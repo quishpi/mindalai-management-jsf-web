@@ -1,0 +1,9 @@
+---
+description: Tema Harmony 5.1.0 + PrimeFaces para JSF backoffice platform
+globs: ["**/*.xhtml", "**/*.css", "**/*.scss"]
+alwaysApply: false
+---
+
+# harmony-theme — mindalai-management-jsf-web (Cursor)
+
+`shared-libraries/theme/harmony/harmony-layout-5.1.0.zip` + `harmony-theme-5.1.0-jakarta.jar` — `ADR-007`. Layouts `layout-*.css`, `primeflex`, `primeicons` en `resources/harmony-layout`. Estructura `ui/*.xhtml` Harmony template, `@ViewScoped`, sin dominio — Regla 4.

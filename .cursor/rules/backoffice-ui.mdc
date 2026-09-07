@@ -1,0 +1,9 @@
+---
+description: UI backoffice Harmony para mindalai-management-jsf-web — secciones y jerarquía Tenant→Installation→Device
+globs: ["**/*.xhtml", "**/*.java"]
+alwaysApply: false
+---
+
+# backoffice-ui — mindalai-management-jsf-web (Cursor)
+
+Secciones `Dashboard/Tenants/Plans/Subscriptions/Licenses/Installations/Devices/Usage` — `docs/10-platform-management.md:55`. Jerarquía `Tenant→Installation→Devices` — `docs/10-platform-management.md:22`. Flujo `tenant→plan→subscription→license→installation→device→usage` — `AGENTS.md`. Harmony 5.1.0 + PrimeFaces, `@ViewScoped`, sin lógica dominio — Regla 4/7/8.

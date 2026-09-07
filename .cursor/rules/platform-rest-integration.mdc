@@ -1,0 +1,9 @@
+---
+description: Cliente REST platform en JSF backoffice — /api/v1.0/platform/* con correlationId
+globs: ["**/*.java", "**/*.properties"]
+alwaysApply: false
+---
+
+# platform-rest-integration — mindalai-management-jsf-web (Cursor)
+
+Solo `mindalai-management-api` vía `/api/v1.0/platform/*` — `docs/12-api-boundaries.md:18`; nunca `mindalai-api` — `docs/02-target-architecture.md:112`. DTOs versionados — Regla 7, `docs/04-project-structure.md:52`. `RestClient` con `app.api.base-url=http://localhost:8082`, timeout, `X-Correlation-Id` — `docs/03-technology-stack.md:47`, Regla 15. Puerto 8083, no YAML, 0 `spring.datasource`.
