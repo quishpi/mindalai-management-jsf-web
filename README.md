@@ -1,6 +1,6 @@
 # mindalai-management-jsf-web — Platform Management JSF Web
 
-![Java 25](https://img.shields.io/badge/Java-25-orange) ![Spring Boot 4.1.1](https://img.shields.io/badge/Spring_Boot-4.1.1-brightgreen) ![JoinFaces 6.1.0](https://img.shields.io/badge/JoinFaces-6.1.0-blue) ![PrimeFaces](https://img.shields.io/badge/PrimeFaces-15%2B-9cf) ![Harmony](https://img.shields.io/badge/Theme-Harmony-purple) ![Status](https://img.shields.io/badge/Status-Fase_0_Baseline-lightgrey)
+![Java 25](https://img.shields.io/badge/Java-25-orange) ![Spring Boot 4.1.1](https://img.shields.io/badge/Spring_Boot-4.1.1-brightgreen) ![JoinFaces 6.1.0](https://img.shields.io/badge/JoinFaces-6.1.0-blue) ![PrimeFaces](https://img.shields.io/badge/PrimeFaces-15%2B-9cf) ![Harmony](https://img.shields.io/badge/Theme-Harmony-purple) ![Status](https://img.shields.io/badge/Status-Fase_1_Foundation-brightgreen)
 
 > **Idioma:** Español en la narrativa; bloques de código y términos técnicos en inglés.
 
@@ -365,3 +365,28 @@ De `docs/17-acceptance.md:1` y `docs/16-phase1-backlog.md:40`:
 ---
 
 *Este proyecto es el backoffice de `mindalai-management-api`. Su evolución a React no afecta al backend. Ver `shared-libraries/mindalai-platform-phase0/docs/02-target-architecture.md:139` y `shared-libraries/mindalai-platform-phase0/README.md:34`.*
+
+---
+
+## Estado Fase 1 - Implementado (2026-09-07)
+
+Base técnica real implementada según `shared-libraries/prompts/prompt-fase-1.md` y `docs/01-phase1-implementation-report.md`.
+
+**Cambios Fase 1:**
+- Estructura multi-module Maven, Java 25, Spring Boot 4.1.1, `application.properties` (no YAML), perfiles dev/test/prod.
+- PostgreSQL 16 + Flyway (migraciones en `src/main/resources/db/migration`), `timestamptz` UTC, UUID PK, `jsonb`.
+- Seguridad base: Spring Security JWT, BCrypt, CorrelationId, GlobalExceptionHandler con formato estándar, Bean Validation.
+- OpenAPI springdoc, Actuator health/info/metrics, logs estructurados con correlationId.
+- Tests base (`mvn verify` PASS), Dockerfile y docker-compose.
+
+**Cómo ejecutar (desarrollo local):**
+Ver `docs/04-phase1-runbook.md` y `docker-compose.yml` en el workspace raíz.
+
+**Endpoints principales:**
+Ver tablas en este README y en `docs/01-phase1-implementation-report.md`. Todos versionados `/api/v1.0`.
+
+**Fronteras respetadas:**
+- REST y JSF totalmente separados; JSF consume REST vía HTTP/JSON (RestClient), sin JPA ni datasources.
+- Sin dependencias Maven entre REST y JSF.
+- Catálogos SRI en BD (Flyway), no enums.
+

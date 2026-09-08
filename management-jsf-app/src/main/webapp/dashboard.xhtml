@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui">
+<h:head><title>Platform Management - Dashboard</title></h:head>
+<h:body>
+    <p:toolbar>
+        <p:toolbarGroup><h:outputText value="MindalAI Platform Management - Dashboard" style="font-weight:bold;" /></p:toolbarGroup>
+        <p:toolbarGroup align="right"><h:form><p:commandButton value="Logout" action="#{loginBean.logout}" ajax="false" styleClass="ui-button-secondary"/></h:form></p:toolbarGroup>
+    </p:toolbar>
+    <div style="padding:1rem;">
+        <p:messages autoUpdate="true" />
+        <p:panel header="Tenants - CorrelationId: #{dashboardBean.correlationId}">
+            <h:outputText value="Tenants: #{dashboardBean.tenantCount}" />
+            <p:dataTable value="#{dashboardBean.tenants}" var="t" paginator="true" rows="10" emptyMessage="Sin tenants (backend no conectado)">
+                <p:column headerText="Razón Social"><h:outputText value="#{t.legalName}" /></p:column>
+                <p:column headerText="RUC"><h:outputText value="#{t.ruc}" /></p:column>
+                <p:column headerText="Estado"><h:outputText value="#{t.status}" /></p:column>
+            </p:dataTable>
+        </p:panel>
+        <p:panel header="Crear Tenant" style="margin-top:1rem;">
+            <h:form>
+                <p:panelGrid columns="2">
+                    <p:outputLabel value="Razón Social" />
+                    <p:inputText value="#{tenantBean.legalName}" required="true" />
+                    <p:outputLabel value="RUC" />
+                    <p:inputText value="#{tenantBean.ruc}" required="true" />
+                    <p:outputLabel value="Nombre Comercial" />
+                    <p:inputText value="#{tenantBean.tradeName}" />
+                </p:panelGrid>
+                <p:commandButton value="Crear" action="#{tenantBean.create}" update="@form" style="margin-top:1rem;" />
+                <p:commandButton value="Recargar" action="#{tenantBean.load}" update="@form" style="margin-left:0.5rem;" />
+            </h:form>
+        </p:panel>
+    </div>
+</h:body>
+</html>
