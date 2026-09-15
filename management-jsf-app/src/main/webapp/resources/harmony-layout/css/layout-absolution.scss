@@ -1,0 +1,71 @@
+/*Topbar*/
+$topbarBgLeftColor:#2d3f47 !default;
+$topbarBgRightColor:#2d3f47 !default;
+$topbarLogoColor:#ffffff !default;
+$topbarProfileTextColor:#ffffff !default;
+$topbarQuickMenuIconColor1:#f4f4f4 !default;
+$topbarQuickMenuIconColor2:#f4f4f4 !default;
+$topbarQuickMenuIconColor3:#f4f4f4 !default;
+$topbarQuickMenuIconColor4:#f4f4f4 !default;
+$topbarQuickMenuButtonTextColor:#ffffff !default;
+$quickMenuTooltipBgColor:#212121 !default;
+$quickMenuTooltipTextColor:#c8c8c8 !default;
+$topbarSearchInputTextColor:#ffffff !default;
+$topbarSearchInputBorderColor:#f4f4f4 !default;
+$topbarSearchInputBorderFocusColor:#ffffff !default;
+$topbarSearchInputIconColor:#ffffff !default;
+$topbarRightPanelIconColor:#f4f4f4 !default;
+$topbarIconHoverBgColor:#425259 !default;
+$topbarSidebarButtonColor:#f4f4f4 !default;
+
+/* Topbar Profile */
+$profileMenuBgColor:#212121 !default;
+$profileMenuItemTextColor:#eaeaea !default;
+$profileMenuItemIconColor:#6f919f !default;
+$profileMenuItemHoverBgColor:#333333 !default;
+$profileMenuItemHoverIconColor:#6f919f !default;
+$profileMenuItemHoverTextColor:#f4f4f4 !default;
+$profileMenuItemActiveBgColor:#6f919f !default;
+$profileMenuItemActiveTextColor:#ffffff !default;
+$profileMenuItemActiveIconColor:#ffffff !default;
+
+/*Sidebar*/
+$sidebarBgColor:#eaeaea !default;
+$sidebarDividerColor:#d0d0d0 !default;
+
+$sidebarMenuItemTextColor:#333333 !default;
+$sidebarMenuItemIconColor:#a6a6a6 !default;
+$sidebarMenuItemHoverBgColor:#d0d0d0 !default;
+$sidebarMenuItemHoverIconColor:#333333 !default;
+$sidebarMenuItemHoverTextColor:#333333 !default;
+$sidebarMenuItemActiveBgColor:#acbcc3 !default;
+$sidebarMenuItemActiveTextColor:#2d3f47 !default;
+$sidebarMenuItemActiveIconColor:#2d3f47 !default;
+
+$sidebarSubmenuBgColor:#f4f4f4 !default;
+$sidebarSubmenuItemTextColor:#333333 !default;
+$sidebarSubmenuItemIconColor:#a6a6a6 !default;
+$sidebarSubmenuItemHoverBgColor:#d0d0d0 !default;
+$sidebarSubmenuItemHoverTextColor:#333333 !default;
+$sidebarSubmenuItemHoverIconColor:#333333 !default;
+$sidebarSubmenuItemActiveBgColor:#eaeaea !default;
+$sidebarSubmenuItemActiveTextColor:#2d3f47 !default;
+$sidebarSubmenuItemActiveIconColor:#2d3f47 !default;
+
+$slimMenuTooltipBgColor:#212121 !default;
+$slimMenuTooltipTextColor:#ffffff !default;
+
+//active router
+$sidebarMenuItemActiveRouteTextColor:#2d3f47 !default;
+$sidebarMenuItemActiveRouteIconColor:#2d3f47 !default;
+$sidebarSubmenuItemActiveRouteBgColor:#eaeaea !default;
+
+//mask
+$maskBgColor: #212121 !default;
+
+/*Footer*/
+$footerBgColor:#212121 !default;
+$footerTextColor:#ffffff !default;
+$footerIconColor:#ffffff !default;
+
+@import '../../sass/layout/_layout';

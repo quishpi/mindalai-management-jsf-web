@@ -1,0 +1,66 @@
+/*Topbar*/
+$topbarBgLeftColor:#007ad9 !default;
+$topbarBgRightColor:#007ad9 !default;
+$topbarLogoColor:#ffffff !default;
+$topbarProfileTextColor:#ffffff !default;
+$topbarQuickMenuIconColor1:#ffba01 !default;
+$topbarQuickMenuIconColor2:#00b395 !default;
+$topbarQuickMenuIconColor3:#e4018d !default;
+$topbarQuickMenuIconColor4:#b5a1ff !default;
+$topbarQuickMenuButtonTextColor:#ffffff !default;
+$quickMenuTooltipBgColor:#212121 !default;
+$quickMenuTooltipTextColor:#c8c8c8 !default;
+$topbarSearchInputTextColor:#ffffff !default;
+$topbarSearchInputBorderColor:#dadada !default;
+$topbarSearchInputBorderFocusColor:#ffffff !default;
+$topbarSearchInputIconColor:#ffffff !default;
+$topbarRightPanelIconColor:#ffffff !default;
+$topbarIconHoverBgColor:#005b9f !default;
+$topbarSidebarButtonColor:#ffffff !default;
+
+/* Topbar Profile */
+$profileMenuBgColor:#1e1e1e !default;
+$profileMenuItemTextColor:#f4f4f4 !default;
+$profileMenuItemIconColor:#ffba01 !default;
+$profileMenuItemHoverBgColor:#333333 !default;
+$profileMenuItemHoverIconColor:#ffba01 !default;
+$profileMenuItemHoverTextColor:#f4f4f4 !default;
+$profileMenuItemActiveBgColor:#ffba01 !default;
+$profileMenuItemActiveTextColor:#333333 !default;
+$profileMenuItemActiveIconColor:#212121 !default;
+
+/*Sidebar*/
+$sidebarBgColor:#333333 !default;
+$sidebarDividerColor:#282828 !default;
+
+$sidebarMenuItemTextColor:#eaeaea !default;
+$sidebarMenuItemIconColor:#ffba01 !default;
+$sidebarMenuItemHoverBgColor:#474747 !default;
+$sidebarMenuItemHoverIconColor:#ffba01 !default;
+$sidebarMenuItemHoverTextColor:#f4f4f4 !default;
+$sidebarMenuItemActiveBgColor:#ffba01 !default;
+$sidebarMenuItemActiveTextColor:#212121 !default;
+$sidebarMenuItemActiveIconColor:#212121 !default;
+
+$sidebarSubmenuBgColor:#1e1e1e !default;
+$sidebarSubmenuItemTextColor:#f4f4f4 !default;
+$sidebarSubmenuItemIconColor:#ffba01 !default;
+$sidebarSubmenuItemHoverBgColor:#474747 !default;
+$sidebarSubmenuItemHoverTextColor:#f4f4f4 !default;
+$sidebarSubmenuItemHoverIconColor:#ffba01 !default;
+$sidebarSubmenuItemActiveBgColor:#1e1e1e !default;
+$sidebarSubmenuItemActiveTextColor:#ffba01 !default;
+$sidebarSubmenuItemActiveIconColor:#ffba01 !default;
+
+$slimMenuTooltipBgColor:#212121 !default;
+$slimMenuTooltipTextColor:#ffffff !default;
+
+//mask
+$maskBgColor: #212121 !default;
+
+/*Footer*/
+$footerBgColor:#212121 !default;
+$footerTextColor:#ffffff !default;
+$footerIconColor:#ffffff !default;
+
+@import '../../sass/layout/_layout';
