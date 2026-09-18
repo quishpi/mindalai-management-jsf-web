@@ -15,7 +15,7 @@ Al tocar `rest-client/`, backing beans platform o `app.api.*` en este repo.
 - Solo `mindalai-management-api`; nunca `mindalai-api`/`mindalai-jsf-web` — backends separados — `docs/02-target-architecture.md:112`.
 - HTTP/JSON `/api/v1.0/platform/*` versionado — `docs/12-api-boundaries.md:18`; nombres draft, OpenAPI antes Fase 1 — `docs/12-api-boundaries.md:30`; React futuro igual.
 - DTOs del API (Regla 7), 0 JPA/DataSource en JSF (Regla 2/3), dominio sin HTTP (Regla 8).
-- `RestClient` con `app.api.base-url=http://localhost:8082`, `timeout=5000`, `auth.token-url=/platform/auth/login`, `X-Correlation-Id` — `docs/03-technology-stack.md:47`, Regla 15, `AGENTS.md:Config`.
+- `RestClient` con `app.api.base-url=http://localhost:9094`, `timeout=5000`; `auth.token-url=/platform/auth/login` se deriva de `base-url` en `AppProperties`; `X-Correlation-Id` — `docs/03-technology-stack.md:47`, Regla 15, `AGENTS.md:Config`.
 - Estructura: `management-jsf-app/rest-client/*` + `presentation/jsf/@Named/@ViewScoped` + `ui/*` — `AGENTS.md`.
 - `server.port=8083`, `application.properties` no YAML.
 

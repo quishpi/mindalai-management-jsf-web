@@ -270,8 +270,8 @@ server.port=8083
 
 # Backend API
 app.api.base-url=http://localhost:8082
-app.api.auth.token-url=http://localhost:8082/api/v1.0/platform/auth/login
 app.api.timeout=5000
+# app.api.auth.token-url derives from app.api.base-url (/api/v1.0/platform/auth/login)
 
 # Security / Session
 server.servlet.session.timeout=30m

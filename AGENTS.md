@@ -42,9 +42,8 @@ management-jsf-app/
 
 ## Config — `application.properties`
 ```properties
-server.port=8083
-app.api.base-url=http://localhost:8082
-app.api.auth.token-url=http://localhost:8082/api/v1.0/platform/auth/login
+server.port=9096
+app.api.base-url=http://localhost:9094
 app.api.timeout=5000
 server.servlet.session.timeout=30m
 server.servlet.session.cookie.http-only=true

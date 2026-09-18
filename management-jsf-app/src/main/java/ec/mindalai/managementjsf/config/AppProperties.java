@@ -7,7 +7,11 @@ import org.springframework.stereotype.Component;
 @Component @ConfigurationProperties(prefix="app.api")
 @Getter @Setter
 public class AppProperties {
-    private String baseUrl = "http://localhost:8082";
-    private String authTokenUrl = "http://localhost:8082/api/v1.0/platform/auth/login";
-    private int timeout = 5000;
+    private String baseUrl;
+    private int timeout;
+
+    public String getAuthTokenUrl() {
+        String base = baseUrl == null ? "" : baseUrl.replaceAll("/+$", "");
+        return base + "/api/v1.0/platform/auth/login";
+    }
 }
