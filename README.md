@@ -79,6 +79,8 @@ Cada sección se implementa como backing beans + `RestClient` + Facelets, sin l�
 - No expone API REST propia; es consumidor puro.
 - No comparte sesión ni permisos con `mindalai-jsf-web`; son contextos de seguridad distintos (`docs/10-platform-management.md:73`).
 
+> El Authorization Service del ecosistema (`authorization-service/`) pertenece al flujo de negocio de `mindalai-api`; este frontend no debe contactarlo (ver `../AGENTS.md`).
+
 ## 5. Stack tecnológico
 
 Definido en `docs/03-technology-stack.md:18`:
@@ -351,6 +353,7 @@ De `docs/17-acceptance.md:1` y `docs/16-phase1-backlog.md:40`:
 ## 19. Referencias
 
 - `shared-libraries/mindalai-platform-phase0/README.md:1` — Decisiones y separación REST/JSF
+- `./AGENTS.md` y `../AGENTS.md` — mapa multi-repositorio del workspace MINDALAI
 - `shared-libraries/mindalai-platform-phase0/docs/02-target-architecture.md:99` — Rol platform-management-web
 - `shared-libraries/mindalai-platform-phase0/docs/03-technology-stack.md:18` — Stack JSF (JoinFaces 6.1.0, PrimeFaces, Harmony)
 - `shared-libraries/mindalai-platform-phase0/docs/04-project-structure.md:26` y `89` — Estructura `management-jsf-app → management-api-app`

@@ -12,7 +12,7 @@ Platform-management backoffice JSF frontend. Pure consumer of `mindalai-manageme
 ## Hard boundaries — will break review if violated
 - No `EntityManager`, `Repository` JPA, `DataSource`/`spring.datasource`, direct PostgreSQL — `docs/04-project-structure.md:82`, Regla 2/3
 - No REST endpoints exposed; client only — `docs/12-api-boundaries.md:33`
-- No POS/SRI logic; never contact `mindalai-api` — backends are fully separate (`docs/02-target-architecture.md:112`), no direct communication between the two JSF apps.
+- No POS/SRI logic; never contact `mindalai-api` — backends are fully separate (`docs/02-target-architecture.md:112`), no direct communication between the two JSF apps. Also never contact `authorization-service` (sibling repo `../authorization-service/`), reserved for `mindalai-api`.
 - Never import `mindalai-management-api` source; share only versioned DTO contract + HTTP/JSON — `docs/04-project-structure.md:52`; React migration must not touch backend — `docs/02-target-architecture.md:139`
 
 ## Project structure (when scaffolded)
