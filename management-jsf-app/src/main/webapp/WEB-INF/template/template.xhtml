@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" lang="en">
+
+<h:head>
+    <f:facet name="first">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+    </f:facet>
+    <title>
+        <ui:insert name="title">PrimeFaces Harmony</ui:insert>
+    </title>
+    <h:outputScript name="js/layout.js" library="harmony-layout" />
+    <h:outputScript name="js/prism.js" library="harmony-layout" />
+    <ui:insert name="head" />
+</h:head>
+
+<h:body styleClass="#{guestPreferences.inputStyleClass}">
+    <div class="layout-wrapper #{guestPreferences.menuMode} #{guestPreferences.orientationRTL ? 'layout-rtl' : null}">
+        <ui:include src="./topbar.xhtml" />
+        <ui:include src="./right_panel.xhtml" />
+        <ui:include src="./sidebar.xhtml" />
+        <ui:include src="./config.xhtml" />
+
+        <div class="layout-main">
+            <div class="route-bar">
+                <div class="route-bar-breadcrumb">
+                    <i class="pi pi-home" /> <span>/ </span>
+                    <ui:insert name="viewname" />
+                </div>
+                <ui:include src="./routebar-menu.xhtml" />
+            </div>
+
+            <div class="layout-content">
+                <ui:insert name="content" />
+            </div>
+
+            <ui:include src="./footer.xhtml" />
+
+            <div class="layout-mask"></div>
+        </div>
+    </div>
+
+    <p:ajaxStatus style="width:32px;height:32px;position:fixed;right:7px;bottom:7px">
+        <f:facet name="start">
+            <i class="pi pi-spin pi-spinner layout-ajax-loader-icon" aria-hidden="true" />
+        </f:facet>
+
+        <f:facet name="complete">
+            <h:outputText value="" />
+        </f:facet>
+    </p:ajaxStatus>
+
+    <h:outputStylesheet name="css/primeicons.css" library="harmony-layout" />
+    <h:outputStylesheet name="css/primeflex.min.css" library="harmony-layout" />
+    <h:outputStylesheet name="css/demo.css" library="demo" />
+    <h:outputStylesheet name="css/layout-#{guestPreferences.theme}.css" library="harmony-layout" />
+</h:body>
+
+</html>

@@ -1,0 +1,96 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html" xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:p="http://primefaces.org/ui">
+
+    <a tabindex="0" id="layout-config-button" class="layout-config-button">
+        <i class="pi pi-cog" />
+    </a>
+
+    <div class="layout-config">
+        <h5>Menu Type</h5>
+        <h:form id="config-form">
+            <p:selectOneRadio value="#{guestPreferences.menuMode}" layout="pageDirection"
+                onchange="PrimeFaces.HarmonyConfigurator.changeMenuMode(event.target.value)">
+                <f:selectItem itemLabel="Static" itemValue="layout-menu-static" />
+                <f:selectItem itemLabel="Overlay" itemValue="layout-menu-overlay" />
+                <f:selectItem itemLabel="Slim" itemValue="layout-menu-slim" />
+                <f:selectItem itemLabel="Horizontal" itemValue="layout-menu-horizontal" />
+                <p:ajax update="config-form" />
+            </p:selectOneRadio>
+
+            <hr />
+
+            <h5>Input Style</h5>
+            <p:selectOneRadio value="#{guestPreferences.inputStyle}" layout="pageDirection"
+                onchange="PrimeFaces.HarmonyConfigurator.updateInputStyle(event.target.value)">
+                <f:selectItem itemLabel="Outlined" itemValue="outlined" />
+                <f:selectItem itemLabel="Filled" itemValue="filled" />
+                <p:ajax />
+            </p:selectOneRadio>
+
+            <hr />
+
+            <h5>RTL</h5>
+            <p:toggleSwitch id="rtl-switch" value="#{guestPreferences.orientationRTL}"
+                onchange="PrimeFaces.HarmonyConfigurator.changeMenuToRTL()">
+                <p:ajax onstart="PrimeFaces.HarmonyConfigurator.beforeResourceChange()" update="config-form" />
+            </p:toggleSwitch>
+
+            <hr />
+
+            <h5>Image Themes</h5>
+            <div class="layout-themes">
+                <ui:repeat value="#{guestPreferences.imageThemes}" var="theme">
+                    <div>
+                        <p:commandLink action="#{guestPreferences.setTheme(theme.file)}" process="@this"
+                            update="config-form" onstart="PrimeFaces.HarmonyConfigurator.beforeResourceChange()"
+                            oncomplete="PrimeFaces.HarmonyConfigurator.changeScheme('#{theme.file}')">
+                            <p:graphicImage name="images/configurator/#{theme.image}" library="harmony-layout"
+                                title="#{theme.name}" />
+                            <ui:fragment rendered="#{theme.file eq guestPreferences.theme}">
+                                <i class="pi pi-check" />
+                            </ui:fragment>
+                        </p:commandLink>
+                    </div>
+                </ui:repeat>
+            </div>
+
+            <hr />
+
+            <h5>Gradient Themes</h5>
+            <div class="layout-themes">
+                <ui:repeat value="#{guestPreferences.gradientThemes}" var="theme">
+                    <div>
+                        <p:commandLink action="#{guestPreferences.setTheme(theme.file)}"
+                            style="background-image: linear-gradient(to right,#{theme.color1},#{theme.color2})"
+                            title="#{theme.name}" process="@this" update="config-form"
+                            onstart="PrimeFaces.HarmonyConfigurator.beforeResourceChange()"
+                            oncomplete="PrimeFaces.HarmonyConfigurator.changeScheme('#{theme.file}')">
+                            <ui:fragment rendered="#{theme.file eq guestPreferences.theme}">
+                                <i class="pi pi-check" />
+                            </ui:fragment>
+                        </p:commandLink>
+                    </div>
+                </ui:repeat>
+            </div>
+
+            <hr />
+
+            <h5>Flat Themes</h5>
+            <div class="layout-themes">
+                <ui:repeat value="#{guestPreferences.flatThemes}" var="theme">
+                    <div>
+                        <p:commandLink action="#{guestPreferences.setTheme(theme.file)}"
+                            style="background-color: #{theme.color}" title="#{theme.name}" process="@this"
+                            onstart="PrimeFaces.HarmonyConfigurator.beforeResourceChange()" update="config-form"
+                            oncomplete="PrimeFaces.HarmonyConfigurator.changeScheme('#{theme.file}')">
+                            <ui:fragment rendered="#{theme.file eq guestPreferences.theme}">
+                                <i class="pi pi-check" />
+                            </ui:fragment>
+                        </p:commandLink>
+                    </div>
+                </ui:repeat>
+            </div>
+        </h:form>
+    </div>
+</ui:composition>

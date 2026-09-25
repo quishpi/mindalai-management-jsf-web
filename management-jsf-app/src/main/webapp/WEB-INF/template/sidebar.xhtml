@@ -1,0 +1,29 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:p="http://primefaces.org/ui" xmlns:ph="http://primefaces.org/harmony">
+
+    <div class="layout-sidebar">
+        <div class="layout-menu-container">
+            <h:form id="menuform">
+                <ph:menu widgetVar="HarmonyMenuWidget">
+                    <p:menuitem id="m_dashboard" value="Dashboard" icon="pi pi-fw pi-home" outcome="/dashboard" />
+                    <p:submenu id="m_components" label="Ejemplo menú" icon="pi pi-fw pi-star">
+                        <p:menuitem id="m_formlayout" value="Ejemplo submenú" icon="pi pi-fw pi-id-card"
+                            outcome="/dashboard" />
+                    </p:submenu>
+                    <p:submenu id="m_hierarchy" label="Ejemplo Hierarchy" icon="pi pi-fw pi-align-left">
+                        <p:submenu id="m_sm1" label="Submenu 1" icon="pi pi-fw pi-align-left">
+                            <p:submenu id="m_sm11" label="Submenu 1.1" icon="pi pi-fw pi-align-left">
+                                <p:menuitem id="m_lnk111" value="Link 1.1.1" icon="pi pi-fw pi-align-left" url="#" />
+                            </p:submenu>
+                            <p:submenu id="m_sm12" label="Submenu 1.2" icon="pi pi-fw pi-align-left">
+                                <p:menuitem id="m_lnk121" value="Link 1.2.1" icon="pi pi-fw pi-align-left" url="#" />
+                            </p:submenu>
+                        </p:submenu>
+                    </p:submenu>
+                    <p:menuitem id="m_buy" value="Ejemplo URL" icon="pi pi-fw pi-shopping-cart" url="#" />
+                </ph:menu>
+            </h:form>
+        </div>
+    </div>
+</ui:composition>
