@@ -1,51 +1,65 @@
-<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core"
-                xmlns:ui="jakarta.faces.facelets" xmlns:p="http://primefaces.org/ui"
-                template="/WEB-INF/template/template.xhtml">
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets" xmlns:p="http://primefaces.org/ui">
 
-    <ui:define name="title">Acceso - MINDALAI Platform Management</ui:define>
-    <ui:define name="viewname">Login</ui:define>
+<h:head>
+    <f:facet name="first">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+    </f:facet>
 
-    <ui:define name="content">
-        <div class="grid justify-content-center align-items-center" style="min-height:70vh">
-            <div class="col-12 md:col-6 lg:col-4">
-                <div class="card">
-                    <div class="card-content">
-                        <div class="text-center mb-4">
-                            <i class="pi pi-shield text-4xl text-cyan-500" />
-                            <h1 class="text-3xl font-medium mt-3 mb-1">MINDALAI</h1>
-                            <span class="text-color-secondary">Platform Management</span>
+    <title>Acceso - MINDALAI Platform Management</title>
+
+    <h:outputStylesheet library="primefaces-harmony" name="theme.css" />
+    <h:outputStylesheet library="harmony-layout" name="css/primeicons.css" />
+    <h:outputStylesheet library="harmony-layout" name="css/primeflex.min.css" />
+    <h:outputStylesheet library="demo" name="css/demo.css" />
+    <h:outputStylesheet library="harmony-layout" name="css/layout-#{guestPreferences.theme}.css" />
+</h:head>
+
+<h:body styleClass="login-body #{guestPreferences.inputStyleClass}">
+    <div class="flex flex-column align-items-center justify-content-center min-h-screen">
+        <div class="col-12 md:col-6 lg:col-4">
+            <div class="card">
+                <div class="card-content">
+                    <div class="text-center mb-4">
+                        <i class="pi pi-shield text-4xl text-cyan-500" />
+                        <h1 class="text-3xl font-medium mt-3 mb-1">MINDALAI</h1>
+                        <span class="text-color-secondary">Platform Management</span>
+                    </div>
+
+                    <h:form id="loginForm">
+                        <p:messages id="formMessages" showDetail="true" closable="true" />
+
+                        <div class="field">
+                            <p:outputLabel for="username" value="Usuario" />
+                            <p:inputText id="username" value="#{loginBean.username}" autocomplete="username"
+                                         required="true" requiredMessage="Ingrese su usuario"
+                                         styleClass="w-full" />
                         </div>
 
-                        <h:form id="loginForm">
-                            <p:messages id="formMessages" showDetail="true" closable="true" />
+                        <div class="field">
+                            <p:outputLabel for="password" value="Contrasena" />
+                            <p:password id="password" value="#{loginBean.password}" autocomplete="current-password"
+                                        required="true" requiredMessage="Ingrese su contrasena"
+                                        styleClass="w-full" feedback="false" />
+                        </div>
 
-                            <div class="field">
-                                <p:outputLabel for="username" value="Usuario" />
-                                <p:inputText id="username" value="#{loginBean.username}" autocomplete="username"
-                                             required="true" requiredMessage="Ingrese su usuario"
-                                             styleClass="w-full" />
-                            </div>
+                        <p:commandButton id="loginButton" value="Ingresar" icon="pi pi-sign-in"
+                                         styleClass="w-full" update="@form" process="@form"
+                                         action="#{loginBean.login}" />
+                    </h:form>
 
-                            <div class="field">
-                                <p:outputLabel for="password" value="Contrasena" />
-                                <p:password id="password" value="#{loginBean.password}" autocomplete="current-password"
-                                            required="true" requiredMessage="Ingrese su contrasena"
-                                            styleClass="w-full" feedback="false" />
-                            </div>
-
-                            <p:commandButton id="loginButton" value="Ingresar" icon="pi pi-sign-in"
-                                             styleClass="w-full" update="@form" process="@form"
-                                             action="#{loginBean.login}" />
-                        </h:form>
-
-                        <p class="text-color-secondary text-sm mt-4 mb-0 text-center">
-                            Acceso exclusivo para operadores de plataforma.
-                            Los operadores de tenant ingresan por su propio punto de venta.
-                        </p>
-                    </div>
+                    <p class="text-color-secondary text-sm mt-4 mb-0 text-center">
+                        Acceso exclusivo para operadores de plataforma.
+                        Los operadores de tenant ingresan por su propio punto de venta.
+                    </p>
                 </div>
             </div>
         </div>
-    </ui:define>
+    </div>
+</h:body>
 
-</ui:composition>
+</html>
