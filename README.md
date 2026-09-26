@@ -92,7 +92,7 @@ Definido en `docs/03-technology-stack.md:18`:
 | UI | PrimeFaces, Harmony Theme (`ADR-007`) |
 | Comunicación | HTTP/JSON `RestClient` hacia `mindalai-management-api` (sin JPA) |
 | Infraestructura | Linux Ubuntu Server, Docker, Docker Compose |
-| Principios | `application.properties` (no YAML), UTC, logs estructurados, correlation ID |
+| Principios | `application.yml` (YAML), UTC, logs estructurados, correlation ID |
 
 El frontend JSF consume REST igual que lo haría un futuro frontend React (`shared-libraries/mindalai-platform-phase0/README.md:32`). La misma separación permite coexistir `mindalai-jsf-web` y `mindalai-management-jsf-web` como dos UIs independientes con backends distintos.
 
@@ -289,25 +289,35 @@ Autenticación sugerida: login en JSF que autentica contra `POST /api/v1.0/platf
 
 ## 12. Configuración
 
-Este proyecto usa `application.properties`, no YAML (`docs/03-technology-stack.md:39`):
+Este proyecto usa `application.yml` con perfiles `dev`/`test`/`prod` (`docs/03-technology-stack.md:39`):
 
-```properties
+```yaml
 # Server — different from mindalai-management-api and from PYME projects
-server.port=8083
+server:
+  port: 9096
+  servlet:
+    session:
+      timeout: 30m
+      cookie:
+        http-only: true
+        secure: true
 
 # Backend API
-app.api.base-url=http://localhost:8082
-app.api.timeout=5000
-# app.api.auth.token-url derives from app.api.base-url (/api/v1.0/platform/auth/login)
-
-# Security / Session
-server.servlet.session.timeout=30m
-server.servlet.session.cookie.http-only=true
-server.servlet.session.cookie.secure=true
+app:
+  api:
+    base-url: http://localhost:9094
+    timeout: 5000
+    # app.api.auth.token-url derives from app.api.base-url (/api/v1.0/platform/auth/login)
 
 # Observability
-logging.level.ec.mindalai.management.jsf=INFO
-management.endpoints.web.exposure.include=health,info
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+logging:
+  level:
+    ec.mindalai.management.jsf: INFO
 ```
 
 Variables clave: `app.api.base-url` (URL de `mindalai-management-api`), `app.api.auth.*`, `spring.security.*` y `server.servlet.session.*`. No se configura `spring.datasource` en este proyecto (Reglas 2–3). La configuración de datos y Flyway vive exclusivamente en `mindalai-management-api`.
@@ -322,10 +332,10 @@ Variables clave: `app.api.base-url` (URL de `mindalai-management-api`), `app.api
 
 # 2. Run Platform Management JSF Web (different port)
 ./mvnw spring-boot:run -pl management-jsf-app -am \
-  -Dspring-boot.run.arguments="--server.port=8083 --app.api.base-url=http://localhost:8082"
+  -Dspring-boot.run.arguments="--server.port=9096 --app.api.base-url=http://localhost:9094"
 
 # 3. Verify
-# Open http://localhost:8083/ -> login -> browse Tenants -> create test license
+# Open http://localhost:9096/ -> login -> browse Tenants -> create test license
 ```
 
 Debe ser posible detener este proyecto sin detener `mindalai-management-api` (`docs/17-acceptance.md:5`) y viceversa. En el futuro, reemplazarlo por React sin modificar el backend (`docs/02-target-architecture.md:139`).
@@ -344,7 +354,7 @@ De `docs/16-phase1-backlog.md:40` (EPIC 5) y `docs/16-phase1-backlog.md:70`:
 ## 15. Despliegue y operación
 
 - **Artefacto:** `management-jsf-app` como jar ejecutable Spring Boot + JSF.
-- **Infra local:** mismo servidor Ubuntu que `mindalai-management-api`, puerto distinto (ej. 8082 API, 8083 JSF), sin base de datos propia.
+- **Infra local:** mismo servidor Ubuntu que `mindalai-management-api`, puerto distinto (ej. 9094 API, 9096 JSF), sin base de datos propia.
 - **Infra SaaS:** consola cloud detrás de HTTPS, con control de acceso por roles de plataforma y logs de auditoría.
 - **Observabilidad:** logs estructurados con correlation ID propagado al API.
 - **Coexistencia:** puede correr simultáneamente con `mindalai-jsf-web` sin conflictos, al ser UIs y backends separados (`docs/02-target-architecture.md:112`).
@@ -401,7 +411,7 @@ De `docs/17-acceptance.md:1` y `docs/16-phase1-backlog.md:40`:
 Base técnica real implementada según `shared-libraries/prompts/prompt-fase-1.md` y `docs/01-phase1-implementation-report.md`.
 
 **Cambios Fase 1:**
-- Estructura multi-module Maven, Java 25, Spring Boot 4.1.1, `application.properties` (no YAML), perfiles dev/test/prod.
+- Estructura multi-module Maven, Java 25, Spring Boot 4.1.1, `application.yml` (YAML), perfiles dev/test/prod.
 - PostgreSQL 16 + Flyway (migraciones en `src/main/resources/db/migration`), `timestamptz` UTC, UUID PK, `jsonb`.
 - Seguridad base: Spring Security JWT, BCrypt, CorrelationId, GlobalExceptionHandler con formato estándar, Bean Validation.
 - OpenAPI springdoc, Actuator health/info/metrics, logs estructurados con correlationId.

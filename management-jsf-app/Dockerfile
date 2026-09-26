@@ -6,5 +6,5 @@ RUN mvn -B -DskipTests package
 FROM eclipse-temurin:25-jre
 WORKDIR /app
 COPY --from=build /app/management-jsf-app/target/management-jsf-app-*.jar app.jar
-EXPOSE 8083
+EXPOSE 9096
 ENTRYPOINT ["java","-jar","app.jar"]

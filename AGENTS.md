@@ -5,9 +5,9 @@ Platform-management backoffice JSF frontend. Pure consumer of `mindalai-manageme
 ## Stack — do not guess versions
 - Java 25, Spring Boot 4.1.1, JoinFaces 6.1.0, Jakarta Faces, PrimeFaces 15+, Harmony 5.1.0 — `docs/03-technology-stack.md:18`, `ADR-002`, `ADR-007`
 - Theme zip: `shared-libraries/theme/harmony/harmony-layout-5.1.0.zip`
-- `application.properties` only (never YAML) — `docs/03-technology-stack.md:39`
-- Build: `./mvnw clean verify` ; run: `./mvnw spring-boot:run -pl management-jsf-app -am -Dspring-boot.run.arguments="--server.port=8083 --app.api.base-url=http://localhost:8082"` — `README.md:12-13`
-- Port `8083` (mgmt-api `8082`, business API `8080`, business JSF `8081`) for simultaneous local run; no DB of its own.
+- `application.yml` only (YAML) — `docs/03-technology-stack.md:39`
+- Build: `./mvnw clean verify` ; run: `./mvnw spring-boot:run -pl management-jsf-app -am -Dspring-boot.run.arguments="--server.port=9096 --app.api.base-url=http://localhost:9094"` — `README.md:12-13`
+- Port `9096` (mgmt-api `9094`, business API `9090`, business JSF `9092`) for simultaneous local run; no DB of its own.
 
 ## Hard boundaries — will break review if violated
 - No `EntityManager`, `Repository` JPA, `DataSource`/`spring.datasource`, direct PostgreSQL — `docs/04-project-structure.md:82`, Regla 2/3
@@ -44,18 +44,24 @@ management-jsf-app/
 - Session: `HttpOnly`+`Secure`+`SameSite`, CSRF, timeout `30m`, platform-role gate — `docs/11-security.md:15,26`; platform admin is separate context from tenant cashier — `docs/10-platform-management.md:73`
 - Chain: `Browser → mindalai-management-jsf-web → REST credentials` — `docs/11-security.md:26`; show audit trail when API exposes it; never leak credentials in Git/logs/responses.
 
-## Config — `application.properties`
-```properties
-server.port=9096
-app.api.base-url=http://localhost:9094
-app.api.timeout=5000
-server.servlet.session.timeout=30m
-server.servlet.session.cookie.http-only=true
-server.servlet.session.cookie.secure=true
+## Config — `application.yml`
+```yaml
+server:
+  port: 9096
+  servlet:
+    session:
+      timeout: 30m
+      cookie:
+        http-only: true
+        secure: true
+app:
+  api:
+    base-url: http://localhost:9094
+    timeout: 5000
 ```
 No `spring.datasource` here. Full reference: `README.md:12`.
 
 ## Verification
-- Start `mindalai-management-api:8082` first; then `mindalai-management-jsf-web:8083`; open `http://localhost:8083/` → login → browse Tenants → create license
-- Must be stoppable without stopping `mindalai-management-api` — `docs/17-acceptance.md:5`; can run alongside `mindalai-jsf-web:8081` without conflict — `docs/02-target-architecture.md:112`
+- Start `mindalai-management-api:9094` first; then `mindalai-management-jsf-web:9096`; open `http://localhost:9096/` → login → browse Tenants → create license
+- Must be stoppable without stopping `mindalai-management-api` — `docs/17-acceptance.md:5`; can run alongside `mindalai-jsf-web:9092` without conflict — `docs/02-target-architecture.md:112`
 - Tests: backing-bean unit with mocked `RestClient`; integration with WireMock for `mindalai-management-api`.

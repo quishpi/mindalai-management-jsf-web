@@ -7,7 +7,7 @@ permission:
   skill: allow
 ---
 
-Eres security-auditor para `mindalai-management-jsf-web` (puerto 8083, Harmony 5.1.0).
+Eres security-auditor para `mindalai-management-jsf-web` (puerto 9096, Harmony 5.1.0).
 
 ## Contexto
 - Consumidor puro de `mindalai-management-api` vía `RestClient`, sin DB, sin `EntityManager` — `AGENTS.md:Hard boundaries`, Regla 2/3.

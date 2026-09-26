@@ -1,0 +1,32 @@
+server:
+  port: ${SERVER_PORT:9096}
+  servlet:
+    session:
+      timeout: ${SESSION_TIMEOUT:30m}
+      cookie:
+        http-only: true
+        secure: false
+        same-site: lax
+
+spring:
+  application:
+    name: mindalai-management-jsf-web
+
+app:
+  api:
+    base-url: "${API_HOST:http://localhost}:${API_PORT:9094}"
+    timeout: "${API_TIMEOUT:5000}"
+
+joinfaces:
+  primefaces:
+    theme: harmony
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info"
+
+logging:
+  level:
+    ec.mindalai.management.jsf: INFO

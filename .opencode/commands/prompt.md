@@ -77,5 +77,5 @@ Do NOT execute the optimized prompt itself — only optimize it.
 <constraints>
 - Use $ARGUMENTS verbatim as <raw_prompt>; do not hallucinate additional requirements.
 - Output optimized prompt in English unless <raw_prompt> is Spanish — then keep optimized prompt in Spanish (these repos use "Español en la narrativa; bloques de código y términos en inglés").
-- Do not add speculative claims about project stack unless relevant; if relevant, reference these repos' verified stack: Java 25, Spring Boot 4.1.1, JoinFaces 6.1.0, PrimeFaces, Harmony, PostgreSQL, application.properties (not YAML).
+- Do not add speculative claims about project stack unless relevant; if relevant, reference these repos' verified stack: Java 25, Spring Boot 4.1.1, JoinFaces 6.1.0, PrimeFaces, Harmony, PostgreSQL, application.yml (YAML).
 </constraints>

@@ -1,0 +1,7 @@
+app:
+  api:
+    base-url: "http://localhost:9094"
+
+logging:
+  level:
+    ec.mindalai.management.jsf: DEBUG

@@ -17,7 +17,7 @@ Al tocar `rest-client/`, backing beans platform o `app.api.*` en este repo.
 - DTOs del API (Regla 7), 0 JPA/DataSource en JSF (Regla 2/3), dominio sin HTTP (Regla 8).
 - `RestClient` con `app.api.base-url=http://localhost:9094`, `timeout=5000`; `auth.token-url=/platform/auth/login` se deriva de `base-url` en `AppProperties`; `X-Correlation-Id` — `docs/03-technology-stack.md:47`, Regla 15, `AGENTS.md:Config`.
 - Estructura: `management-jsf-app/rest-client/*` + `presentation/jsf/@Named/@ViewScoped` + `ui/*` — `AGENTS.md`.
-- `server.port=8083`, `application.properties` no YAML.
+- `server.port=9096`, `application.yml` (YAML).
 
 ## Auth
 `POST /platform/auth/login` → JWT en `HttpSession` → interceptor `Authorization: Bearer`.
