@@ -186,6 +186,28 @@ graph LR
 
 Prohibiciones verificables: no `EntityManager`, no `Repository` JPA, no `DataSource`/`spring.datasource` hacia PostgreSQL en este proyecto (`docs/04-project-structure.md:82`). Toda operación empresarial debe pasar por un caso de uso del backend (Regla 4).
 
+### 7.1 Layout Harmony (implementado)
+
+El layout de PrimeFaces Harmony 5.1.0 está montado en `management-jsf-app/src/main/webapp`:
+
+```text
+management-jsf-app/src/main/
+├── java/ec/mindalai/managementjsf/
+│   ├── client/                → RestClients HTTP hacia mindalai-management-api
+│   ├── config/                → AppProperties, SecurityConfig, RestClientConfig
+│   └── controller/            → backing beans + GuestPreferences (preferencias de tema/menú)
+└── webapp/
+    ├── dashboard.xhtml        → página usando el template
+    ├── WEB-INF/template/      → template.xhtml, topbar, sidebar, right_panel,
+    │                           routebar-menu, config, footer
+    └── resources/
+        ├── harmony-layout/    → layout-<tema>.css, primeicons, primeflex, js, fonts, images
+        ├── demo/css/demo.css  → estilos de páginas demo (librería JSF "demo")
+        └── primefaces-harmony/theme.css  → tema de componentes (joinfaces.primefaces.theme=harmony)
+```
+
+Origen de los recursos: `shared-libraries/theme/harmony/harmony-layout-5.1.0/resources/harmony-layout` y `.../tag/src/main/webapp/resources/demo` (copiar, nunca editar el original compartido).
+
 ## 8. Integración REST
 
 Este proyecto es **consumidor** puro (`docs/12-api-boundaries.md:33`):
@@ -224,6 +246,9 @@ El `RestClient` debe manejar timeouts, retries delegados al backend con idempote
 ## 9. Navegación y experiencia de backoffice
 
 - **Navegación:** flujos JSF con templates Harmony, menú PrimeFaces y breadcrumbs. Secciones alineadas al dashboard de `docs/10-platform-management.md:55`.
+- **Páginas:** cada vista es un `<ui:composition template="/WEB-INF/template/template.xhtml">` con `ui:define` de `title`, `viewname` y `content`; dentro del `content` se usan las clases del layout (`grid`, `col-12`, `card`, `formgrid` de PrimeFlex). Todo `p:commandButton`/`p:commandLink` debe ir dentro de un `h:form`.
+- **Layout Harmony — wiring obligatorio:** el template depende de (1) `webapp/WEB-INF/template/*.xhtml`, (2) `webapp/resources/harmony-layout/**` y `webapp/resources/demo/css/demo.css`, (3) el bean `guestPreferences` (`controller/GuestPreferences.java`) y (4) `joinfaces.primefaces.theme=harmony` con `resources/primefaces-harmony/theme.css`. Si falta el bean, `#{guestPreferences.theme}` es `null`, el template pide `css/layout-.css` y el navegador recibe `RES_NOT_FOUND`: la página se renderiza **sin ningún CSS del layout** (todo desordenado). El bean se llama así porque los templates de harmony vienen del módulo demo de PrimeFaces, no del jar `harmony-theme`.
+- **Cambio de tema:** el engranaje ⚙ (`config.xhtml`) escribe en el bean de sesión y reemplaza el `layout-<tema>.css` en caliente vía `PrimeFaces.HarmonyConfigurator.changeScheme(...)`; los `theme.file` deben existir como `layout-<file>.css` en `resources/harmony-layout/css/`.
 - **Estado de vista:** `@ViewScoped` para listados con filtros, paginación y formularios de tenant/plan/licencia.
 - **Validación UI:** validación inmediata en vista y mensajes de error provenientes del API.
 - **Experiencia administrativa:** creación de tenant → selección de plan → creación de subscription → emisión de license → registro de installation → alta de devices → consulta de usage. La jerarquía `Tenant → Installation → Devices (Server + cajas)` (`docs/10-platform-management.md:22`) se visualiza como árbol o detalle maestro-detalle.

@@ -31,6 +31,10 @@ management-jsf-app/
 
 ## Navigation & domain view
 - Sections aligned to `docs/10-platform-management.md:55`: `Dashboard, Tenants, Plans, Subscriptions, Licenses, Installations, Devices, Usage, Support, Configuration, Audit`
+- Pages use `template="/WEB-INF/template/template.xhtml"` with `ui:define` `title`/`viewname`/`content`; layout classes inside content: `grid`, `col-12`, `card`, `formgrid`
+- **Harmony layout needs 4 things together** — `webapp/WEB-INF/template/*.xhtml`, `webapp/resources/harmony-layout/**` + `webapp/resources/demo/css/demo.css`, the `guestPreferences` session bean (`controller/GuestPreferences.java`), and `joinfaces.primefaces.theme=harmony` + `webapp/resources/primefaces-harmony/theme.css`. Resources come from `shared-libraries/theme/harmony/*` (copy, never edit the shared source). Missing the bean ⇒ `#{guestPreferences.theme}` is null ⇒ `css/layout-.css` ⇒ `RES_NOT_FOUND` ⇒ page renders with **no layout CSS at all**
+- Theme swatches (`WEB-INF/template/config.xhtml`) call `action="#{guestPreferences.setTheme(theme.file)}"` and swap `layout-<file>.css` client-side; every `theme.file` must exist as a `layout-<file>.css`
+- `p:commandButton`/`p:commandLink` must be inside an `h:form`; pass arguments with `f:param`, not in `actionListener`
 - `@ViewScoped` for lists with filters/pagination and tenant/plan/license forms
 - Hierarchy `Tenant → Installation → Devices (Server + cajas)` as tree/master-detail — `docs/10-platform-management.md:22`
 - Entities consumed as DTOs (no JPA): `tenant, plan, subscription, license, installation, device, usage, feature, platform_audit` — `docs/10-platform-management.md:7`; catalogs in tables, not Java enums — Regla 13
