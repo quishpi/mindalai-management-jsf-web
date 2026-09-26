@@ -66,6 +66,20 @@
         </dependency>
     </dependencies>
     <build>
+        <!--
+          El webapp no se empaqueta por defecto en un jar ejecutable: sin esto, la imagen
+          Docker sirve 404 en todas las vistas porque Tomcat no encuentra el docBase.
+          META-INF/resources es la ubicacion estatica que Spring Boot resuelve desde el jar.
+        -->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>src/main/webapp</directory>
+                <targetPath>META-INF/resources</targetPath>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
