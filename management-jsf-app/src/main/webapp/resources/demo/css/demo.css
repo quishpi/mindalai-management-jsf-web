@@ -733,3 +733,16 @@ pre[class*=language-] code {
     margin-top: 1rem;
   }
 }
+
+/* Topbar — logout alineado a la derecha dentro de .topbar-content (float:left + text-align:center) */
+.layout-wrapper .layout-topbar .topbar-content .topbar-logout {
+  float: right;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+}
+
+.layout-wrapper .layout-topbar .topbar-content .topbar-logout .topbar-logout-button {
+  white-space: nowrap;
+}

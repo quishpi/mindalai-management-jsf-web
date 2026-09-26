@@ -1,0 +1,120 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets" xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template/template.xhtml">
+    <f:metadata>
+        <f:viewAction action="#{auditBean.load}" onPostBack="false" />
+    </f:metadata>
+
+    <ui:define name="title">Auditoria - MINDALAI Platform Management</ui:define>
+    <ui:define name="viewname">Auditoria</ui:define>
+
+    <ui:define name="content">
+
+        <div class="grid">
+            <div class="col-12">
+                <h1 class="text-3xl font-medium">Auditoria</h1>
+                <p class="text-color-secondary">Trazabilidad de las operaciones de plataforma</p>
+            </div>
+
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-content">
+                        <h:form id="filterForm">
+                            <p:messages id="formMessages" showDetail="true" closable="true" />
+                            <div class="formgrid grid">
+                                <div class="field col-12 md:col-3">
+                                    <p:outputLabel for="action" value="Accion" />
+                                    <p:inputText id="action" value="#{auditBean.action}" styleClass="w-full" />
+                                </div>
+                                <div class="field col-12 md:col-3">
+                                    <p:outputLabel for="resourceType" value="Recurso" />
+                                    <p:inputText id="resourceType" value="#{auditBean.resourceType}"
+                                                 styleClass="w-full" />
+                                </div>
+                                <div class="field col-12 md:col-3">
+                                    <p:outputLabel for="result" value="Resultado" />
+                                    <p:inputText id="result" value="#{auditBean.result}" styleClass="w-full" />
+                                </div>
+                                <div class="field col-12 md:col-3">
+                                    <p:outputLabel for="tenantId" value="Tenant (UUID)" />
+                                    <p:inputText id="tenantId" value="#{auditBean.tenantId}" styleClass="w-full" />
+                                </div>
+                                <div class="field col-6 md:col-2">
+                                    <p:outputLabel for="from" value="Desde" />
+                                    <p:datePicker id="from" value="#{auditBean.from}" dateFormat="dd/MM/yyyy"
+                                                  showIcon="true" styleClass="w-full" />
+                                </div>
+                                <div class="field col-6 md:col-2">
+                                    <p:outputLabel for="to" value="Hasta" />
+                                    <p:datePicker id="to" value="#{auditBean.to}" dateFormat="dd/MM/yyyy"
+                                                  showIcon="true" styleClass="w-full" />
+                                </div>
+                                <div class="field col-12 md:col-2 flex align-items-end">
+                                    <p:commandButton id="searchButton" value="Buscar" icon="pi pi-search"
+                                                     update="@form" process="@form"
+                                                     action="#{auditBean.search}" styleClass="w-full" />
+                                </div>
+                                <div class="field col-12 md:col-2 flex align-items-end">
+                                    <p:commandButton id="resetButton" value="Limpiar" severity="secondary"
+                                                     icon="pi pi-times" update="@form" process="@form"
+                                                     action="#{auditBean.reset}" styleClass="w-full" />
+                                </div>
+                            </div>
+                        </h:form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-content">
+                        <h:form id="listForm">
+                            <p:messages id="formMessages" showDetail="true" closable="true" />
+                            <p:dataTable id="auditTable" value="#{auditBean.entries}" var="entry" paginator="true"
+                                         rows="20" lazy="false"
+                                         emptyMessage="No hay eventos de auditoria para los filtros indicados">
+                                <p:column headerText="Fecha">
+                                    <h:outputText value="#{entry.occurredAt}" />
+                                </p:column>
+                                <p:column headerText="Usuario">
+                                    <h:outputText value="#{entry.username}" />
+                                </p:column>
+                                <p:column headerText="Accion">
+                                    <h:outputText value="#{entry.action}" />
+                                </p:column>
+                                <p:column headerText="Recurso">
+                                    <h:outputText value="#{entry.resourceType}" />
+                                </p:column>
+                                <p:column headerText="Resultado">
+                                    <p:tag value="#{entry.result}" severity="info" />
+                                </p:column>
+                                <p:column headerText="IP">
+                                    <h:outputText value="#{entry.ipAddress}" />
+                                </p:column>
+                                <p:column headerText="Metadata">
+                                    <h:outputText value="#{entry.metadata}" />
+                                </p:column>
+                            </p:dataTable>
+
+                            <div class="flex align-items-center justify-content-between mt-3">
+                                <p:commandButton id="previousButton" value="Anterior" icon="pi pi-chevron-left"
+                                                 severity="secondary" update="@form" process="@this"
+                                                 disabled="#{not auditBean.hasPrevious}"
+                                                 action="#{auditBean.previousPage}" />
+                                <span class="text-color-secondary">
+                                    Pagina #{auditBean.page + 1} de #{auditBean.totalPages}
+                                    (#{auditBean.totalElements} eventos)
+                                </span>
+                                <p:commandButton id="nextButton" value="Siguiente" icon="pi pi-chevron-right"
+                                                 severity="secondary" update="@form" process="@this"
+                                                 disabled="#{not auditBean.hasNext}"
+                                                 action="#{auditBean.nextPage}" />
+                            </div>
+                        </h:form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ui:define>
+
+</ui:composition>

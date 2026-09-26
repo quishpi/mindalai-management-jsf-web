@@ -1,31 +1,14 @@
-<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html"
-    xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets"
-    xmlns:p="http://primefaces.org/ui">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets" xmlns:p="http://primefaces.org/ui">
 
     <div class="layout-footer">
-        <h:link outcome="/dashboard" styleClass="logo-container">
-            <p:graphicImage name="images/harmony-logo.png" library="harmony-layout" />
+        <div class="layout-footer-left">
             <span class="app-name">MINDALAI</span>
-        </h:link>
-
-        <div class="footer-icons">
-            <ul>
-                <li>
-                    <a>
-                        <i class="pi pi-twitter"></i>
-                    </a>
-                </li>
-                <li>
-                    <a>
-                        <i class="pi pi-facebook"></i>
-                    </a>
-                </li>
-                <li>
-                    <a>
-                        <i class="pi pi-github"></i>
-                    </a>
-                </li>
-            </ul>
+            <span class="app-subname">Platform Management</span>
+        </div>
+        <div class="layout-footer-right">
+            <i class="pi pi-shield" /> <span>Acceso restringido a operadores de plataforma</span>
         </div>
     </div>
+
 </ui:composition>

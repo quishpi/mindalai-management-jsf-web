@@ -1,0 +1,105 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets" xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template/template.xhtml">
+    <f:metadata>
+        <f:viewAction action="#{configurationBean.load}" onPostBack="false" />
+    </f:metadata>
+
+    <ui:define name="title">Configuracion - MINDALAI Platform Management</ui:define>
+    <ui:define name="viewname">Configuracion</ui:define>
+
+    <ui:define name="content">
+
+        <div class="grid">
+            <div class="col-12">
+                <h1 class="text-3xl font-medium">Configuracion</h1>
+                <p class="text-color-secondary">Parametros globales de la plataforma</p>
+            </div>
+
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-content">
+                        <h:form id="filterForm">
+                            <p:messages id="formMessages" showDetail="true" closable="true" />
+                            <div class="formgrid grid">
+                                <div class="field col-12 md:col-6">
+                                    <p:outputLabel for="categoryFilter" value="Categoria" />
+                                    <p:inputText id="categoryFilter" value="#{configurationBean.categoryFilter}"
+                                                 styleClass="w-full" placeholder="platform, license, support, email" />
+                                </div>
+                                <div class="field col-12 md:col-6 flex align-items-end">
+                                    <p:commandButton id="filterButton" value="Filtrar" icon="pi pi-filter"
+                                                     update="@form" process="@form"
+                                                     action="#{configurationBean.load}" />
+                                </div>
+                            </div>
+                        </h:form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-content">
+                        <h:form id="editForm">
+                            <p:messages id="formMessages" showDetail="true" closable="true" />
+                            <p:dataTable id="configurationTable" value="#{configurationBean.entries}" var="entry"
+                                         paginator="true" rows="15" emptyMessage="No hay parametros configurados">
+                                <p:column headerText="Clave">
+                                    <h:outputText value="#{entry.configKey}" />
+                                </p:column>
+                                <p:column headerText="Categoria">
+                                    <h:outputText value="#{entry.category}" />
+                                </p:column>
+                                <p:column headerText="Valor">
+                                    <h:outputText value="#{entry.configValue}" />
+                                </p:column>
+                                <p:column headerText="Tipo">
+                                    <h:outputText value="#{entry.valueType}" />
+                                </p:column>
+                                <p:column headerText="Descripcion">
+                                    <h:outputText value="#{entry.description}" />
+                                </p:column>
+                                <p:column headerText="Actualizado">
+                                    <h:outputText value="#{entry.updatedAt}" />
+                                </p:column>
+                                <p:column headerText="Acciones" style="width:8rem">
+                                    <p:commandButton id="editButton" icon="pi pi-pencil" title="Editar"
+                                                     update=":editForm" process="@this"
+                                                     rendered="#{entry.editable}"
+                                                     action="#{configurationBean.startEdit(entry)}">
+                                        <f:param name="entry" value="#{entry}" />
+                                    </p:commandButton>
+                                </p:column>
+                            </p:dataTable>
+
+                            <h:panelGroup id="editPanel" layout="block"
+                                          rendered="#{configurationBean.editKey != null}" styleClass="mt-3">
+                                <h:form id="valueForm">
+                                    <p:messages id="formMessages" showDetail="true" closable="true" />
+                                    <div class="card-content">
+                                        <h3 class="text-lg font-medium">
+                                            Editar <h:outputText value="#{configurationBean.editKey}" />
+                                        </h3>
+                                        <div class="field">
+                                            <p:outputLabel for="editValue" value="Valor *" />
+                                            <p:inputText id="editValue" value="#{configurationBean.editValue}"
+                                                         styleClass="w-full" />
+                                        </div>
+                                        <p:commandButton id="saveButton" value="Guardar" icon="pi pi-check"
+                                                         update="@form" process="@form"
+                                                         action="#{configurationBean.save}" />
+                                        <p:commandButton id="cancelButton" value="Cancelar" severity="secondary"
+                                                         icon="pi pi-times" update="@form" process="@form"
+                                                         styleClass="ml-2" action="#{configurationBean.cancelEdit}" />
+                                    </div>
+                                </h:form>
+                            </h:panelGroup>
+                        </h:form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ui:define>
+
+</ui:composition>

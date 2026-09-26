@@ -1,40 +1,11 @@
-<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://java.sun.com/jsf/core"
-    xmlns:h="http://java.sun.com/jsf/html" xmlns:ui="http://java.sun.com/jsf/facelets"
-    xmlns:p="http://primefaces.org/ui">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets" xmlns:p="http://primefaces.org/ui">
 
     <ul class="route-bar-menu">
-        <li>
-            <a href="#">
-                <i class="pi pi-eye"></i>
-                <span>Overview</span>
-            </a>
-        </li>
-        <li>
-            <a href="#">
-                <i class="pi pi-briefcase"></i>
-                <span>Demos</span>
-            </a>
-        </li>
-        <li>
-            <a href="#">
-                <i class="pi pi-file"></i>
-                <span>Documentation</span>
-            </a>
-        </li>
-        <li>
-            <a href="#">
-                <i class="pi pi-envelope"></i>
-                <span>Support</span>
-            </a>
-        </li>
-        <li>
-            <a href="#">
-                <i class="pi pi-user"></i>
-                <span>Profile</span>
-            </a>
-        </li>
+        <li><a href="#{request.contextPath}/dashboard.xhtml">Dashboard</a></li>
+        <li><a href="#{request.contextPath}/tenants.xhtml">Tenants</a></li>
+        <li><a href="#{request.contextPath}/licenses.xhtml">Licencias</a></li>
+        <li><a href="#{request.contextPath}/audit.xhtml">Auditoria</a></li>
     </ul>
-
-    <p:tooltip globalSelector=".route-bar-menu a" position="bottom" showDelay="0" />
 
 </ui:composition>

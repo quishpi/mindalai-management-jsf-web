@@ -1,0 +1,19 @@
+# Perfil de produccion: la sesion exige HTTPS y no se exponen logs de depuracion.
+app:
+  api:
+    base-url: ${API_HOST:https://api.mindalai.local}
+    timeout: ${API_TIMEOUT:5s}
+
+server:
+  servlet:
+    session:
+      timeout: ${SESSION_TIMEOUT:30m}
+      cookie:
+        http-only: true
+        secure: true
+        same-site: strict
+
+logging:
+  level:
+    ec.mindalai.managementjsf: INFO
+    org.springframework.security: WARN

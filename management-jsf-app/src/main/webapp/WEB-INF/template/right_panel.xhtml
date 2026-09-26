@@ -1,178 +1,59 @@
-<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html"
-    xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets"
-    xmlns:p="http://primefaces.org/ui">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets" xmlns:p="http://primefaces.org/ui">
 
     <div id="layout-right-panel">
         <div class="right-panel-scroll-content">
-            <h:form>
-                <p:tabView>
-                    <p:tab title="Status">
-                        <div class="submenu-content settings">
-                            <div class="grid">
-                                <div class="col-12 md:col-6">
-                                    <div class="status-box wireless-status">
-                                        <i class="pi pi-wifi box-icon"></i>
-                                        <i class="pi pi-angle-right icon-details"></i>
-                                        <span class="status-name">WIRELESS STATUS</span>
-                                        <span class="status">Stable</span>
-                                    </div>
-                                </div>
-                                <div class="col-12 md:col-6">
-                                    <div class="status-box cooling-systems">
-                                        <i class="pi pi-compass box-icon"></i>
-                                        <i class="pi pi-angle-right icon-details"></i>
-                                        <span class="status-name">COOLING SYSTEMS</span>
-                                        <span class="status">Stable</span>
-                                    </div>
-                                </div>
-                                <div class="col-12 md:col-6">
-                                    <div class="status-box hq-security">
-                                        <i class="pi pi-lock box-icon"></i>
-                                        <i class="pi pi-angle-right icon-details"></i>
-                                        <span class="status-name">HQ SECURITY</span>
-                                        <span class="status">Critical</span>
-                                    </div>
-                                </div>
-
-                                <div class="col-12 md:col-6">
-                                    <div class="status-box help-desk-load">
-                                        <i class="pi pi-envelope box-icon"></i>
-                                        <i class="pi pi-angle-right icon-details"></i>
-                                        <span class="status-name">HELP DESK LOAD</span>
-                                        <div class="progress-bar">
-                                            <div class="progress"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-12 md:col-6">
-                                    <div class="status-box meeting-intensity">
-                                        <i class="pi pi-calendar box-icon"></i>
-                                        <i class="pi pi-angle-right icon-details"></i>
-                                        <span class="status-name">MEETING INTENSITY</span>
-                                        <span class="status">Stable</span>
-                                    </div>
-                                </div>
-                                <div class="col-12 md:col-6">
-                                    <div class="status-box energy-backup ">
-                                        <i class="pi pi-info-circle box-icon"></i>
-                                        <i class="pi pi-angle-right icon-details"></i>
-                                        <span class="status-name">ENERGY BACKUP</span>
-                                        <div class="progress-bar">
-                                            <div class="progress"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+            <h:form id="profileForm">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="flex align-items-center justify-content-between mb-3">
+                            <span class="text-xl font-semibold">Sesion</span>
+                            <i class="pi pi-shield text-cyan-500" />
                         </div>
-                    </p:tab>
+                        <ul class="list-none p-0 m-0 border-top border-surface pt-3">
+                            <li class="flex justify-content-between py-2">
+                                <span class="text-color-secondary">Operador</span>
+                                <span class="font-medium">#{authSession.displayName()}</span>
+                            </li>
+                            <li class="flex justify-content-between py-2">
+                                <span class="text-color-secondary">Usuario</span>
+                                <span class="font-medium">#{authSession.username}</span>
+                            </li>
+                            <li class="flex justify-content-between py-2">
+                                <span class="text-color-secondary">Roles</span>
+                                <span class="font-medium">#{authSession.roleLabel()}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
 
-                    <p:tab title="Inbox">
-                        <div class="submenu-content messages">
-                            <ul>
-                                <li>
-                                    <p:graphicImage name="images/avatar-john.png" library="harmony-layout" />
-                                    <span class="messager-name">John Swisher
-                                        <span class="time-stamp">24m</span>
-                                    </span>
-                                    <span class="message-text">User interface review is done.</span>
-                                    <div class="message-actions">
-                                        <i class="pi pi-times-circle delete"></i>
-                                        <i class="pi pi-check-circle check"></i>
-                                    </div>
-                                </li>
-                                <li>
-                                    <p:graphicImage name="images/avatar-warren.png" library="harmony-layout" />
-                                    <span class="messager-name">Warren Shaw
-                                        <span class="time-stamp">2h</span>
-                                    </span>
-                                    <span class="message-text">Uh, we have sort of a problem here.</span>
-                                    <div class="message-actions">
-                                        <i class="pi pi-times-circle delete"></i>
-                                        <i class="pi pi-check-circle check"></i>
-                                    </div>
-                                </li>
-                                <li>
-                                    <p:graphicImage name="images/avatar-brenda.png" library="harmony-layout" />
-                                    <span class="messager-name">Brenda Soto
-                                        <span class="time-stamp">9h</span>
-                                    </span>
-                                    <span class="message-text">You apparently didn’t put one of the new coversheets on
-                                        TPS.</span>
-                                    <div class="message-actions">
-                                        <i class="pi pi-times-circle delete"></i>
-                                        <i class="pi pi-check-circle check"></i>
-                                    </div>
-                                </li>
-                                <li>
-                                    <p:graphicImage name="images/avatar-arlene.png" library="harmony-layout" />
-                                    <span class="messager-name">Arlene Welch
-                                        <span class="time-stamp">7d</span>
-                                    </span>
-                                    <span class="message-text">Meeting reports attached.</span>
-                                    <div class="message-actions">
-                                        <i class="pi pi-times-circle delete"></i>
-                                        <i class="pi pi-check-circle check"></i>
-                                    </div>
-                                </li>
-                            </ul>
+                <div class="card">
+                    <div class="card-content">
+                        <div class="flex align-items-center justify-content-between mb-3">
+                            <span class="text-xl font-semibold">Accesos directos</span>
+                            <i class="pi pi-bolt text-cyan-500" />
                         </div>
-                    </p:tab>
-
-                    <p:tab title="Notes">
-                        <div class="submenu-content notes">
-                            <ul>
-                                <li>
-                                    <span class="note-reminder">You have
-                                        <span>24</span> notes in
-                                        <span>4</span> categories</span>
-                                    <p:commandButton type="button" value="Important"
-                                        styleClass="important ui-button-raised" />
-                                    <p:commandButton type="button" value="Work" styleClass="work ui-button-raised" />
-                                    <p:commandButton type="button" value="School"
-                                        styleClass="school ui-button-raised" />
-                                    <span class="note-add-more">+ Add More Categories</span>
-                                    <div class="note-seperator"></div>
-                                </li>
-                                <li>
-                                    <i class="pi pi-circle-on important"></i>
-                                    <span class="note-header">Q3 BUDGET PLANNING</span>
-                                    <span class="note-date">23.33 2/7/2018</span>
-                                    <span class="note-details">Leverage agile frameworks to provide
-                                        a robust synopsis for high level overviews. </span>
-                                </li>
-                                <li>
-                                    <i class="pi pi-circle-on important"></i>
-                                    <span class="note-header">EXECUTIVE INFLUENCER OUTREACH</span>
-                                    <span class="note-date">23.33 2/7/2018</span>
-                                    <span class="note-details">Bring to the table win-win survival
-                                        strategies to ensure proactive domination. </span>
-                                </li>
-                                <li>
-                                    <i class="pi pi-circle-on school"></i>
-                                    <span class="note-header">DEVELOP SELLING TRAINING</span>
-                                    <span class="note-date">23.33 2/7/2018</span>
-                                    <span class="note-details">Capitalize on low hanging fruit to
-                                        identify a ballpark value added activity to beta test. </span>
-                                </li>
-                                <li>
-                                    <i class="pi pi-circle-on important"></i>
-                                    <span class="note-header">MEETING W/ PRODUCT TEAM</span>
-                                    <span class="note-date">23.33 2/7/2018</span>
-                                    <span class="note-details">Podcasting operational change management
-                                        inside of workflows to establish a framework. </span>
-                                </li>
-                                <li>
-                                    <i class="pi pi-circle-on work"></i>
-                                    <span class="note-header">INVESTIGATE FOLLOWER PROGRAMS</span>
-                                    <span class="note-date">23.33 2/7/2018</span>
-                                    <span class="note-details">Collaboratively administrate empowered
-                                        markets via plug-and-play networks. </span>
-                                </li>
-                            </ul>
-                        </div>
-                    </p:tab>
-                </p:tabView>
+                        <ul class="list-none p-0 m-0">
+                            <li class="mb-2">
+                                <h:link outcome="/licenses" styleClass="flex align-items-center">
+                                    <i class="pi pi-key mr-2" /> <span>Emitir licencia</span>
+                                </h:link>
+                            </li>
+                            <li class="mb-2">
+                                <h:link outcome="/support" styleClass="flex align-items-center">
+                                    <i class="pi pi-life-ring mr-2" /> <span>Ver tickets abiertos</span>
+                                </h:link>
+                            </li>
+                            <li class="mb-2">
+                                <h:link outcome="/audit" styleClass="flex align-items-center">
+                                    <i class="pi pi-shield mr-2" /> <span>Auditoria reciente</span>
+                                </h:link>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </h:form>
         </div>
     </div>
+
 </ui:composition>

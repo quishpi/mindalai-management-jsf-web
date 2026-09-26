@@ -1,0 +1,4 @@
+management-jsf-app/target/*
+target/*
+.env
+!.env.example

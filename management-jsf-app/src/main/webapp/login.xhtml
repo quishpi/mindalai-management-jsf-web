@@ -1,20 +1,51 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://xmlns.jcp.org/jsf/html"
-      xmlns:p="http://primefaces.org/ui">
-<h:head><title>MindalAI - Platform Management Login</title></h:head>
-<h:body style="background:#f8f9fa; display:flex; justify-content:center; align-items:center; height:100vh;">
-    <h:form style="background:white; padding:2rem; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1); min-width:380px;">
-        <h2 style="text-align:center; color:#2c3e50;">Platform Management</h2>
-        <p:messages autoUpdate="true" />
-        <p:panelGrid columns="1" style="width:100%">
-            <p:outputLabel for="user" value="Usuario" />
-            <p:inputText id="user" value="#{loginBean.username}" required="true" style="width:100%" placeholder="admin"/>
-            <p:outputLabel for="pass" value="Contraseña" />
-            <p:password id="pass" value="#{loginBean.password}" required="true" style="width:100%" feedback="false" placeholder="admin"/>
-            <p:commandButton value="Ingresar" action="#{loginBean.login}" ajax="false" style="width:100%; margin-top:1rem;" />
-        </p:panelGrid>
-        <p style="text-align:center; margin-top:1rem; font-size:0.9em; color:#666;">Fase 1 - demo: admin/admin</p>
-    </h:form>
-</h:body>
-</html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets" xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template/template.xhtml">
+
+    <ui:define name="title">Acceso - MINDALAI Platform Management</ui:define>
+    <ui:define name="viewname">Login</ui:define>
+
+    <ui:define name="content">
+        <div class="grid justify-content-center align-items-center" style="min-height:70vh">
+            <div class="col-12 md:col-6 lg:col-4">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="text-center mb-4">
+                            <i class="pi pi-shield text-4xl text-cyan-500" />
+                            <h1 class="text-3xl font-medium mt-3 mb-1">MINDALAI</h1>
+                            <span class="text-color-secondary">Platform Management</span>
+                        </div>
+
+                        <h:form id="loginForm">
+                            <p:messages id="formMessages" showDetail="true" closable="true" />
+
+                            <div class="field">
+                                <p:outputLabel for="username" value="Usuario" />
+                                <p:inputText id="username" value="#{loginBean.username}" autocomplete="username"
+                                             required="true" requiredMessage="Ingrese su usuario"
+                                             styleClass="w-full" />
+                            </div>
+
+                            <div class="field">
+                                <p:outputLabel for="password" value="Contrasena" />
+                                <p:password id="password" value="#{loginBean.password}" autocomplete="current-password"
+                                            required="true" requiredMessage="Ingrese su contrasena"
+                                            styleClass="w-full" feedback="false" />
+                            </div>
+
+                            <p:commandButton id="loginButton" value="Ingresar" icon="pi pi-sign-in"
+                                             styleClass="w-full" update="@form" process="@form"
+                                             action="#{loginBean.login}" />
+                        </h:form>
+
+                        <p class="text-color-secondary text-sm mt-4 mb-0 text-center">
+                            Acceso exclusivo para operadores de plataforma.
+                            Los operadores de tenant ingresan por su propio punto de venta.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ui:define>
+
+</ui:composition>

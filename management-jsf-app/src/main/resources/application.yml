@@ -4,18 +4,23 @@ server:
     session:
       timeout: ${SESSION_TIMEOUT:30m}
       cookie:
+        name: MINDALAI_MGMT_SESSION
         http-only: true
-        secure: false
+        secure: ${SESSION_COOKIE_SECURE:true}
         same-site: lax
 
 spring:
   application:
     name: mindalai-management-jsf-web
+  # El backoffice es consumidor puro: sin datasource, sin JPA (Reglas 2 y 3).
+  mvc:
+    problemdetails:
+      enabled: true
 
 app:
   api:
-    base-url: "${API_HOST:http://localhost}:${API_PORT:9094}"
-    timeout: "${API_TIMEOUT:5000}"
+    base-url: ${API_HOST:http://localhost}:${API_PORT:9094}
+    timeout: ${API_TIMEOUT:5s}
 
 joinfaces:
   primefaces:
@@ -25,8 +30,8 @@ management:
   endpoints:
     web:
       exposure:
-        include: "health,info"
+        include: health,info
 
 logging:
   level:
-    ec.mindalai.management.jsf: INFO
+    ec.mindalai.managementjsf: INFO

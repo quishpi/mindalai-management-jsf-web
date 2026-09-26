@@ -1,6 +1,15 @@
 app:
   api:
-    base-url: "http://localhost:9094"
+    base-url: ${TEST_API_HOST:http://localhost:9094}
+    timeout: 2s
 
 server:
   port: 0
+  servlet:
+    session:
+      cookie:
+        secure: false
+
+logging:
+  level:
+    ec.mindalai.managementjsf: WARN

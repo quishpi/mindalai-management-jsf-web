@@ -1,7 +1,15 @@
+# Desarrollo local: el API y el JSF corren sobre http://localhost, por lo que una cookie
+# Secure no viaja y la sesion no se persistiria. En produccion usar SESSION_COOKIE_SECURE=true.
 app:
   api:
-    base-url: "http://localhost:9094"
+    base-url: ${API_HOST:http://localhost}:${API_PORT:9094}
+
+server:
+  servlet:
+    session:
+      cookie:
+        secure: false
 
 logging:
   level:
-    ec.mindalai.management.jsf: DEBUG
+    ec.mindalai.managementjsf: DEBUG

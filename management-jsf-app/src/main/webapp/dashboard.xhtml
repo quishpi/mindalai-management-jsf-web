@@ -1,78 +1,122 @@
-<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html"
-    xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets"
-    xmlns:p="http://primefaces.org/ui" template="/WEB-INF/template/template.xhtml">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets" xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template/template.xhtml">
+    <f:metadata>
+        <f:viewAction action="#{dashboardBean.load}" onPostBack="false" />
+    </f:metadata>
 
-    <ui:define name="title">MindalAI Platform Management - Dashboard</ui:define>
-
-    <ui:define name="viewname">
-        <li>Pages</li>
-        <li>/</li>
-        <li>
-            <p:link outcome="/dashboard">Dashboard</p:link>
-        </li>
-    </ui:define>
+    <ui:define name="title">Dashboard - MINDALAI Platform Management</ui:define>
+    <ui:define name="viewname">Dashboard</ui:define>
 
     <ui:define name="content">
-        <p:messages autoUpdate="true" />
 
         <div class="grid">
             <div class="col-12">
-                <div class="card">
-                    <h4>Tenants</h4>
-                    <p>CorrelationId: #{dashboardBean.correlationId}</p>
-                    <p>Tenants: #{dashboardBean.tenantCount}</p>
-                    <h:form>
-                        <p:commandButton action="#{loginBean.logout}" value="Logout" ajax="false"
-                            icon="pi pi-sign-out" style="margin-top:6px" />
-                    </h:form>
-                </div>
+                <h1 class="text-3xl font-medium">Dashboard</h1>
+                <p class="text-color-secondary">Estado consolidado de la plataforma</p>
             </div>
-        </div>
 
-        <div class="grid">
-            <div class="col-12">
-                <div class="card">
-                    <h4>Listado de Tenants</h4>
-                    <p:dataTable value="#{dashboardBean.tenants}" var="t" paginator="true" rows="10"
-                        emptyMessage="Sin tenants (backend no conectado)">
-                        <p:column headerText="Razón Social">
-                            <h:outputText value="#{t.legalName}" />
-                        </p:column>
-                        <p:column headerText="RUC">
-                            <h:outputText value="#{t.ruc}" />
-                        </p:column>
-                        <p:column headerText="Estado">
-                            <h:outputText value="#{t.status}" />
-                        </p:column>
-                    </p:dataTable>
-                </div>
-            </div>
-        </div>
-
-        <div class="grid">
-            <div class="col-12">
-                <div class="card">
-                    <h4>Crear Tenant</h4>
-                    <h:form>
-                        <div class="grid formgrid">
-                            <div class="col-12 md:col-6">
-                                <p:outputLabel for="legalName" value="Razón Social" />
-                                <p:inputText id="legalName" value="#{tenantBean.legalName}" required="true" />
-                            </div>
-                            <div class="col-12 md:col-6">
-                                <p:outputLabel for="ruc" value="RUC" />
-                                <p:inputText id="ruc" value="#{tenantBean.ruc}" required="true" />
-                            </div>
-                            <div class="col-12 md:col-6">
-                                <p:outputLabel for="tradeName" value="Nombre Comercial" />
-                                <p:inputText id="tradeName" value="#{tenantBean.tradeName}" />
-                            </div>
+            <div class="col-12 md:col-6 lg:col-3">
+                <div class="card mb-3">
+                    <div class="card-content">
+                        <div class="flex align-items-center justify-content-between mb-3">
+                            <span class="font-medium text-color-secondary">Tenants</span>
+                            <i class="pi pi-users text-cyan-500" />
                         </div>
-                        <p:commandButton value="Crear" action="#{tenantBean.create}" update="@form"
-                            icon="pi pi-check" style="margin-top:1rem;" />
-                        <p:commandButton value="Recargar" action="#{tenantBean.load}" update="@form"
-                            icon="pi pi-refresh" style="margin-left:0.5rem;" />
-                    </h:form>
+                        <div class="text-4xl font-semibold">#{dashboardBean.totalTenants()}</div>
+                        <p class="text-color-secondary mt-2 mb-0">#{dashboardBean.activeTenants()} activos</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 md:col-6 lg:col-3">
+                <div class="card mb-3">
+                    <div class="card-content">
+                        <div class="flex align-items-center justify-content-between mb-3">
+                            <span class="font-medium text-color-secondary">Instalaciones</span>
+                            <i class="pi pi-building text-cyan-500" />
+                        </div>
+                        <div class="text-4xl font-semibold">#{dashboardBean.totalInstallations()}</div>
+                        <p class="text-color-secondary mt-2 mb-0">puntos de operacion</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 md:col-6 lg:col-3">
+                <div class="card mb-3">
+                    <div class="card-content">
+                        <div class="flex align-items-center justify-content-between mb-3">
+                            <span class="font-medium text-color-secondary">Dispositivos</span>
+                            <i class="pi pi-server text-cyan-500" />
+                        </div>
+                        <div class="text-4xl font-semibold">#{dashboardBean.totalDevices()}</div>
+                        <p class="text-color-secondary mt-2 mb-0">servidores y cajas</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 md:col-6 lg:col-3">
+                <div class="card mb-3">
+                    <div class="card-content">
+                        <div class="flex align-items-center justify-content-between mb-3">
+                            <span class="font-medium text-color-secondary">Licencias</span>
+                            <i class="pi pi-key text-cyan-500" />
+                        </div>
+                        <div class="text-4xl font-semibold">#{dashboardBean.activeLicenses()}</div>
+                        <p class="text-color-secondary mt-2 mb-0">activas</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 md:col-6 lg:col-3">
+                <div class="card mb-3">
+                    <div class="card-content">
+                        <div class="flex align-items-center justify-content-between mb-3">
+                            <span class="font-medium text-color-secondary">Tickets abiertos</span>
+                            <i class="pi pi-life-ring text-orange-500" />
+                        </div>
+                        <div class="text-4xl font-semibold">#{dashboardBean.openTickets()}</div>
+                        <p class="text-color-secondary mt-2 mb-0">requieren atencion</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 md:col-6 lg:col-3">
+                <div class="card mb-3">
+                    <div class="card-content">
+                        <div class="flex align-items-center justify-content-between mb-3">
+                            <span class="font-medium text-color-secondary">Suscripciones</span>
+                            <i class="pi pi-sync text-orange-500" />
+                        </div>
+                        <div class="text-4xl font-semibold">#{dashboardBean.subscriptionsExpiringSoon()}</div>
+                        <p class="text-color-secondary mt-2 mb-0">por vencer</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="flex align-items-center justify-content-between mb-3">
+                            <span class="text-xl font-semibold">Consumo destacado</span>
+                            <h:link outcome="/usage" styleClass="text-cyan-500">Ver detalle</h:link>
+                        </div>
+                        <p:dataTable id="usageHighlights" value="#{dashboardBean.usageHighlights}" var="usage"
+                                     emptyMessage="Sin consumo registrado">
+                            <p:column headerText="Tenant">
+                                <h:outputText value="#{usage.tenantName}" />
+                            </p:column>
+                            <p:column headerText="Metrica">
+                                <h:outputText value="#{usage.metricName}" />
+                            </p:column>
+                            <p:column headerText="Total">
+                                <h:outputText value="#{dashboardBean.formatValue(usage.total)}" />
+                            </p:column>
+                            <p:column headerText="Muestras">
+                                <h:outputText value="#{usage.samples}" />
+                            </p:column>
+                        </p:dataTable>
+                    </div>
                 </div>
             </div>
         </div>

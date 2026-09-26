@@ -1,0 +1,149 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets" xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template/template.xhtml">
+    <f:metadata>
+        <f:viewAction action="#{tenantBean.load}" onPostBack="false" />
+    </f:metadata>
+
+    <ui:define name="title">Tenants - MINDALAI Platform Management</ui:define>
+    <ui:define name="viewname">Tenants</ui:define>
+
+    <ui:define name="content">
+
+        <div class="grid">
+            <div class="col-12">
+                <h1 class="text-3xl font-medium">Tenants</h1>
+                <p class="text-color-secondary">Empresas cliente de la plataforma</p>
+            </div>
+
+            <div class="col-12 lg:col-4">
+                <div class="card">
+                    <div class="card-content">
+                        <h2 class="text-xl font-semibold mb-3"
+                            styleClass="formTitle">#{tenantBean.editing ? 'Editar tenant' : 'Nuevo tenant'}</h2>
+
+                        <h:form id="tenantForm">
+                            <p:messages id="formMessages" showDetail="true" closable="true" />
+                            <div class="field">
+                                <p:outputLabel for="legalName" value="Razon social *" />
+                                <p:inputText id="legalName" value="#{tenantBean.legalName}" required="true"
+                                             requiredMessage="La razon social es obligatoria" styleClass="w-full" />
+                            </div>
+
+                            <div class="field">
+                                <p:outputLabel for="ruc" value="RUC (13 digitos) *" />
+                                <p:inputText id="ruc" value="#{tenantBean.ruc}" required="true"
+                                             requiredMessage="El RUC es obligatorio" styleClass="w-full"
+                                             maxlength="13" />
+                            </div>
+
+                            <div class="field">
+                                <p:outputLabel for="tradeName" value="Nombre comercial" />
+                                <p:inputText id="tradeName" value="#{tenantBean.tradeName}" styleClass="w-full" />
+                            </div>
+
+                            <div class="field">
+                                <p:outputLabel for="email" value="Correo" />
+                                <p:inputText id="email" value="#{tenantBean.email}" styleClass="w-full" />
+                            </div>
+
+                            <div class="field">
+                                <p:outputLabel for="phone" value="Telefono" />
+                                <p:inputText id="phone" value="#{tenantBean.phone}" styleClass="w-full" />
+                            </div>
+
+                            <div class="flex justify-content-between mt-4">
+                                <p:commandButton id="saveButton" type="submit"
+                                                 value="#{tenantBean.editing ? 'Guardar cambios' : 'Registrar tenant'}"
+                                                 icon="pi pi-check" update="@form"
+                                                 process="@form" action="#{tenantBean.save}" />
+
+                                <p:commandButton id="cancelButton" value="Cancelar" icon="pi pi-times"
+                                                 severity="secondary" update="@form" process="@form"
+                                                 rendered="#{tenantBean.editing}"
+                                                 action="#{tenantBean.cancelEdit}" />
+                            </div>
+                        </h:form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 lg:col-8">
+                <div class="card">
+                    <div class="card-content">
+                        <h:form id="filterForm">
+                            <p:messages id="formMessages" showDetail="true" closable="true" />
+                            <div class="formgrid grid">
+                                <div class="field col-12 md:col-5">
+                                    <p:outputLabel for="statusFilter" value="Estado" />
+                                    <p:selectOneMenu id="statusFilter" value="#{tenantBean.statusFilter}"
+                                                     styleClass="w-full">
+                                        <f:selectItem itemLabel="Todos" itemValue="" noSelectionOption="true" />
+                                        <f:selectItems value="#{tenantBean.statuses}" var="status"
+                                                       itemLabel="#{status}" itemValue="#{status}" />
+                                    </p:selectOneMenu>
+                                </div>
+                                <div class="field col-12 md:col-5">
+                                    <p:outputLabel for="search" value="Buscar" />
+                                    <p:inputText id="search" value="#{tenantBean.search}" styleClass="w-full"
+                                                 placeholder="RUC, razon social o correo" />
+                                </div>
+                                <div class="field col-12 md:col-2 flex align-items-end">
+                                    <p:commandButton id="filterButton" value="Filtrar" icon="pi pi-filter"
+                                                     update="@form" process="@form"
+                                                     action="#{tenantBean.load}" styleClass="w-full" />
+                                </div>
+                            </div>
+                        </h:form>
+
+                        <h:form id="listForm">
+                            <p:messages id="formMessages" showDetail="true" closable="true" />
+                        <p:dataTable id="tenantsTable" value="#{tenantBean.tenants}" var="tenant" paginator="true"
+                                     rows="10" emptyMessage="No hay tenants que coincidan con el filtro"
+                                     styleClass="mt-3">
+                            <p:column headerText="RUC">
+                                <h:outputText value="#{tenant.ruc}" />
+                            </p:column>
+                            <p:column headerText="Razon social">
+                                <h:outputText value="#{tenant.legalName}" />
+                            </p:column>
+                            <p:column headerText="Comercial">
+                                <h:outputText value="#{tenant.tradeName}" />
+                            </p:column>
+                            <p:column headerText="Estado">
+                                <p:tag value="#{tenant.status}" severity="info" />
+                            </p:column>
+                            <p:column headerText="Acciones" style="width:14rem">
+                                <p:commandButton id="editButton" icon="pi pi-pencil" title="Editar"
+                                                 update=":tenantForm :filterForm :tenantsTable" process="@form"
+                                                 action="#{tenantBean.edit(tenant)}">
+                                    <f:param name="tenant" value="#{tenant}" />
+                                </p:commandButton>
+                                <p:commandButton id="suspendButton" icon="pi pi-pause" title="Suspender"
+                                                 update=":tenantForm :filterForm :tenantsTable" process="@this" styleClass="ml-1"
+                                                 rendered="#{tenant.status == 'ACTIVE'}"
+                                                 action="#{tenantBean.suspend(tenant)}">
+                                    <f:param name="tenant" value="#{tenant}" />
+                                </p:commandButton>
+                                <p:commandButton id="reactivateButton" icon="pi pi-play" title="Reactivar"
+                                                 update=":tenantForm :filterForm :tenantsTable" process="@this" styleClass="ml-1"
+                                                 rendered="#{tenant.status == 'SUSPENDED'}"
+                                                 action="#{tenantBean.reactivate(tenant)}">
+                                    <f:param name="tenant" value="#{tenant}" />
+                                </p:commandButton>
+                                <p:commandButton id="deactivateButton" icon="pi pi-ban" title="Desactivar"
+                                                 update=":tenantForm :filterForm :tenantsTable" process="@this" styleClass="ml-1"
+                                                 rendered="#{tenant.status != 'INACTIVE'}"
+                                                 action="#{tenantBean.deactivate(tenant)}">
+                                    <f:param name="tenant" value="#{tenant}" />
+                                </p:commandButton>
+                            </p:column>
+                        </p:dataTable>
+                        </h:form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ui:define>
+
+</ui:composition>

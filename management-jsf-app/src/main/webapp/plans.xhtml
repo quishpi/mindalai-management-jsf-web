@@ -1,0 +1,155 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets" xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template/template.xhtml">
+    <f:metadata>
+        <f:viewAction action="#{planBean.load}" onPostBack="false" />
+    </f:metadata>
+
+    <ui:define name="title">Planes - MINDALAI Platform Management</ui:define>
+    <ui:define name="viewname">Planes</ui:define>
+
+    <ui:define name="content">
+
+        <div class="grid">
+            <div class="col-12">
+                <h1 class="text-3xl font-medium">Planes</h1>
+                <p class="text-color-secondary">Catalogo comercial y features habilitadas</p>
+            </div>
+
+            <div class="col-12 lg:col-4">
+                <div class="card">
+                    <div class="card-content">
+                        <h2 class="text-xl font-semibold mb-3">Nuevo plan</h2>
+                        <h:form id="planForm">
+                            <p:messages id="formMessages" showDetail="true" closable="true" />
+                            <div class="formgrid grid">
+                                <div class="field col-12 md:col-6">
+                                    <p:outputLabel for="code" value="Codigo *" />
+                                    <p:inputText id="code" value="#{planBean.code}" required="true"
+                                                 requiredMessage="El codigo es obligatorio" styleClass="w-full" />
+                                </div>
+                                <div class="field col-12 md:col-6">
+                                    <p:outputLabel for="name" value="Nombre *" />
+                                    <p:inputText id="name" value="#{planBean.name}" required="true"
+                                                 requiredMessage="El nombre es obligatorio" styleClass="w-full" />
+                                </div>
+                                <div class="field col-12">
+                                    <p:outputLabel for="description" value="Descripcion" />
+                                    <p:inputText id="description" value="#{planBean.description}"
+                                                 styleClass="w-full" />
+                                </div>
+                                <div class="field col-12">
+                                    <p:outputLabel for="monthlyPrice" value="Precio mensual (USD)" />
+                                    <p:inputNumber id="monthlyPrice" value="#{planBean.monthlyPrice}"
+                                                   decimalPlaces="2" decimalSeparator="." thousandSeparator=","
+                                                   styleClass="w-full" />
+                                </div>
+                                <div class="field col-6">
+                                    <p:outputLabel for="maxUsers" value="Usuarios" />
+                                    <p:inputNumber id="maxUsers" value="#{planBean.maxUsers}" min="0"
+                                                   styleClass="w-full" />
+                                </div>
+                                <div class="field col-6">
+                                    <p:outputLabel for="maxDevices" value="Dispositivos" />
+                                    <p:inputNumber id="maxDevices" value="#{planBean.maxDevices}" min="0"
+                                                   styleClass="w-full" />
+                                </div>
+                                <div class="field col-6">
+                                    <p:outputLabel for="maxInstallations" value="Instalaciones" />
+                                    <p:inputNumber id="maxInstallations" value="#{planBean.maxInstallations}"
+                                                   min="0" styleClass="w-full" placeholder="Sin limite" />
+                                </div>
+                                <div class="field col-6">
+                                    <p:outputLabel for="maxDocumentsPerMonth" value="Docs por mes" />
+                                    <p:inputNumber id="maxDocumentsPerMonth"
+                                                   value="#{planBean.maxDocumentsPerMonth}" min="0"
+                                                   styleClass="w-full" placeholder="Sin limite" />
+                                </div>
+                            </div>
+
+                            <p:commandButton id="createButton" value="Crear plan" icon="pi pi-plus"
+                                             update="@form" process="@form" action="#{planBean.create}"
+                                             styleClass="mt-3" />
+                        </h:form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 lg:col-8">
+                <div class="card">
+                    <div class="card-content">
+                        <h:form id="listForm">
+                            <p:messages id="formMessages" showDetail="true" closable="true" />
+                            <p:dataTable id="plansTable" value="#{planBean.plans}" var="plan" paginator="true"
+                                         rows="10" emptyMessage="No hay planes registrados">
+                                <p:column headerText="Codigo">
+                                    <h:outputText value="#{plan.code}" />
+                                </p:column>
+                                <p:column headerText="Nombre">
+                                    <h:outputText value="#{plan.name}" />
+                                </p:column>
+                                <p:column headerText="Precio">
+                                    <h:outputText value="#{plan.monthlyPrice}" />
+                                </p:column>
+                                <p:column headerText="Limites">
+                                    <h:outputText value="#{plan.limits()}" />
+                                </p:column>
+                                <p:column headerText="Estado">
+                                    <p:tag value="#{plan.active ? 'ACTIVO' : 'INACTIVO'}" severity="info" />
+                                </p:column>
+                                <p:column headerText="Acciones" style="width:12rem">
+                                    <p:commandButton id="activateButton" icon="pi pi-check" title="Activar"
+                                                     update="@form" process="@this"
+                                                     rendered="#{!plan.active}"
+                                                     action="#{planBean.activate(plan)}">
+                                        <f:param name="plan" value="#{plan}" />
+                                    </p:commandButton>
+                                    <p:commandButton id="deactivateButton" icon="pi pi-ban" title="Desactivar"
+                                                     update="@form" process="@this" styleClass="ml-1"
+                                                     rendered="#{plan.active}"
+                                                     action="#{planBean.deactivate(plan)}">
+                                        <f:param name="plan" value="#{plan}" />
+                                    </p:commandButton>
+                                </p:column>
+                            </p:dataTable>
+                        </h:form>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-content">
+                        <h2 class="text-xl font-semibold mb-3">Features disponibles</h2>
+                        <h:form id="featureForm">
+                            <p:messages id="formMessages" showDetail="true" closable="true" />
+                            <div class="formgrid grid">
+                                <div class="field col-12 md:col-6">
+                                    <p:outputLabel for="planSelect" value="Plan" />
+                                    <p:selectOneMenu id="planSelect" value="#{planBean.selectedPlanId}"
+                                                     styleClass="w-full">
+                                        <f:selectItem itemLabel="Seleccione un plan" itemValue=""
+                                                      noSelectionOption="true" />
+                                        <f:selectItems value="#{planBean.plans}" var="planItem"
+                                                       itemLabel="#{planItem.code} - #{planItem.name}"
+                                                       itemValue="#{planItem.id}" />
+                                        <p:ajax listener="#{planBean.selectPlan}" update="featureChecks" />
+                                    </p:selectOneMenu>
+                                </div>
+                            </div>
+
+                            <p:selectManyCheckbox id="featureChecks" layout="grid" columns="3"
+                                                   value="#{planBean.selectedFeatures}">
+                                <f:selectItems value="#{planBean.features}" var="feature"
+                                               itemLabel="#{feature.name}" itemValue="#{feature.id}" />
+                            </p:selectManyCheckbox>
+
+                            <p:commandButton id="assignButton" value="Guardar features" icon="pi pi-check"
+                                             update="@form" process="@form"
+                                             action="#{planBean.assignFeatures}" styleClass="mt-3" />
+                        </h:form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ui:define>
+
+</ui:composition>

@@ -406,25 +406,40 @@ De `docs/17-acceptance.md:1` y `docs/16-phase1-backlog.md:40`:
 
 ---
 
-## Estado Fase 1 - Implementado (2026-09-07)
+## Estado Fase 2 - Implementado (2026-09-25)
 
-Base técnica real implementada según `shared-libraries/prompts/prompt-fase-1.md` y `docs/01-phase1-implementation-report.md`.
+Backoffice real, sin contenido demo y validado de extremo a extremo contra `mindalai-management-api`.
 
-**Cambios Fase 1:**
-- Estructura multi-module Maven, Java 25, Spring Boot 4.1.1, `application.yml` (YAML), perfiles dev/test/prod.
-- PostgreSQL 16 + Flyway (migraciones en `src/main/resources/db/migration`), `timestamptz` UTC, UUID PK, `jsonb`.
-- Seguridad base: Spring Security JWT, BCrypt, CorrelationId, GlobalExceptionHandler con formato estándar, Bean Validation.
-- OpenAPI springdoc, Actuator health/info/metrics, logs estructurados con correlationId.
-- Tests base (`mvn verify` PASS), Dockerfile y docker-compose.
+**Backoffice (este repositorio):**
+- Las 11 secciones operativas con plantilla Harmony y `ui:define` (`title`/`viewname`/`content`):
+  Dashboard, Tenants, Plans, Subscriptions, Licenses, Installations, Devices, Usage, Support,
+  Configuration y Audit.
+- Capa de consumo REST sobre `RestClient` (`client/PlatformApiClient` + `client/PlatformRestClient`):
+  cabeceras `Authorization` y `X-Correlation-Id`, timeouts por `app.api.timeout` y mapeo de los
+  errores JSON del backend a `PlatformApiException`. Sin reintentos: la idempotencia es del backend.
+- Sesion en `HttpSession` (`security/AuthSession`) con renovacion transparente via
+  `POST /auth/refresh`; un 401 cierra la sesion y devuelve al login.
+- Gate de seguridad (`config/SecurityConfig`): solo se acepta una sesion creada por el API, cookie
+  `HttpOnly` + `Secure` + `SameSite`, `changeSessionId` y timeout de 30 min.
+- DTOs propios en `dto/` que reflejan el contrato publicado del API. Sin JPA, sin `DataSource`
+  y sin endpoints REST propios.
 
-**Cómo ejecutar (desarrollo local):**
-Ver `docs/04-phase1-runbook.md` y `docker-compose.yml` en el workspace raíz.
+**Verificacion ejecutada:**
+- `mvn -o clean verify` -> BUILD SUCCESS, 20 tests.
+- Sin sesion, las 11 paginas responden 403; `/` redirige al login.
+- Login por el formulario JSF (ViewState + POST parcial) y acceso autenticado a las 11 paginas.
+- Alta de tenant por el formulario: creada en PostgreSQL y visible en la tabla.
+- RUC invalido: el mensaje de Bean Validation del API llega al operador.
 
-**Endpoints principales:**
-Ver tablas en este README y en `docs/01-phase1-implementation-report.md`. Todos versionados `/api/v1.0`.
+**Deuda conocida:**
+- No hay seccion de gestion de operadores de plataforma (12ava seccion): el API expone
+  `GET/POST /platform/users` y `POST /platform/users/{id}/status`, pero el flujo
+  `tenant -> plan -> subscription -> license -> installation -> device` no lo requiere.
+- `support.xhtml` pide el UUID del responsable para asignar un ticket porque
+  `UserProfile` no expone el identificador del operador.
+- La cookie `Secure` viene por defecto activa; `application-dev.yml` la desactiva para
+  trabajar sobre `http://localhost`. En produccion debe quedar activa.
 
-**Fronteras respetadas:**
-- REST y JSF totalmente separados; JSF consume REST vía HTTP/JSON (RestClient), sin JPA ni datasources.
-- Sin dependencias Maven entre REST y JSF.
-- Catálogos SRI en BD (Flyway), no enums.
+---
 
+*Este proyecto es el backoffice de `mindalai-management-api`. Su evolucion a React no afecta al backend. Ver `shared-libraries/mindalai-platform-phase0/docs/02-target-architecture.md:139` y `shared-libraries/mindalai-platform-phase0/README.md:34`.*

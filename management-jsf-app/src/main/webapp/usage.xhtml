@@ -1,0 +1,139 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets" xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template/template.xhtml">
+    <f:metadata>
+        <f:viewAction action="#{usageBean.load}" onPostBack="false" />
+    </f:metadata>
+
+    <ui:define name="title">Consumo - MINDALAI Platform Management</ui:define>
+    <ui:define name="viewname">Consumo</ui:define>
+
+    <ui:define name="content">
+
+        <div class="grid">
+            <div class="col-12">
+                <h1 class="text-3xl font-medium">Consumo</h1>
+                <p class="text-color-secondary">Metricas ingeridas desde los puntos de operacion</p>
+            </div>
+
+            <div class="col-12 lg:col-4">
+                <div class="card">
+                    <div class="card-content">
+                        <h2 class="text-xl font-semibold mb-3">Registrar consumo</h2>
+                        <h:form id="usageForm">
+                            <p:messages id="formMessages" showDetail="true" closable="true" />
+                            <div class="field">
+                                <p:outputLabel for="tenantId" value="Tenant *" />
+                                <p:selectOneMenu id="tenantId" value="#{usageBean.tenantId}" required="true"
+                                                 requiredMessage="Seleccione un tenant" filter="true"
+                                                 styleClass="w-full">
+                                    <f:selectItem itemLabel="Seleccione un tenant" itemValue=""
+                                                  noSelectionOption="true" />
+                                    <f:selectItems value="#{usageBean.tenants}" var="tenant"
+                                                   itemLabel="#{tenant.displayName()} - #{tenant.ruc}"
+                                                   itemValue="#{tenant.id}" />
+                                    <p:ajax listener="#{usageBean.onTenantChange}" update="installationsPanel" />
+                                </p:selectOneMenu>
+                            </div>
+
+                            <h:panelGroup id="installationsPanel" layout="block">
+                                <div class="field">
+                                    <p:outputLabel for="installationId" value="Instalacion" />
+                                    <p:selectOneMenu id="installationId" value="#{usageBean.installationId}"
+                                                     filter="true" styleClass="w-full">
+                                        <f:selectItem itemLabel="Sin instalacion" itemValue=""
+                                                      noSelectionOption="true" />
+                                        <f:selectItems value="#{usageBean.installations}" var="installation"
+                                                       itemLabel="#{installation.name}"
+                                                       itemValue="#{installation.id}" />
+                                    </p:selectOneMenu>
+                                </div>
+                            </h:panelGroup>
+
+                            <div class="field">
+                                <p:outputLabel for="metricName" value="Metrica *" />
+                                <p:inputText id="metricName" value="#{usageBean.metricName}" required="true"
+                                             requiredMessage="La metrica es obligatoria" styleClass="w-full"
+                                             placeholder="documents_issued" />
+                            </div>
+
+                            <div class="field">
+                                <p:outputLabel for="metricValue" value="Valor *" />
+                                <p:inputNumber id="metricValue" value="#{usageBean.metricValue}" required="true"
+                                               decimalPlaces="2" styleClass="w-full" />
+                            </div>
+
+                            <p:commandButton id="recordButton" value="Registrar" icon="pi pi-plus" update="@form"
+                                             process="@form" action="#{usageBean.record}" styleClass="mt-3" />
+                        </h:form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 lg:col-8">
+                <div class="card">
+                    <div class="card-content">
+                        <h2 class="text-xl font-semibold mb-3">Resumen agregado</h2>
+                        <h:form id="filterForm">
+                            <p:messages id="formMessages" showDetail="true" closable="true" />
+                            <div class="formgrid grid">
+                                <div class="field col-6">
+                                    <p:outputLabel for="from" value="Desde" />
+                                    <p:datePicker id="from" value="#{usageBean.from}" dateFormat="dd/MM/yyyy"
+                                                  showIcon="true" styleClass="w-full" />
+                                </div>
+                                <div class="field col-6">
+                                    <p:outputLabel for="to" value="Hasta" />
+                                    <p:datePicker id="to" value="#{usageBean.to}" dateFormat="dd/MM/yyyy"
+                                                  showIcon="true" styleClass="w-full" />
+                                </div>
+                                <div class="field col-12">
+                                    <p:commandButton id="filterButton" value="Aplicar rango" icon="pi pi-filter"
+                                                     update="@form" process="@form" action="#{usageBean.load}" />
+                                </div>
+                            </div>
+                        </h:form>
+
+                        <p:dataTable id="summaryTable" value="#{usageBean.summary}" var="summary" paginator="true"
+                                     rows="10" emptyMessage="Sin consumo en el rango seleccionado">
+                            <p:column headerText="Tenant">
+                                <h:outputText value="#{summary.tenantName}" />
+                            </p:column>
+                            <p:column headerText="Metrica">
+                                <h:outputText value="#{summary.metricName}" />
+                            </p:column>
+                            <p:column headerText="Total">
+                                <h:outputText value="#{summary.total}" />
+                            </p:column>
+                            <p:column headerText="Muestras">
+                                <h:outputText value="#{summary.samples}" />
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-content">
+                        <h2 class="text-xl font-semibold mb-3">Ultimos eventos</h2>
+                        <p:dataTable id="latestTable" value="#{usageBean.latest}" var="event" paginator="true"
+                                     rows="10" emptyMessage="Sin eventos registrados">
+                            <p:column headerText="Metrica">
+                                <h:outputText value="#{event.metricName}" />
+                            </p:column>
+                            <p:column headerText="Valor">
+                                <h:outputText value="#{event.metricValue}" />
+                            </p:column>
+                            <p:column headerText="Instalacion">
+                                <h:outputText value="#{event.installationId}" />
+                            </p:column>
+                            <p:column headerText="Registrado">
+                                <h:outputText value="#{event.recordedAt}" />
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ui:define>
+
+</ui:composition>
