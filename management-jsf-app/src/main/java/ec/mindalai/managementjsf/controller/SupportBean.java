@@ -31,6 +31,7 @@ public class SupportBean extends AbstractPageBean {
     private static final String TICKET_DIALOG = "ticketDialogWidget";
     private static final String ASSIGN_DIALOG = "assignDialogWidget";
     private static final String RESOLVE_DIALOG = "resolveDialogWidget";
+    private static final String CLOSE_DIALOG = "closeDialogWidget";
 
     @Inject
     private PlatformRestClient restClient;
@@ -56,6 +57,9 @@ public class SupportBean extends AbstractPageBean {
     /** Ticket a resolver y texto de resolucion, con el dialog abierto. */
     private SupportTicketDto resolving;
     private String resolution;
+
+    /** Ticket a cerrar, pendiente de la confirmacion en el dialog. */
+    private SupportTicketDto closing;
 
     public int rowNumber(int rowIndex) {
         return rowIndex + 1;
@@ -211,16 +215,35 @@ public class SupportBean extends AbstractPageBean {
         hideDialog(RESOLVE_DIALOG);
     }
 
-    public void close(SupportTicketDto ticket) {
+    /** Cerrar un ticket no tiene vuelta atras, asi que pide confirmacion antes de llamar al API. */
+    public void requestClose(SupportTicketDto ticket) {
+        if (ticket == null) {
+            error("Seleccione el ticket a cerrar");
+            return;
+        }
+        closing = ticket;
+    }
+
+    public void confirmClose() {
+        if (closing == null) {
+            error("Seleccione el ticket a cerrar");
+            return;
+        }
         String cid = correlationId();
         String token = token();
-        UUID id = ticket.getId();
+        UUID id = closing.getId();
         SupportTicketDto closed = call(() -> restClient.closeTicket(token, cid, id), null);
         if (closed == null) {
             return;
         }
         success("Ticket " + closed.getSubject() + " cerrado");
         replaceInPlace(closed);
+        closing = null;
+        hideDialog(CLOSE_DIALOG);
+    }
+
+    public void cancelClose() {
+        closing = null;
     }
 
     private void replaceInPlace(SupportTicketDto updated) {

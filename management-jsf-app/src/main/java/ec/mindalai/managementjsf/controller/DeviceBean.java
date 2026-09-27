@@ -40,6 +40,7 @@ public class DeviceBean extends AbstractPageBean {
     private static final String ACTION_RETIRE = "RETIRE";
 
     private static final String DEVICE_DIALOG = "deviceDialogWidget";
+    private static final String EDIT_DIALOG = "deviceEditDialogWidget";
     private static final String STATUS_DIALOG = "deviceStatusDialogWidget";
     private static final String HISTORY_DIALOG = "deviceHistoryDialogWidget";
 
@@ -54,6 +55,11 @@ public class DeviceBean extends AbstractPageBean {
     private String deviceType = "BOX";
     private String identifier;
     private String name;
+
+    /** Dispositivo abierto en el dialog de edicion, con los valores a enviar. */
+    private DeviceDto editing;
+    private String editType;
+    private String editName;
 
     /** Dispositivo sobre el que se confirmo el cambio de estado o se pidio el historial. */
     private DeviceDto selected;
@@ -106,6 +112,42 @@ public class DeviceBean extends AbstractPageBean {
         name = null;
         hideDialog(DEVICE_DIALOG);
         load();
+    }
+
+    public void requestEdit(DeviceDto device) {
+        if (device == null) {
+            error("Seleccione el dispositivo a editar");
+            return;
+        }
+        editing = device;
+        editType = device.getDeviceType();
+        editName = device.getName();
+    }
+
+    public void saveEdit() {
+        if (editing == null) {
+            error("Seleccione el dispositivo a editar");
+            return;
+        }
+        if (isBlank(editType)) {
+            error("El tipo de dispositivo es obligatorio");
+            return;
+        }
+        String cid = correlationId();
+        String token = token();
+        UUID id = editing.getId();
+        String type = editType.trim();
+        String deviceName = blankToNull(editName);
+        DeviceDto updated = call(() -> restClient.updateDevice(token, cid, id, type, deviceName), null);
+        if (updated == null) {
+            return;
+        }
+        success("Dispositivo " + updated.getIdentifier() + " actualizado");
+        replaceInPlace(updated);
+        editing = null;
+        editType = null;
+        editName = null;
+        hideDialog(EDIT_DIALOG);
     }
 
     public void requestBlock(DeviceDto device) {

@@ -229,6 +229,13 @@ public class PlatformRestClient {
                 "identifier", identifier, "name", name), DeviceDto.class);
     }
 
+    public DeviceDto updateDevice(String token, String cid, UUID id, String deviceType, String name) {
+        // DeviceUpdateRequest no admite installationId ni identifier: la instalacion del
+        // dispositivo no cambia y su identificador es su identidad en la plataforma.
+        return api.put(path("/devices/" + id), token, cid,
+                PlatformApiClient.body("deviceType", deviceType, "name", name), DeviceDto.class);
+    }
+
     public DeviceDto blockDevice(String token, String cid, UUID id, String reason) {
         return api.post(path("/devices/" + id + "/block"), token, cid,
                 PlatformApiClient.body("reason", reason), DeviceDto.class);

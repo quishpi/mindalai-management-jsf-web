@@ -117,10 +117,12 @@
                                 <p:column headerText="Resolucion">
                                     <h:outputText value="#{row.resolution}" />
                                 </p:column>
-                                <p:column headerText="Acciones" exportable="false" style="width:18rem">
+                                <p:column headerText="Acciones" exportable="false" style="width:15rem">
                                     <p:commandButton id="assignRowButton" icon="pi pi-user-plus" title="Asignar"
                                         styleClass="rounded-button ui-button-secondary" process="@this"
-                                        update=":assignDialog :messages" action="#{supportBean.requestAssign(row)}"
+                                        update=":assignDialog :messages"
+                                        rendered="#{row.status == 'OPEN' or row.status == 'IN_PROGRESS'}"
+                                        action="#{supportBean.requestAssign(row)}"
                                         oncomplete="PF('assignDialogWidget').show()">
                                         <f:param name="row" value="#{row}" />
                                     </p:commandButton>
@@ -134,9 +136,10 @@
                                     </p:commandButton>
                                     <p:commandButton id="closeButton" icon="pi pi-inbox" title="Cerrar"
                                         styleClass="ml-1 rounded-button ui-button-secondary" process="@this"
-                                        update=":messages :listForm"
+                                        update=":closeDialog :messages"
                                         rendered="#{row.status == 'OPEN' or row.status == 'IN_PROGRESS' or row.status == 'RESOLVED'}"
-                                        action="#{supportBean.close(row)}">
+                                        action="#{supportBean.requestClose(row)}"
+                                        oncomplete="PF('closeDialogWidget').show()">
                                         <f:param name="row" value="#{row}" />
                                     </p:commandButton>
                                 </p:column>
@@ -235,6 +238,42 @@
                                     <p:commandButton id="cancelAssignButton" value="Cancelar" icon="pi pi-times"
                                         type="button" styleClass="ui-button-secondary"
                                         onclick="PF('assignDialogWidget').hide()" />
+                                </div>
+                            </h:form>
+                        </p:dialog>
+
+                        <p:dialog id="closeDialog" widgetVar="closeDialogWidget" header="Cerrar ticket" showEffect="fade"
+                            modal="true" responsive="true" style="max-width: 94vw">
+                            <h:form id="closeForm">
+                                <p:outputPanel id="closeFormContent" styleClass="ui-fluid"
+                                    style="max-height: 60vh; overflow-y: auto">
+                                    <div class="field">
+                                        <p:outputLabel for="closeSubject" value="Asunto" />
+                                        <h:outputText id="closeSubject" value="#{supportBean.closing.subject}"
+                                            styleClass="w-full surface-100 p-2 border-round" />
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="closeTenant" value="Tenant" />
+                                        <h:outputText id="closeTenant" value="#{supportBean.closing.tenantName}"
+                                            styleClass="w-full surface-100 p-2 border-round" />
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputPanel styleClass="p-messages p-messages-warn surface-100 border-round">
+                                            <span class="p-message-text">Cerrar el ticket lo archiva y ya no
+                                                admite cambios. Esta accion no se puede deshacer.</span>
+                                        </p:outputPanel>
+                                    </div>
+                                </p:outputPanel>
+
+                                <div class="flex justify-content-between mt-4">
+                                    <p:commandButton id="confirmCloseButton" value="Cerrar ticket" icon="pi pi-inbox"
+                                        process="@form" update="@form :listForm :messages"
+                                        action="#{supportBean.confirmClose}" />
+                                    <p:commandButton id="cancelCloseButton" value="Cancelar" icon="pi pi-times"
+                                        type="button" styleClass="ui-button-secondary"
+                                        onclick="PF('closeDialogWidget').hide()" />
                                 </div>
                             </h:form>
                         </p:dialog>

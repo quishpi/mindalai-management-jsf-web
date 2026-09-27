@@ -27,15 +27,21 @@ public class AuditBean extends AbstractPageBean {
 
     private static final long serialVersionUID = 1L;
 
-    private static final int PAGE_SIZE = 20;
+    /** Filas por pagina del paginador de la vista, igual que en el resto de paginas. */
+    private static final int PAGE_SIZE = 10;
+
+    /**
+     * Ventana de eventos que se pide al API. El paginador de la vista reparte esas filas en
+     * paginas de {@link #PAGE_SIZE}; el total real del filtro se muestra en la cabecera.
+     */
+    private static final int FETCH_SIZE = 200;
 
     @Inject
     private PlatformRestClient restClient;
 
     private List<AuditEntryDto> entries = new ArrayList<>();
     private long totalElements;
-    private int totalPages;
-    private int page;
+    private int pageSize = PAGE_SIZE;
 
     private UUID userId;
     private UUID tenantId;
@@ -53,10 +59,13 @@ public class AuditBean extends AbstractPageBean {
      * vista en la ultima pagina devolvia una tabla vacia sin explicacion.
      */
     public void load() {
-        page = 0;
         entries = search();
     }
 
+    /**
+     * Numero de orden de la fila. {@code rowIndexVar} entrega el indice global de la fila, de
+     * modo que la numeracion continua entre paginas sin depender del bean.
+     */
     public int rowNumber(int rowIndex) {
         return rowIndex + 1;
     }
@@ -72,30 +81,15 @@ public class AuditBean extends AbstractPageBean {
         putIfPresent(query, "result", trimToNull(result));
         putIfPresent(query, "from", atStartOfDay(from));
         putIfPresent(query, "to", atEndOfDay(to));
-        query.put("page", page);
-        query.put("size", PAGE_SIZE);
+        query.put("page", 0);
+        query.put("size", FETCH_SIZE);
         PageResult<AuditEntryDto> result = call(() -> restClient.audit(token, cid, query), null);
         if (result == null) {
             return entries;
         }
         entries = result.getContent() == null ? new ArrayList<>() : new ArrayList<>(result.getContent());
         totalElements = result.getTotalElements();
-        totalPages = result.getTotalPages();
         return entries;
-    }
-
-    public void nextPage() {
-        if (page + 1 < totalPages) {
-            page++;
-            load();
-        }
-    }
-
-    public void previousPage() {
-        if (page > 0) {
-            page--;
-            load();
-        }
     }
 
     public void reset() {
@@ -126,24 +120,8 @@ public class AuditBean extends AbstractPageBean {
         };
     }
 
-    public int getPage() {
-        return page;
-    }
-
-    public int getTotalPages() {
-        return totalPages;
-    }
-
     public long getTotalElements() {
         return totalElements;
-    }
-
-    public boolean isHasPrevious() {
-        return page > 0;
-    }
-
-    public boolean isHasNext() {
-        return page + 1 < totalPages;
     }
 
     private void putIfPresent(Map<String, Object> query, String key, Object value) {

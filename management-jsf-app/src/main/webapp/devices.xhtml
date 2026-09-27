@@ -96,7 +96,13 @@
                                 <p:column headerText="Estado" exportableValue="#{row.status}">
                                     <p:tag value="#{row.status}" severity="#{deviceBean.statusSeverity(row.status)}" />
                                 </p:column>
-                                <p:column headerText="Acciones" exportable="false" style="width:19rem">
+                                <p:column headerText="Acciones" exportable="false" style="width:23rem">
+                                    <p:commandButton id="editButton" icon="pi pi-pencil" title="Editar"
+                                        styleClass="rounded-button ui-button-secondary" process="@this"
+                                        update=":deviceEditDialog :messages" action="#{deviceBean.requestEdit(row)}"
+                                        oncomplete="PF('deviceEditDialogWidget').show()">
+                                        <f:param name="row" value="#{row}" />
+                                    </p:commandButton>
                                     <p:commandButton id="blockButton" icon="pi pi-lock" title="Bloquear"
                                         styleClass="rounded-button ui-button-warning" process="@this"
                                         update=":deviceStatusDialog :messages" rendered="#{row.status == 'ACTIVE'}"
@@ -121,7 +127,8 @@
                                     </p:commandButton>
                                     <p:commandButton id="heartbeatButton" icon="pi pi-send" title="Registrar latido"
                                         styleClass="ml-1 rounded-button ui-button-secondary" process="@this"
-                                        update=":messages :listForm" action="#{deviceBean.heartbeat(row)}">
+                                        update=":messages :listForm" rendered="#{row.status == 'ACTIVE'}"
+                                        action="#{deviceBean.heartbeat(row)}">
                                         <f:param name="row" value="#{row}" />
                                     </p:commandButton>
                                     <p:commandButton id="historyButton" icon="pi pi-history"
@@ -183,6 +190,53 @@
                                         update="@form :listForm :messages" action="#{deviceBean.save}" />
                                     <p:commandButton id="cancelButton" value="Cancelar" icon="pi pi-times" type="button"
                                         styleClass="ui-button-secondary" onclick="PF('deviceDialogWidget').hide()" />
+                                </div>
+                            </h:form>
+                        </p:dialog>
+
+                        <p:dialog id="deviceEditDialog" widgetVar="deviceEditDialogWidget" header="Editar dispositivo"
+                            showEffect="fade" modal="true" responsive="true" style="max-width: 94vw">
+                            <h:form id="deviceEditForm">
+                                <p:outputPanel id="deviceEditFormContent" styleClass="ui-fluid"
+                                    style="max-height: 60vh; overflow-y: auto">
+                                    <div class="field">
+                                        <p:outputLabel for="editInstallation" value="Instalacion" />
+                                        <h:outputText id="editInstallation"
+                                            value="#{deviceBean.editing.installationName}"
+                                            styleClass="w-full surface-100 p-2 border-round" />
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="editIdentifier" value="Identificador" />
+                                        <h:outputText id="editIdentifier" value="#{deviceBean.editing.identifier}"
+                                            styleClass="w-full surface-100 p-2 border-round" />
+                                        <small class="text-color-secondary">El identificador no se puede
+                                            modificar.</small>
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="editType" value="Tipo" />
+                                        <p:selectOneMenu id="editType" value="#{deviceBean.editType}" required="true"
+                                            requiredMessage="El tipo es obligatorio" styleClass="w-full">
+                                            <f:selectItems value="#{deviceBean.deviceTypes()}" var="type"
+                                                itemLabel="#{type}" itemValue="#{type}" />
+                                        </p:selectOneMenu>
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="editName" value="Nombre" />
+                                        <p:inputText id="editName" value="#{deviceBean.editName}" styleClass="w-full"
+                                            maxlength="200" />
+                                    </div>
+                                </p:outputPanel>
+
+                                <div class="flex justify-content-between mt-4">
+                                    <p:commandButton id="saveEditButton" value="Guardar" icon="pi pi-check"
+                                        process="@form" update="@form :listForm :messages"
+                                        action="#{deviceBean.saveEdit}" />
+                                    <p:commandButton id="cancelEditButton" value="Cancelar" icon="pi pi-times"
+                                        type="button" styleClass="ui-button-secondary"
+                                        onclick="PF('deviceEditDialogWidget').hide()" />
                                 </div>
                             </h:form>
                         </p:dialog>

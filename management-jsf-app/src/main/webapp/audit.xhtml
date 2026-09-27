@@ -67,8 +67,8 @@
                         <h:form id="listForm">
                             <p:toolbar styleClass="mb-4">
                                 <p:toolbarGroup>
-                                    <span class="text-color-secondary">
-                                        #{auditBean.totalElements} eventos encontrados</span>
+                                    <span class="text-color-secondary">Trazabilidad de las acciones
+                                        administrativas</span>
                                 </p:toolbarGroup>
                                 <p:toolbarGroup align="right">
                                     <p:commandButton id="exportPdf" value="PDF" icon="pi pi-file-pdf" process="@this"
@@ -88,12 +88,13 @@
 
                             <p:dataTable id="auditTable" widgetVar="auditTableWidget" var="row"
                                 value="#{auditBean.entries}" reflow="true" rowIndexVar="rowIdx"
+                                paginator="true" rows="#{auditBean.pageSize}" paginatorPosition="bottom"
                                 emptyMessage="No hay eventos de auditoria que coincidan con el filtro">
                                 <f:facet name="header">
                                     <div class="products-table-header">
                                         <span style="font-weight: bold">Gestionar Auditoria</span>
-                                        <span class="text-color-secondary">Pagina #{auditBean.page + 1} de
-                                            #{auditBean.totalPages == 0 ? 1 : auditBean.totalPages}</span>
+                                        <span class="text-color-secondary">#{auditBean.totalElements} eventos
+                                            encontrados</span>
                                     </div>
                                 </f:facet>
 
@@ -128,15 +129,6 @@
                                     </p:commandButton>
                                 </p:column>
                             </p:dataTable>
-
-                            <div class="flex justify-content-between align-items-center mt-3">
-                                <p:commandButton id="previousButton" value="Anterior" icon="pi pi-chevron-left"
-                                    styleClass="ui-button-secondary" process="@this" update=":listForm :messages"
-                                    action="#{auditBean.previousPage}" disabled="#{not auditBean.hasPrevious}" />
-                                <p:commandButton id="nextButton" value="Siguiente" icon="pi pi-chevron-right"
-                                    styleClass="ui-button-secondary" process="@this" update=":listForm :messages"
-                                    action="#{auditBean.nextPage}" disabled="#{not auditBean.hasNext}" />
-                            </div>
                         </h:form>
 
                         <p:dialog id="detailDialog" widgetVar="detailDialogWidget" header="Detalle del evento"
