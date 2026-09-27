@@ -166,6 +166,13 @@
                                         <p:outputLabel for="phone" value="Telefono" />
                                         <p:inputText id="phone" value="#{tenantBean.phone}" styleClass="w-full" />
                                     </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="notes" value="Notas" />
+                                        <p:inputTextarea id="notes" value="#{tenantBean.notes}" rows="3"
+                                            maxlength="1000" styleClass="w-full"
+                                            placeholder="Observaciones internas del tenant" />
+                                    </div>
                                 </p:outputPanel>
 
                                 <div class="flex justify-content-between mt-4">

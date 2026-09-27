@@ -52,16 +52,17 @@ public class PlatformRestClient {
     }
 
     public TenantDto createTenant(String token, String cid, String legalName, String ruc, String tradeName,
-                                  String email, String phone) {
+                                  String email, String phone, String notes) {
         return api.post(path("/tenants"), token, cid, PlatformApiClient.body(
                 "legalName", legalName, "ruc", ruc, "tradeName", tradeName,
-                "email", email, "phone", phone), TenantDto.class);
+                "email", email, "phone", phone, "notes", notes), TenantDto.class);
     }
 
     public TenantDto updateTenant(String token, String cid, UUID id, String legalName, String tradeName,
-                                  String email, String phone) {
+                                  String email, String phone, String notes) {
         return api.put(path("/tenants/" + id), token, cid, PlatformApiClient.body(
-                "legalName", legalName, "tradeName", tradeName, "email", email, "phone", phone), TenantDto.class);
+                "legalName", legalName, "tradeName", tradeName, "email", email, "phone", phone,
+                "notes", notes), TenantDto.class);
     }
 
     public TenantDto suspendTenant(String token, String cid, UUID id, String reason) {

@@ -24,7 +24,6 @@ public class TenantDto {
     private String email;
     private String phone;
     private String notes;
-    private Instant deactivatedAt;
     private Instant createdAt;
     private Instant updatedAt;
 

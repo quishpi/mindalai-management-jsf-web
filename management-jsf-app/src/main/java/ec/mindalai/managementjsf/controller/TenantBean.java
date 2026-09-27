@@ -53,6 +53,7 @@ public class TenantBean extends AbstractPageBean {
     private String tradeName;
     private String email;
     private String phone;
+    private String notes;
 
     private UUID editingId;
     private boolean editing;
@@ -99,6 +100,7 @@ public class TenantBean extends AbstractPageBean {
         tradeName = tenant.getTradeName();
         email = tenant.getEmail();
         phone = tenant.getPhone();
+        notes = tenant.getNotes();
     }
 
     public void save() {
@@ -117,7 +119,9 @@ public class TenantBean extends AbstractPageBean {
         String trade = blankToNull(tradeName);
         String mail = blankToNull(email);
         String phoneValue = blankToNull(phone);
-        TenantDto updated = call(() -> restClient.updateTenant(token, cid, id, legal, trade, mail, phoneValue), null);
+        String note = blankToNull(notes);
+        TenantDto updated = call(() -> restClient.updateTenant(token, cid, id, legal, trade, mail, phoneValue, note),
+                null);
         if (updated == null) {
             return;
         }
@@ -194,8 +198,9 @@ public class TenantBean extends AbstractPageBean {
         String trade = blankToNull(tradeName);
         String mail = blankToNull(email);
         String phoneValue = blankToNull(phone);
-        TenantDto created = call(() -> restClient.createTenant(token, cid, legal, rucValue, trade, mail, phoneValue),
-                null, this::duplicateRucMessage);
+        String note = blankToNull(notes);
+        TenantDto created = call(() -> restClient.createTenant(token, cid, legal, rucValue, trade, mail, phoneValue,
+                note), null, this::duplicateRucMessage);
         if (created == null) {
             return;
         }
@@ -267,6 +272,7 @@ public class TenantBean extends AbstractPageBean {
         tradeName = null;
         email = null;
         phone = null;
+        notes = null;
     }
 
     private boolean isBlank(String value) {
