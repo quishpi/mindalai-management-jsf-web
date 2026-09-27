@@ -4,8 +4,10 @@ import ec.mindalai.managementjsf.dto.AuditEntryDto;
 import ec.mindalai.managementjsf.dto.ConfigurationDto;
 import ec.mindalai.managementjsf.dto.DashboardSummaryDto;
 import ec.mindalai.managementjsf.dto.DeviceDto;
+import ec.mindalai.managementjsf.dto.DeviceStatusHistoryDto;
 import ec.mindalai.managementjsf.dto.FeatureDto;
 import ec.mindalai.managementjsf.dto.InstallationDto;
+import ec.mindalai.managementjsf.dto.InstallationStatusHistoryDto;
 import ec.mindalai.managementjsf.dto.LicenseDto;
 import ec.mindalai.managementjsf.dto.PageResult;
 import ec.mindalai.managementjsf.dto.PlanDto;
@@ -92,21 +94,21 @@ public class PlatformRestClient {
 
     public PlanDto createPlan(String token, String cid, String code, String name, String description,
                               BigDecimal monthlyPrice, int maxUsers, int maxDevices, Integer maxInstallations,
-                              Integer maxDocumentsPerMonth) {
+                              Integer maxDocumentsPerMonth, Set<UUID> featureIds) {
         return api.post(path("/plans"), token, cid, PlatformApiClient.body(
                 "code", code, "name", name, "description", description, "monthlyPrice", monthlyPrice,
                 "maxUsers", maxUsers, "maxDevices", maxDevices, "maxInstallations", maxInstallations,
-                "maxDocumentsPerMonth", maxDocumentsPerMonth), PlanDto.class);
+                "maxDocumentsPerMonth", maxDocumentsPerMonth, "featureIds", featureIds), PlanDto.class);
     }
 
     public PlanDto updatePlan(String token, String cid, UUID id, String name, String description,
                               BigDecimal monthlyPrice, int maxUsers, int maxDevices, Integer maxInstallations,
-                              Integer maxDocumentsPerMonth) {
+                              Integer maxDocumentsPerMonth, Set<UUID> featureIds) {
         // PlanUpdateRequest no admite code: el codigo del plan es inmutable.
         return api.put(path("/plans/" + id), token, cid, PlatformApiClient.body(
                 "name", name, "description", description, "monthlyPrice", monthlyPrice,
                 "maxUsers", maxUsers, "maxDevices", maxDevices, "maxInstallations", maxInstallations,
-                "maxDocumentsPerMonth", maxDocumentsPerMonth), PlanDto.class);
+                "maxDocumentsPerMonth", maxDocumentsPerMonth, "featureIds", featureIds), PlanDto.class);
     }
 
     public PlanDto activatePlan(String token, String cid, UUID id) {
@@ -189,14 +191,28 @@ public class PlatformRestClient {
                 "name", name, "address", address, "contactName", contactName), InstallationDto.class);
     }
 
-    public InstallationDto setInstallationMaintenance(String token, String cid, UUID id, boolean maintenance) {
-        // El API declara @RequestParam boolean value: debe viajar como query param, no como cuerpo.
-        return api.postWithQuery(path("/installations/" + id + "/maintenance"), token, cid,
-                PlatformApiClient.body("value", maintenance), InstallationDto.class);
+    public InstallationDto activateInstallation(String token, String cid, UUID id, String reason) {
+        return api.post(path("/installations/" + id + "/activate"), token, cid,
+                PlatformApiClient.body("reason", reason), InstallationDto.class);
     }
 
-    public InstallationDto deactivateInstallation(String token, String cid, UUID id) {
-        return api.delete(path("/installations/" + id), token, cid, InstallationDto.class);
+    public InstallationDto setInstallationMaintenance(String token, String cid, UUID id, boolean maintenance,
+                                                     String reason) {
+        // El API declara @RequestParam boolean value: debe viajar como query param, no como cuerpo.
+        // El motivo viaja en el cuerpo, que es lo que espera InstallationStatusChangeRequest.
+        return api.postWithQueryAndBody(path("/installations/" + id + "/maintenance"), token, cid,
+                PlatformApiClient.body("value", maintenance),
+                PlatformApiClient.body("reason", reason), InstallationDto.class);
+    }
+
+    public InstallationDto deactivateInstallation(String token, String cid, UUID id, String reason) {
+        return api.deleteWithBody(path("/installations/" + id), token, cid,
+                PlatformApiClient.body("reason", reason), InstallationDto.class);
+    }
+
+    public List<InstallationStatusHistoryDto> installationStatusHistory(String token, String cid, UUID id) {
+        return api.getList(path("/installations/" + id + "/status-history"), token, cid,
+                InstallationStatusHistoryDto[].class, Map.of());
     }
 
     // ------------------------------------------------------------------ devices
@@ -213,16 +229,24 @@ public class PlatformRestClient {
                 "identifier", identifier, "name", name), DeviceDto.class);
     }
 
-    public DeviceDto blockDevice(String token, String cid, UUID id) {
-        return api.post(path("/devices/" + id + "/block"), token, cid, null, DeviceDto.class);
+    public DeviceDto blockDevice(String token, String cid, UUID id, String reason) {
+        return api.post(path("/devices/" + id + "/block"), token, cid,
+                PlatformApiClient.body("reason", reason), DeviceDto.class);
     }
 
-    public DeviceDto activateDevice(String token, String cid, UUID id) {
-        return api.post(path("/devices/" + id + "/activate"), token, cid, null, DeviceDto.class);
+    public DeviceDto activateDevice(String token, String cid, UUID id, String reason) {
+        return api.post(path("/devices/" + id + "/activate"), token, cid,
+                PlatformApiClient.body("reason", reason), DeviceDto.class);
     }
 
-    public DeviceDto retireDevice(String token, String cid, UUID id) {
-        return api.post(path("/devices/" + id + "/retire"), token, cid, null, DeviceDto.class);
+    public DeviceDto retireDevice(String token, String cid, UUID id, String reason) {
+        return api.post(path("/devices/" + id + "/retire"), token, cid,
+                PlatformApiClient.body("reason", reason), DeviceDto.class);
+    }
+
+    public List<DeviceStatusHistoryDto> deviceStatusHistory(String token, String cid, UUID id) {
+        return api.getList(path("/devices/" + id + "/status-history"), token, cid,
+                DeviceStatusHistoryDto[].class, Map.of());
     }
 
     public DeviceDto deviceHeartbeat(String token, String cid, UUID id) {

@@ -1,6 +1,5 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core"
-                xmlns:ui="jakarta.faces.facelets" xmlns:p="http://primefaces.org/ui"
-                template="/WEB-INF/template/template.xhtml">
+    xmlns:ui="jakarta.faces.facelets" xmlns:p="http://primefaces.org/ui" template="/WEB-INF/template/template.xhtml">
     <f:metadata>
         <f:viewAction action="#{supportBean.load}" onPostBack="false" />
     </f:metadata>
@@ -10,189 +9,266 @@
 
     <ui:define name="content">
 
-        <p:messages id="globalMessages" showSummary="false" showDetail="true" closable="true" />
+        <p:growl id="messages" showDetail="false" life="7000" />
 
-        <div class="grid">
+        <div class="grid crud-demo">
             <div class="col-12">
                 <h1 class="text-3xl font-medium">Soporte</h1>
-                <p class="text-color-secondary">Tickets de incidentes de la plataforma</p>
+                <p class="text-color-secondary">Tickets OPEN, IN_PROGRESS, RESOLVED y CLOSED</p>
             </div>
 
-            <div class="col-12 lg:col-4">
-                <div class="card">
-                    <div class="card-content">
-                        <h2 class="text-xl font-semibold mb-3">Abrir ticket</h2>
-                        <h:form id="ticketForm">
-                            <div class="field">
-                                <p:outputLabel for="tenantId" value="Tenant *" />
-                                <p:selectOneMenu id="tenantId" value="#{supportBean.tenantId}" required="true"
-                                                 requiredMessage="Seleccione un tenant" filter="true"
-                                                 styleClass="w-full">
-                                    <f:selectItem itemLabel="Seleccione un tenant" itemValue=""
-                                                  noSelectionOption="true" />
-                                    <f:selectItems value="#{supportBean.tenants}" var="tenant"
-                                                   itemLabel="#{tenant.displayName()} - #{tenant.ruc}"
-                                                   itemValue="#{tenant.id}" />
-                                    <p:ajax listener="#{supportBean.onTenantChange}" update="installationsPanel :globalMessages" />
-                                </p:selectOneMenu>
-                            </div>
-
-                            <h:panelGroup id="installationsPanel" layout="block">
-                                <div class="field">
-                                    <p:outputLabel for="installationId" value="Instalacion" />
-                                    <p:selectOneMenu id="installationId" value="#{supportBean.installationId}"
-                                                     filter="true" styleClass="w-full">
-                                        <f:selectItem itemLabel="Sin instalacion" itemValue=""
-                                                      noSelectionOption="true" />
-                                        <f:selectItems value="#{supportBean.installations}" var="installation"
-                                                       itemLabel="#{installation.name}"
-                                                       itemValue="#{installation.id}" />
-                                    </p:selectOneMenu>
-                                </div>
-                            </h:panelGroup>
-
-                            <div class="field">
-                                <p:outputLabel for="subject" value="Asunto *" />
-                                <p:inputText id="subject" value="#{supportBean.subject}" required="true"
-                                             requiredMessage="El asunto es obligatorio" styleClass="w-full" />
-                            </div>
-
-                            <div class="field">
-                                <p:outputLabel for="priority" value="Prioridad" />
-                                <p:selectOneMenu id="priority" value="#{supportBean.priority}" styleClass="w-full">
-                                    <f:selectItems value="#{supportBean.priorities()}" var="priority"
-                                                   itemLabel="#{priority}" itemValue="#{priority}" />
-                                </p:selectOneMenu>
-                            </div>
-
-                            <div class="field">
-                                <p:outputLabel for="description" value="Descripcion *" />
-                                <p:inputTextarea id="description" value="#{supportBean.description}" required="true"
-                                                 requiredMessage="La descripcion es obligatoria" rows="4"
-                                                 styleClass="w-full" />
-                            </div>
-
-                            <p:commandButton id="openButton" value="Abrir ticket" icon="pi pi-plus" update=":ticketForm :listForm :globalMessages"
-                                             process="@form" action="#{supportBean.openTicket}"
-                                             styleClass="mt-3" />
-                        </h:form>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-12 lg:col-8">
+            <div class="col-12">
                 <div class="card">
                     <div class="card-content">
                         <h:form id="filterForm">
                             <div class="formgrid grid">
-                                <div class="field col-12 md:col-8">
-                                    <p:outputLabel for="tenantFilter" value="Filtrar por tenant" />
+                                <div class="field col-12 md:col-4">
+                                    <p:outputLabel for="tenantFilter" value="Tenant" />
                                     <p:selectOneMenu id="tenantFilter" value="#{supportBean.tenantFilter}"
-                                                     filter="true" styleClass="w-full">
-                                        <f:selectItem itemLabel="Todos los tenants" itemValue=""
-                                                      noSelectionOption="true" />
-                                        <f:selectItems value="#{supportBean.tenants}" var="filterTenant"
-                                                       itemLabel="#{filterTenant.displayName()}"
-                                                       itemValue="#{filterTenant.id}" />
+                                        styleClass="w-full" filter="true">
+                                        <f:selectItem itemLabel="Todos" itemValue="" noSelectionOption="true" />
+                                        <f:selectItems value="#{supportBean.tenants}" var="tenant"
+                                            itemLabel="#{tenant.displayName()}" itemValue="#{tenant.id}" />
                                     </p:selectOneMenu>
                                 </div>
-                                <div class="field col-12 md:col-4 flex align-items-end">
+                                <div class="field col-12 md:col-3">
+                                    <p:outputLabel for="statusFilter" value="Estado" />
+                                    <p:selectOneMenu id="statusFilter" value="#{supportBean.statusFilter}"
+                                        styleClass="w-full">
+                                        <f:selectItem itemLabel="Todos" itemValue="" noSelectionOption="true" />
+                                        <f:selectItems value="#{supportBean.statuses()}" var="status"
+                                            itemLabel="#{status}" itemValue="#{status}" />
+                                    </p:selectOneMenu>
+                                </div>
+                                <div class="field col-12 md:col-3">
+                                    <p:outputLabel for="priorityFilter" value="Prioridad" />
+                                    <p:selectOneMenu id="priorityFilter" value="#{supportBean.priorityFilter}"
+                                        styleClass="w-full">
+                                        <f:selectItem itemLabel="Todas" itemValue="" noSelectionOption="true" />
+                                        <f:selectItems value="#{supportBean.priorities()}" var="priority"
+                                            itemLabel="#{priority}" itemValue="#{priority}" />
+                                    </p:selectOneMenu>
+                                </div>
+                                <div class="field col-12 md:col-2 flex align-items-end">
                                     <p:commandButton id="filterButton" value="Filtrar" icon="pi pi-filter"
-                                                     update=":filterForm :listForm :globalMessages" process="@form" action="#{supportBean.load}"
-                                                     styleClass="w-full" />
+                                        update=":listForm :messages" process="@form" action="#{supportBean.load}"
+                                        styleClass="w-full" />
                                 </div>
                             </div>
                         </h:form>
 
                         <h:form id="listForm">
-                            <div class="field mb-3">
-                                <p:outputLabel for="assignTo"
-                                               value="Operador responsable para el ticket seleccionado" />
-                                <p:selectOneMenu id="assignTo" value="#{supportBean.assignTo}" filter="true"
-                                                 styleClass="w-full">
-                                    <f:selectItem itemLabel="Seleccione un operador" itemValue=""
-                                                  noSelectionOption="true" />
-                                    <f:selectItems value="#{supportBean.activeOperators()}" var="operator"
-                                                   itemLabel="#{operator.displayName()} - #{operator.username}"
-                                                   itemValue="#{operator.id}" />
-                                </p:selectOneMenu>
-                                <small class="text-color-secondary">Solo tickets OPEN pueden asignarse; al asignar, el ticket pasa a IN_PROGRESS.</small>
-                            </div>
-                            <p:dataTable id="ticketsTable" value="#{supportBean.tickets}" var="ticket"
-                                         paginator="true" rows="10" emptyMessage="No hay tickets registrados">
-                                <p:column headerText="Asunto">
-                                    <h:outputText value="#{ticket.subject}" />
+                            <p:toolbar styleClass="mb-4">
+                                <p:toolbarGroup>
+                                    <p:commandButton id="newButton" value="Nuevo ticket" icon="pi pi-plus"
+                                        styleClass="ui-button-success" process="@this" update=":ticketDialog :messages"
+                                        action="#{supportBean.openNew}" oncomplete="PF('ticketDialogWidget').show()" />
+                                </p:toolbarGroup>
+                                <p:toolbarGroup align="right">
+                                    <p:commandButton id="exportPdf" value="PDF" icon="pi pi-file-pdf" process="@this"
+                                        update="@none" styleClass="ml-1 ui-button-danger">
+                                        <p:dataExporter type="pdf" target="ticketsTable" fileName="tickets" />
+                                    </p:commandButton>
+                                    <p:commandButton id="exportExcel" value="Excel" icon="pi pi-file-excel"
+                                        process="@this" update="@none" styleClass="ml-1 ui-button-success">
+                                        <p:dataExporter type="xlsx" target="ticketsTable" fileName="tickets" />
+                                    </p:commandButton>
+                                    <p:commandButton id="exportCsv" value="CSV" icon="pi pi-table" process="@this"
+                                        update="@none" styleClass="ml-1 ui-button-info">
+                                        <p:dataExporter type="csv" target="ticketsTable" fileName="tickets" />
+                                    </p:commandButton>
+                                </p:toolbarGroup>
+                            </p:toolbar>
+
+                            <p:dataTable id="ticketsTable" widgetVar="ticketsTableWidget" var="row"
+                                value="#{supportBean.visibleTickets()}" reflow="true" rowIndexVar="rowIdx"
+                                paginator="true" rows="10" paginatorPosition="bottom"
+                                emptyMessage="No hay tickets que coincidan con el filtro">
+                                <f:facet name="header">
+                                    <div class="products-table-header">
+                                        <span style="font-weight: bold">Gestionar Tickets</span>
+                                        <span class="text-color-secondary">#{supportBean.visibleTickets().size()}
+                                            tickets listados</span>
+                                    </div>
+                                </f:facet>
+
+                                <p:column headerText="Nro." style="width:4rem">
+                                    <h:outputText value="#{supportBean.rowNumber(rowIdx)}" />
                                 </p:column>
                                 <p:column headerText="Tenant">
-                                    <h:outputText value="#{ticket.tenantName}" />
+                                    <h:outputText value="#{row.tenantName}" />
                                 </p:column>
-                                <p:column headerText="Instalacion">
-                                    <h:outputText value="#{empty ticket.installationId ? 'Sin instalacion' : ticket.installationId}" />
+                                <p:column headerText="Asunto">
+                                    <h:outputText value="#{row.subject}" />
                                 </p:column>
                                 <p:column headerText="Descripcion">
-                                    <h:outputText value="#{ticket.description}" />
-                                </p:column>
-                                <p:column headerText="Prioridad">
-                                    <p:tag value="#{ticket.priority}" severity="info" />
-                                </p:column>
-                                <p:column headerText="Estado">
-                                    <p:tag value="#{ticket.status}" severity="info" />
+                                    <h:outputText value="#{row.description}" />
                                 </p:column>
                                 <p:column headerText="Responsable">
-                                    <h:outputText value="#{ticket.assignedTo}" />
+                                    <h:outputText value="#{supportBean.operatorName(row.assignedTo)}" />
                                 </p:column>
-                                <p:column headerText="Abierto">
-                                    <h:outputText value="#{ticket.createdAt}" />
+                                <p:column headerText="Prioridad" exportableValue="#{row.priority}">
+                                    <p:tag value="#{row.priority}"
+                                        severity="#{supportBean.prioritySeverity(row.priority)}" />
                                 </p:column>
-                                <p:column headerText="Acciones" style="width:16rem">
-                                    <p:commandButton id="assignButton" icon="pi pi-user-plus" title="Asignar"
-                                                     update=":ticketForm :listForm :globalMessages" process="@form"
-                                                     rendered="#{ticket.status == 'OPEN'}"
-                                                     action="#{supportBean.assign(ticket)}">
-                                        <f:param name="ticket" value="#{ticket}" />
+                                <p:column headerText="Estado" exportableValue="#{row.status}">
+                                    <p:tag value="#{row.status}" severity="#{supportBean.statusSeverity(row.status)}" />
+                                </p:column>
+                                <p:column headerText="Resolucion">
+                                    <h:outputText value="#{row.resolution}" />
+                                </p:column>
+                                <p:column headerText="Acciones" exportable="false" style="width:18rem">
+                                    <p:commandButton id="assignRowButton" icon="pi pi-user-plus" title="Asignar"
+                                        styleClass="rounded-button ui-button-secondary" process="@this"
+                                        update=":assignDialog :messages" action="#{supportBean.requestAssign(row)}"
+                                        oncomplete="PF('assignDialogWidget').show()">
+                                        <f:param name="row" value="#{row}" />
                                     </p:commandButton>
-                                    <p:commandButton id="resolveButton" icon="pi pi-check" title="Resolver"
-                                                     update=":resolvePanelWrapper :listForm :globalMessages" process="@this" styleClass="ml-1"
-                                                     rendered="#{ticket.status == 'IN_PROGRESS'}"
-                                                     action="#{supportBean.prepareResolve(ticket)}">
-                                        <f:param name="ticket" value="#{ticket}" />
+                                    <p:commandButton id="resolveButton" icon="pi pi-check-circle" title="Resolver"
+                                        styleClass="ml-1 rounded-button ui-button-success" process="@this"
+                                        update=":resolveDialog :messages"
+                                        rendered="#{row.status == 'OPEN' or row.status == 'IN_PROGRESS'}"
+                                        action="#{supportBean.requestResolve(row)}"
+                                        oncomplete="PF('resolveDialogWidget').show()">
+                                        <f:param name="row" value="#{row}" />
                                     </p:commandButton>
-                                    <p:commandButton id="closeButton" icon="pi pi-lock" title="Cerrar"
-                                                     update=":listForm :globalMessages" process="@this" styleClass="ml-1"
-                                                     rendered="#{ticket.status == 'RESOLVED'}"
-                                                     action="#{supportBean.close(ticket)}">
-                                        <f:param name="ticket" value="#{ticket}" />
+                                    <p:commandButton id="closeButton" icon="pi pi-inbox" title="Cerrar"
+                                        styleClass="ml-1 rounded-button ui-button-secondary" process="@this"
+                                        update=":messages"
+                                        rendered="#{row.status == 'OPEN' or row.status == 'IN_PROGRESS' or row.status == 'RESOLVED'}"
+                                        action="#{supportBean.close(row)}">
+                                        <f:param name="row" value="#{row}" />
                                     </p:commandButton>
                                 </p:column>
                             </p:dataTable>
                         </h:form>
 
+                        <p:dialog id="ticketDialog" widgetVar="ticketDialogWidget" header="Nuevo ticket" showEffect="fade"
+                            modal="true" responsive="true" style="max-width: 94vw">
+                            <h:form id="ticketForm">
+                                <p:outputPanel id="ticketFormContent" styleClass="ui-fluid"
+                                    style="max-height: 60vh; overflow-y: auto">
+                                    <div class="field">
+                                        <p:outputLabel for="tenantId" value="Tenant" />
+                                        <p:selectOneMenu id="tenantId" value="#{supportBean.tenantId}" required="true"
+                                            requiredMessage="Seleccione un tenant" filter="true" styleClass="w-full">
+                                            <f:selectItem itemLabel="Seleccione un tenant" itemValue=""
+                                                noSelectionOption="true" />
+                                            <f:selectItems value="#{supportBean.tenants}" var="tenant"
+                                                itemLabel="#{tenant.displayName()} - #{tenant.ruc}"
+                                                itemValue="#{tenant.id}" />
+                                            <p:ajax listener="#{supportBean.onTenantChange}" update="installationId" />
+                                        </p:selectOneMenu>
+                                    </div>
 
-                        <h:panelGroup id="resolvePanelWrapper" layout="block">
-                                                    <h:panelGroup id="resolvePanel" layout="block"
-                                                                  rendered="#{supportBean.resolvingId != null}"
-                                                                  styleClass="card mt-3">
-                                                        <h:form id="resolveForm">
-                                                            <div class="card-content">
-                                                                <h3 class="text-lg font-medium">Resolver ticket</h3>
-                                                                <div class="field">
-                                                                    <p:outputLabel for="resolution" value="Resolucion *" />
-                                                                    <p:inputTextarea id="resolution" value="#{supportBean.resolution}"
-                                                                                     required="true" rows="3" styleClass="w-full"
-                                                                                     requiredMessage="Indique la resolucion del ticket" />
-                                                                </div>
-                                                                <div class="flex justify-content-between">
-                                                                    <p:commandButton id="confirmResolveButton" value="Confirmar resolucion"
-                                                                                     icon="pi pi-check" update=":resolvePanelWrapper :listForm :globalMessages"
-                                                                                     process="@form" action="#{supportBean.resolve}" />
-                                                                    <p:commandButton id="cancelResolveButton" value="Cancelar" icon="pi pi-times"
-                                                                                     severity="secondary" update=":resolvePanelWrapper :listForm :globalMessages"
-                                                                                     process="@form" action="#{supportBean.cancelResolve}" />
-                                                                </div>
-                                                            </div>
-                                                        </h:form>
-                                                    </h:panelGroup>
-                        </h:panelGroup>
+                                    <div class="field">
+                                        <p:outputLabel for="installationId" value="Instalacion" />
+                                        <p:selectOneMenu id="installationId" value="#{supportBean.installationId}"
+                                            filter="true" styleClass="w-full">
+                                            <f:selectItem itemLabel="Sin instalacion" itemValue=""
+                                                noSelectionOption="true" />
+                                            <f:selectItems value="#{supportBean.installations}" var="installation"
+                                                itemLabel="#{installation.name}" itemValue="#{installation.id}" />
+                                        </p:selectOneMenu>
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="subject" value="Asunto" />
+                                        <p:inputText id="subject" value="#{supportBean.subject}" required="true"
+                                            requiredMessage="El asunto es obligatorio" styleClass="w-full"
+                                            maxlength="150" />
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="priority" value="Prioridad" />
+                                        <p:selectOneMenu id="priority" value="#{supportBean.priority}" styleClass="w-full">
+                                            <f:selectItems value="#{supportBean.priorities()}" var="priority"
+                                                itemLabel="#{priority}" itemValue="#{priority}" />
+                                        </p:selectOneMenu>
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="description" value="Descripcion" />
+                                        <p:inputTextarea id="description" value="#{supportBean.description}" rows="4"
+                                            required="true" requiredMessage="La descripcion es obligatoria"
+                                            styleClass="w-full" maxlength="1000" />
+                                    </div>
+                                </p:outputPanel>
+
+                                <div class="flex justify-content-between mt-4">
+                                    <p:commandButton id="saveButton" value="Guardar" icon="pi pi-check" process="@form"
+                                        update="@form :listForm :messages" action="#{supportBean.save}" />
+                                    <p:commandButton id="cancelButton" value="Cancelar" icon="pi pi-times" type="button"
+                                        styleClass="ui-button-secondary" onclick="PF('ticketDialogWidget').hide()" />
+                                </div>
+                            </h:form>
+                        </p:dialog>
+
+                        <p:dialog id="assignDialog" widgetVar="assignDialogWidget" header="Asignar ticket"
+                            showEffect="fade" modal="true" responsive="true" style="max-width: 94vw">
+                            <h:form id="assignForm">
+                                <p:outputPanel id="assignFormContent" styleClass="ui-fluid"
+                                    style="max-height: 60vh; overflow-y: auto">
+                                    <div class="field">
+                                        <p:outputLabel for="assignSubject" value="Asunto" />
+                                        <h:outputText id="assignSubject" value="#{supportBean.assigning.subject}"
+                                            styleClass="w-full surface-100 p-2 border-round" />
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="assignTo" value="Responsable" />
+                                        <p:selectOneMenu id="assignTo" value="#{supportBean.assignTo}" required="true"
+                                            requiredMessage="Seleccione el operador responsable" filter="true"
+                                            styleClass="w-full">
+                                            <f:selectItem itemLabel="Seleccione el operador" itemValue=""
+                                                noSelectionOption="true" />
+                                            <f:selectItems value="#{supportBean.activeOperators()}" var="operator"
+                                                itemLabel="#{operator.displayName()}" itemValue="#{operator.id}" />
+                                        </p:selectOneMenu>
+                                    </div>
+                                </p:outputPanel>
+
+                                <div class="flex justify-content-between mt-4">
+                                    <p:commandButton id="confirmAssignButton" value="Asignar" icon="pi pi-user-plus"
+                                        process="@form" update="@form :listForm :messages"
+                                        action="#{supportBean.confirmAssign}" />
+                                    <p:commandButton id="cancelAssignButton" value="Cancelar" icon="pi pi-times"
+                                        type="button" styleClass="ui-button-secondary"
+                                        onclick="PF('assignDialogWidget').hide()" />
+                                </div>
+                            </h:form>
+                        </p:dialog>
+
+                        <p:dialog id="resolveDialog" widgetVar="resolveDialogWidget" header="Resolver ticket"
+                            showEffect="fade" modal="true" responsive="true" style="max-width: 94vw">
+                            <h:form id="resolveForm">
+                                <p:outputPanel id="resolveFormContent" styleClass="ui-fluid"
+                                    style="max-height: 60vh; overflow-y: auto">
+                                    <div class="field">
+                                        <p:outputLabel for="resolveSubject" value="Asunto" />
+                                        <h:outputText id="resolveSubject" value="#{supportBean.resolving.subject}"
+                                            styleClass="w-full surface-100 p-2 border-round" />
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="resolveResolution" value="Resolucion" />
+                                        <p:inputTextarea id="resolveResolution" value="#{supportBean.resolution}" rows="4"
+                                            required="true" requiredMessage="La resolucion es obligatoria"
+                                            styleClass="w-full" maxlength="1000"
+                                            placeholder="Describa la solucion aplicada al ticket" />
+                                    </div>
+                                </p:outputPanel>
+
+                                <div class="flex justify-content-between mt-4">
+                                    <p:commandButton id="confirmButton" value="Resolver" icon="pi pi-check"
+                                        process="@form" update="@form :listForm :messages"
+                                        action="#{supportBean.confirmResolve}" />
+                                    <p:commandButton id="cancelResolveButton" value="Cancelar" icon="pi pi-times"
+                                        type="button" styleClass="ui-button-secondary"
+                                        onclick="PF('resolveDialogWidget').hide()" />
+                                </div>
+                            </h:form>
+                        </p:dialog>
                     </div>
                 </div>
             </div>

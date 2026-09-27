@@ -1,6 +1,5 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core"
-                xmlns:ui="jakarta.faces.facelets" xmlns:p="http://primefaces.org/ui"
-                template="/WEB-INF/template/template.xhtml">
+    xmlns:ui="jakarta.faces.facelets" xmlns:p="http://primefaces.org/ui" template="/WEB-INF/template/template.xhtml">
     <f:metadata>
         <f:viewAction action="#{licenseBean.load}" onPostBack="false" />
     </f:metadata>
@@ -10,139 +9,208 @@
 
     <ui:define name="content">
 
-        <p:messages id="globalMessages" showSummary="false" showDetail="true" closable="true" />
+        <p:growl id="messages" showDetail="false" life="7000" />
 
-        <div class="grid">
+        <div class="grid crud-demo">
             <div class="col-12">
                 <h1 class="text-3xl font-medium">Licencias</h1>
-                <p class="text-color-secondary">Emision y revocacion de claves por suscripcion</p>
+                <p class="text-color-secondary">Permisos de uso emitidos sobre una suscripcion activa</p>
             </div>
 
-            <div class="col-12 lg:col-4">
-                <div class="card">
-                    <div class="card-content">
-                        <h2 class="text-xl font-semibold mb-3">Emitir licencia</h2>
-                        <h:form id="licenseForm">
-                            <div class="field">
-                                <p:outputLabel for="tenantId" value="Tenant *" />
-                                <p:selectOneMenu id="tenantId" value="#{licenseBean.tenantId}" required="true"
-                                                 requiredMessage="Seleccione un tenant" filter="true"
-                                                 styleClass="w-full">
-                                    <f:selectItem itemLabel="Seleccione un tenant" itemValue=""
-                                                  noSelectionOption="true" />
-                                    <f:selectItems value="#{licenseBean.activeTenants()}" var="tenant"
-                                                   itemLabel="#{tenant.displayName()} - #{tenant.ruc}"
-                                                   itemValue="#{tenant.id}" />
-                                    <p:ajax listener="#{licenseBean.onTenantChange}" update="subscriptionsPanel :globalMessages" />
-                                </p:selectOneMenu>
-                            </div>
-
-                            <h:panelGroup id="subscriptionsPanel" layout="block">
-                                <div class="field">
-                                    <p:outputLabel for="subscriptionId" value="Suscripcion *" />
-                                    <p:selectOneMenu id="subscriptionId" value="#{licenseBean.subscriptionId}"
-                                                     required="true" styleClass="w-full">
-                                        <f:selectItem itemLabel="Seleccione una suscripcion" itemValue=""
-                                                      noSelectionOption="true" />
-                                        <f:selectItems value="#{licenseBean.activeSubscriptions()}" var="subscription"
-                                                       itemLabel="#{subscription.planCode} - #{subscription.status}"
-                                                       itemValue="#{subscription.id}" />
-                                    </p:selectOneMenu>
-                                </div>
-                            </h:panelGroup>
-
-                            <div class="formgrid grid">
-                                <div class="field col-6">
-                                    <p:outputLabel for="validFrom" value="Valida desde" />
-                                    <p:datePicker id="validFrom" value="#{licenseBean.validFrom}"
-                                                  dateFormat="dd/MM/yyyy" showIcon="true" styleClass="w-full" />
-                                </div>
-                                <div class="field col-6">
-                                    <p:outputLabel for="validUntil" value="Valida hasta" />
-                                    <p:datePicker id="validUntil" value="#{licenseBean.validUntil}"
-                                                  dateFormat="dd/MM/yyyy" showIcon="true" styleClass="w-full" />
-                                </div>
-                            </div>
-
-                            <p:commandButton id="issueButton" value="Emitir" icon="pi pi-key" update=":licenseForm :listForm :globalMessages"
-                                             process="@form" action="#{licenseBean.issue}" styleClass="mt-3" />
-                        </h:form>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-12 lg:col-8">
+            <div class="col-12">
                 <div class="card">
                     <div class="card-content">
                         <h:form id="filterForm">
                             <div class="formgrid grid">
-                                <div class="field col-12 md:col-8">
-                                    <p:outputLabel for="tenantFilter" value="Filtrar por tenant" />
+                                <div class="field col-12 md:col-4">
+                                    <p:outputLabel for="tenantFilter" value="Tenant" />
                                     <p:selectOneMenu id="tenantFilter" value="#{licenseBean.tenantFilter}"
-                                                     filter="true" styleClass="w-full">
-                                        <f:selectItem itemLabel="Todos los tenants" itemValue=""
-                                                      noSelectionOption="true" />
-                                        <f:selectItems value="#{licenseBean.activeTenants()}" var="filterTenant"
-                                                       itemLabel="#{filterTenant.displayName()}"
-                                                       itemValue="#{filterTenant.id}" />
+                                        styleClass="w-full" filter="true">
+                                        <f:selectItem itemLabel="Todos" itemValue="" noSelectionOption="true" />
+                                        <f:selectItems value="#{licenseBean.tenants}" var="tenant"
+                                            itemLabel="#{tenant.displayName()}" itemValue="#{tenant.id}" />
+                                    </p:selectOneMenu>
+                                </div>
+                                <div class="field col-12 md:col-4">
+                                    <p:outputLabel for="statusFilter" value="Estado" />
+                                    <p:selectOneMenu id="statusFilter" value="#{licenseBean.statusFilter}"
+                                        styleClass="w-full">
+                                        <f:selectItem itemLabel="Todos" itemValue="" noSelectionOption="true" />
+                                        <f:selectItem itemLabel="ACTIVA" itemValue="ACTIVE" />
+                                        <f:selectItem itemLabel="VENCIDA" itemValue="EXPIRED" />
+                                        <f:selectItem itemLabel="REVOCADA" itemValue="REVOKED" />
                                     </p:selectOneMenu>
                                 </div>
                                 <div class="field col-12 md:col-4 flex align-items-end">
                                     <p:commandButton id="filterButton" value="Filtrar" icon="pi pi-filter"
-                                                     update=":filterForm :listForm :globalMessages" process="@form"
-                                                     action="#{licenseBean.load}" styleClass="w-full" />
+                                        update=":listForm :messages" process="@form" action="#{licenseBean.load}"
+                                        styleClass="w-full" />
                                 </div>
                             </div>
                         </h:form>
 
                         <h:form id="listForm">
-                            <p:dataTable id="licensesTable" value="#{licenseBean.licenses}" var="license"
-                                         paginator="true" rows="10" emptyMessage="No hay licencias emitidas">
-                                <p:column headerText="Clave">
-                                    <h:outputText value="#{license.licenseKey}" />
+                            <p:toolbar styleClass="mb-4">
+                                <p:toolbarGroup>
+                                    <p:commandButton id="newButton" value="Emitir licencia" icon="pi pi-plus"
+                                        styleClass="ui-button-success" process="@this" update=":licenseDialog :messages"
+                                        action="#{licenseBean.openNew}" oncomplete="PF('licenseDialogWidget').show()" />
+                                </p:toolbarGroup>
+                                <p:toolbarGroup align="right">
+                                    <p:commandButton id="exportPdf" value="PDF" icon="pi pi-file-pdf" process="@this"
+                                        update="@none" styleClass="ml-1 ui-button-danger">
+                                        <p:dataExporter type="pdf" target="licensesTable" fileName="licenses" />
+                                    </p:commandButton>
+                                    <p:commandButton id="exportExcel" value="Excel" icon="pi pi-file-excel"
+                                        process="@this" update="@none" styleClass="ml-1 ui-button-success">
+                                        <p:dataExporter type="xlsx" target="licensesTable" fileName="licenses" />
+                                    </p:commandButton>
+                                    <p:commandButton id="exportCsv" value="CSV" icon="pi pi-table" process="@this"
+                                        update="@none" styleClass="ml-1 ui-button-info">
+                                        <p:dataExporter type="csv" target="licensesTable" fileName="licenses" />
+                                    </p:commandButton>
+                                </p:toolbarGroup>
+                            </p:toolbar>
+
+                            <p:dataTable id="licensesTable" widgetVar="licensesTableWidget" var="row"
+                                value="#{licenseBean.visibleLicenses()}" reflow="true" rowIndexVar="rowIdx"
+                                paginator="true" rows="10" paginatorPosition="bottom"
+                                emptyMessage="No hay licencias que coincidan con el filtro">
+                                <f:facet name="header">
+                                    <div class="products-table-header">
+                                        <span style="font-weight: bold">Gestionar Licencias</span>
+                                        <span class="text-color-secondary">#{licenseBean.visibleLicenses().size()}
+                                            licencias listadas</span>
+                                    </div>
+                                </f:facet>
+
+                                <p:column headerText="Nro." style="width:4rem">
+                                    <h:outputText value="#{licenseBean.rowNumber(rowIdx)}" />
                                 </p:column>
                                 <p:column headerText="Tenant">
-                                    <h:outputText value="#{license.tenantName}" />
+                                    <h:outputText value="#{row.tenantName}" />
                                 </p:column>
-                                <p:column headerText="Estado">
-                                    <p:tag value="#{license.status}" severity="info" />
+                                <p:column headerText="Clave">
+                                    <h:outputText value="#{row.licenseKey}" />
                                 </p:column>
-                                <p:column headerText="Valida hasta">
-                                    <h:outputText value="#{license.validUntil}" />
+                                <p:column headerText="Desde">
+                                    <h:outputText value="#{row.validFrom}" />
                                 </p:column>
-                                <p:column headerText="Acciones" style="width:8rem">
+                                <p:column headerText="Hasta">
+                                    <h:outputText value="#{row.validUntil}" />
+                                </p:column>
+                                <p:column headerText="Revocada">
+                                    <h:outputText value="#{row.revokedAt}" />
+                                </p:column>
+                                <p:column headerText="Motivo de revocacion">
+                                    <h:outputText value="#{row.revocationReason}" />
+                                </p:column>
+                                <p:column headerText="Estado" exportableValue="#{row.status}">
+                                    <p:tag value="#{row.status}"
+                                        severity="#{licenseBean.statusSeverity(row.status)}" />
+                                </p:column>
+                                <p:column headerText="Acciones" exportable="false" style="width:8rem">
                                     <p:commandButton id="revokeButton" icon="pi pi-ban" title="Revocar"
-                                                     update=":revokePanelWrapper :listForm :globalMessages" process="@this"
-                                                     rendered="#{license.status != 'REVOKED'}"
-                                                     action="#{licenseBean.prepareRevoke(license)}">
-                                        <f:param name="license" value="#{license}" />
+                                        styleClass="rounded-button ui-button-danger" process="@this"
+                                        update=":revokeDialog :messages" rendered="#{row.status == 'ACTIVE'}"
+                                        action="#{licenseBean.requestRevoke(row)}"
+                                        oncomplete="PF('revokeDialogWidget').show()">
+                                        <f:param name="row" value="#{row}" />
                                     </p:commandButton>
                                 </p:column>
                             </p:dataTable>
                         </h:form>
 
-                        <h:panelGroup id="revokePanelWrapper" layout="block">
-                                                    <h:panelGroup id="revokePanel" layout="block"
-                                                                  rendered="#{licenseBean.revokingId != null}" styleClass="card mt-3">
-                                                        <h:form id="revokeForm">
-                                                            <div class="card-content">
-                                                                <h3 class="text-lg font-medium">Revocar licencia</h3>
-                                                                <div class="field">
-                                                                    <p:outputLabel for="revokeReason" value="Motivo" />
-                                                                    <p:inputTextarea id="revokeReason" value="#{licenseBean.revokeReason}"
-                                                                                     rows="2" styleClass="w-full" />
-                                                                </div>
-                                                                <p:commandButton id="confirmRevokeButton" value="Confirmar revocacion"
-                                                                                 severity="danger" icon="pi pi-ban" update=":revokePanelWrapper :listForm :globalMessages" process="@form"
-                                                                                 action="#{licenseBean.revoke}" />
-                                                                <p:commandButton id="cancelRevokeButton" value="Cancelar"
-                                                                                 severity="secondary" icon="pi pi-times" update=":revokePanelWrapper :listForm :globalMessages"
-                                                                                 process="@form" styleClass="ml-2"
-                                                                                 action="#{licenseBean.cancelRevoke}" />
-                                                            </div>
-                                                        </h:form>
-                                                    </h:panelGroup>
-                        </h:panelGroup>
+                        <p:dialog id="licenseDialog" widgetVar="licenseDialogWidget" header="Emitir licencia"
+                            showEffect="fade" modal="true" responsive="true" style="max-width: 94vw">
+                            <h:form id="licenseForm">
+                                <p:outputPanel id="licenseFormContent" styleClass="ui-fluid"
+                                    style="max-height: 60vh; overflow-y: auto">
+                                    <div class="field">
+                                        <p:outputLabel for="tenantId" value="Tenant" />
+                                        <p:selectOneMenu id="tenantId" value="#{licenseBean.tenantId}" required="true"
+                                            requiredMessage="Seleccione un tenant" filter="true" styleClass="w-full">
+                                            <f:selectItem itemLabel="Seleccione un tenant" itemValue=""
+                                                noSelectionOption="true" />
+                                            <f:selectItems value="#{licenseBean.activeTenants()}" var="tenant"
+                                                itemLabel="#{tenant.displayName()} - #{tenant.ruc}"
+                                                itemValue="#{tenant.id}" />
+                                            <p:ajax listener="#{licenseBean.onTenantChange}" update="subscriptionId" />
+                                        </p:selectOneMenu>
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="subscriptionId" value="Suscripcion activa" />
+                                        <p:selectOneMenu id="subscriptionId" value="#{licenseBean.subscriptionId}"
+                                            required="true" requiredMessage="Seleccione la suscripcion" styleClass="w-full">
+                                            <f:selectItem itemLabel="Seleccione la suscripcion" itemValue=""
+                                                noSelectionOption="true" />
+                                            <f:selectItems value="#{licenseBean.activeSubscriptions()}" var="row"
+                                                itemLabel="#{row.planName} - vigente hasta #{row.validUntil}"
+                                                itemValue="#{row.id}" />
+                                        </p:selectOneMenu>
+                                        <small class="text-color-secondary">Un tenant solo admite una licencia
+                                            activa.</small>
+                                    </div>
+
+                                    <div class="formgrid grid">
+                                        <div class="field col-12 md:col-6">
+                                            <p:outputLabel for="validFrom" value="Valida desde" />
+                                            <p:datePicker id="validFrom" value="#{licenseBean.validFrom}"
+                                                styleClass="w-full" dateFormat="dd/MM/yyyy" showIcon="true" />
+                                        </div>
+                                        <div class="field col-12 md:col-6">
+                                            <p:outputLabel for="validUntil" value="Valida hasta" />
+                                            <p:datePicker id="validUntil" value="#{licenseBean.validUntil}"
+                                                styleClass="w-full" dateFormat="dd/MM/yyyy" showIcon="true" />
+                                        </div>
+                                    </div>
+                                </p:outputPanel>
+
+                                <div class="flex justify-content-between mt-4">
+                                    <p:commandButton id="saveButton" value="Emitir" icon="pi pi-check" process="@form"
+                                        update="@form :listForm :messages" action="#{licenseBean.save}" />
+                                    <p:commandButton id="cancelButton" value="Cancelar" icon="pi pi-times" type="button"
+                                        styleClass="ui-button-secondary"
+                                        onclick="PF('licenseDialogWidget').hide()" />
+                                </div>
+                            </h:form>
+                        </p:dialog>
+
+                        <p:dialog id="revokeDialog" widgetVar="revokeDialogWidget" header="Revocar licencia"
+                            showEffect="fade" modal="true" responsive="true" style="max-width: 94vw">
+                            <h:form id="revokeForm">
+                                <p:outputPanel id="revokeFormContent" styleClass="ui-fluid"
+                                    style="max-height: 60vh; overflow-y: auto">
+                                    <div class="field">
+                                        <p:outputLabel for="revokeTenant" value="Tenant" />
+                                        <h:outputText id="revokeTenant" value="#{licenseBean.revoking.tenantName}"
+                                            styleClass="w-full surface-100 p-2 border-round" />
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="revokeKey" value="Clave de licencia" />
+                                        <h:outputText id="revokeKey" value="#{licenseBean.revoking.licenseKey}"
+                                            styleClass="w-full surface-100 p-2 border-round" />
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="revokeReason" value="Motivo" />
+                                        <p:inputTextarea id="revokeReason" value="#{licenseBean.revokeReason}" rows="3"
+                                            styleClass="w-full" placeholder="Explique por que se revoca la licencia" />
+                                    </div>
+                                </p:outputPanel>
+
+                                <div class="flex justify-content-between mt-4">
+                                    <p:commandButton id="confirmButton" value="Revocar" icon="pi pi-ban"
+                                        process="@form" update="@form :listForm :messages"
+                                        action="#{licenseBean.confirmRevoke}" />
+                                    <p:commandButton id="cancelRevokeButton" value="Cancelar" icon="pi pi-times"
+                                        type="button" styleClass="ui-button-secondary"
+                                        onclick="PF('revokeDialogWidget').hide()" />
+                                </div>
+                            </h:form>
+                        </p:dialog>
                     </div>
                 </div>
             </div>

@@ -100,12 +100,26 @@ public class PlatformApiClient {
         return call("POST", path, token, correlationId, query, null, type);
     }
 
+    /**
+     * POST con parametros de query y cuerpo a la vez: los endpoints que combinan un flag
+     * {@code @RequestParam} con el motivo del cambio ({@code /installations/{id}/maintenance}).
+     */
+    public <T> T postWithQueryAndBody(String path, String token, String correlationId, Map<String, Object> query,
+                                      Object body, Class<T> type) {
+        return call("POST", path, token, correlationId, query, body, type);
+    }
+
     public <T> T put(String path, String token, String correlationId, Object body, Class<T> type) {
         return call("PUT", path, token, correlationId, Map.of(), body, type);
     }
 
     public <T> T delete(String path, String token, String correlationId, Class<T> type) {
         return call("DELETE", path, token, correlationId, Map.of(), null, type);
+    }
+
+    /** DELETE con cuerpo: lo usa la baja logica de instalaciones, que exige el motivo. */
+    public <T> T deleteWithBody(String path, String token, String correlationId, Object body, Class<T> type) {
+        return call("DELETE", path, token, correlationId, Map.of(), body, type);
     }
 
     private <T> T call(String method, String path, String token, String correlationId, Map<String, Object> query,

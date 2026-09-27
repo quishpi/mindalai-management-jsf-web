@@ -1,6 +1,5 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core"
-                xmlns:ui="jakarta.faces.facelets" xmlns:p="http://primefaces.org/ui"
-                template="/WEB-INF/template/template.xhtml">
+    xmlns:ui="jakarta.faces.facelets" xmlns:p="http://primefaces.org/ui" template="/WEB-INF/template/template.xhtml">
     <f:metadata>
         <f:viewAction action="#{deviceBean.load}" onPostBack="false" />
     </f:metadata>
@@ -10,132 +9,273 @@
 
     <ui:define name="content">
 
-        <p:messages id="globalMessages" showSummary="false" showDetail="true" closable="true" />
+        <p:growl id="messages" showDetail="false" life="7000" />
 
-        <div class="grid">
+        <div class="grid crud-demo">
             <div class="col-12">
                 <h1 class="text-3xl font-medium">Dispositivos</h1>
-                <p class="text-color-secondary">Servidores y cajas por instalacion</p>
+                <p class="text-color-secondary">Servidores y cajas registradas en cada instalacion</p>
             </div>
 
-            <div class="col-12 lg:col-4">
-                <div class="card">
-                    <div class="card-content">
-                        <h2 class="text-xl font-semibold mb-3">Registrar dispositivo</h2>
-                        <h:form id="deviceForm">
-                            <div class="field">
-                                <p:outputLabel for="installationId" value="Instalacion *" />
-                                <p:selectOneMenu id="installationId" value="#{deviceBean.installationId}"
-                                                 required="true" requiredMessage="Seleccione una instalacion"
-                                                 filter="true" styleClass="w-full">
-                                    <f:selectItem itemLabel="Seleccione una instalacion" itemValue=""
-                                                  noSelectionOption="true" />
-                                    <f:selectItems value="#{deviceBean.activeInstallations()}" var="installation"
-                                                   itemLabel="#{installation.tenantName} - #{installation.name}"
-                                                   itemValue="#{installation.id}" />
-                                </p:selectOneMenu>
-                            </div>
-
-                            <div class="field">
-                                <p:outputLabel for="deviceType" value="Tipo *" />
-                                <p:selectOneMenu id="deviceType" value="#{deviceBean.deviceType}" required="true"
-                                                 styleClass="w-full">
-                                    <f:selectItems value="#{deviceBean.deviceTypes()}" var="type"
-                                                   itemLabel="#{type}" itemValue="#{type}" />
-                                </p:selectOneMenu>
-                            </div>
-
-                            <div class="field">
-                                <p:outputLabel for="identifier" value="Identificador *" />
-                                <p:inputText id="identifier" value="#{deviceBean.identifier}" required="true"
-                                             requiredMessage="El identificador es obligatorio" styleClass="w-full" />
-                            </div>
-
-                            <div class="field">
-                                <p:outputLabel for="name" value="Nombre" />
-                                <p:inputText id="name" value="#{deviceBean.name}" styleClass="w-full" />
-                            </div>
-
-                            <p:commandButton id="registerButton" value="Registrar" icon="pi pi-plus"
-                                             update=":deviceForm :listForm :globalMessages" process="@form" action="#{deviceBean.register}"
-                                             styleClass="mt-3" />
-                        </h:form>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-12 lg:col-8">
+            <div class="col-12">
                 <div class="card">
                     <div class="card-content">
                         <h:form id="filterForm">
                             <div class="formgrid grid">
                                 <div class="field col-12 md:col-8">
-                                    <p:outputLabel for="installationFilter" value="Filtrar por instalacion" />
+                                    <p:outputLabel for="installationFilter" value="Instalacion" />
                                     <p:selectOneMenu id="installationFilter" value="#{deviceBean.installationFilter}"
-                                                     filter="true" styleClass="w-full">
-                                        <f:selectItem itemLabel="Todas las instalaciones" itemValue=""
-                                                      noSelectionOption="true" />
-                                        <f:selectItems value="#{deviceBean.activeInstallations()}" var="filterInstallation"
-                                                       itemLabel="#{filterInstallation.tenantName} - #{filterInstallation.name}"
-                                                       itemValue="#{filterInstallation.id}" />
+                                        styleClass="w-full" filter="true">
+                                        <f:selectItem itemLabel="Todas" itemValue="" noSelectionOption="true" />
+                                        <f:selectItems value="#{deviceBean.installations}" var="installation"
+                                            itemLabel="#{installation.tenantName} - #{installation.name}"
+                                            itemValue="#{installation.id}" />
                                     </p:selectOneMenu>
                                 </div>
                                 <div class="field col-12 md:col-4 flex align-items-end">
                                     <p:commandButton id="filterButton" value="Filtrar" icon="pi pi-filter"
-                                                     update=":filterForm :listForm :globalMessages" process="@form" action="#{deviceBean.load}"
-                                                     styleClass="w-full" />
+                                        update=":listForm :messages" process="@form" action="#{deviceBean.load}"
+                                        styleClass="w-full" />
                                 </div>
                             </div>
                         </h:form>
 
                         <h:form id="listForm">
-                            <p:dataTable id="devicesTable" value="#{deviceBean.devices}" var="device"
-                                         paginator="true" rows="10" emptyMessage="No hay dispositivos registrados">
-                                <p:column headerText="Identificador">
-                                    <h:outputText value="#{device.identifier}" />
-                                </p:column>
-                                <p:column headerText="Nombre">
-                                    <h:outputText value="#{device.name}" />
-                                </p:column>
-                                <p:column headerText="Tipo">
-                                    <h:outputText value="#{device.deviceType}" />
+                            <p:toolbar styleClass="mb-4">
+                                <p:toolbarGroup>
+                                    <p:commandButton id="newButton" value="Nuevo dispositivo" icon="pi pi-plus"
+                                        styleClass="ui-button-success" process="@this" update=":deviceDialog :messages"
+                                        action="#{deviceBean.openNew}" oncomplete="PF('deviceDialogWidget').show()" />
+                                </p:toolbarGroup>
+                                <p:toolbarGroup align="right">
+                                    <p:commandButton id="exportPdf" value="PDF" icon="pi pi-file-pdf" process="@this"
+                                        update="@none" styleClass="ml-1 ui-button-danger">
+                                        <p:dataExporter type="pdf" target="devicesTable" fileName="devices" />
+                                    </p:commandButton>
+                                    <p:commandButton id="exportExcel" value="Excel" icon="pi pi-file-excel"
+                                        process="@this" update="@none" styleClass="ml-1 ui-button-success">
+                                        <p:dataExporter type="xlsx" target="devicesTable" fileName="devices" />
+                                    </p:commandButton>
+                                    <p:commandButton id="exportCsv" value="CSV" icon="pi pi-table" process="@this"
+                                        update="@none" styleClass="ml-1 ui-button-info">
+                                        <p:dataExporter type="csv" target="devicesTable" fileName="devices" />
+                                    </p:commandButton>
+                                </p:toolbarGroup>
+                            </p:toolbar>
+
+                            <p:dataTable id="devicesTable" widgetVar="devicesTableWidget" var="row"
+                                value="#{deviceBean.devices}" reflow="true" rowIndexVar="rowIdx" paginator="true"
+                                rows="10" paginatorPosition="bottom"
+                                emptyMessage="No hay dispositivos que coincidan con el filtro">
+                                <f:facet name="header">
+                                    <div class="products-table-header">
+                                        <span style="font-weight: bold">Gestionar Dispositivos</span>
+                                        <span class="text-color-secondary">#{deviceBean.devices.size()} dispositivos
+                                            listados</span>
+                                    </div>
+                                </f:facet>
+
+                                <p:column headerText="Nro." style="width:4rem">
+                                    <h:outputText value="#{deviceBean.rowNumber(rowIdx)}" />
                                 </p:column>
                                 <p:column headerText="Instalacion">
-                                    <h:outputText value="#{device.installationName}" />
+                                    <h:outputText value="#{row.installationName}" />
                                 </p:column>
-                                <p:column headerText="Estado">
-                                    <p:tag value="#{device.status}" severity="info" />
+                                <p:column headerText="Tipo">
+                                    <h:outputText value="#{row.deviceType}" />
                                 </p:column>
-                                <p:column headerText="Ultimo contacto">
-                                    <h:outputText value="#{device.lastSeenAt}" />
+                                <p:column headerText="Identificador">
+                                    <h:outputText value="#{row.identifier}" />
                                 </p:column>
-                                <p:column headerText="Acciones" style="width:14rem">
-                                    <p:commandButton id="heartbeatButton" icon="pi pi-send" title="Heartbeat"
-                                                     update=":listForm :globalMessages" process="@this"
-                                                     action="#{deviceBean.heartbeat(device)}">
-                                        <f:param name="device" value="#{device}" />
+                                <p:column headerText="Nombre">
+                                    <h:outputText value="#{row.name}" />
+                                </p:column>
+                                <p:column headerText="Ultimo latido">
+                                    <h:outputText value="#{row.lastSeenAt}" />
+                                </p:column>
+                                <p:column headerText="Estado" exportableValue="#{row.status}">
+                                    <p:tag value="#{row.status}" severity="#{deviceBean.statusSeverity(row.status)}" />
+                                </p:column>
+                                <p:column headerText="Acciones" exportable="false" style="width:19rem">
+                                    <p:commandButton id="blockButton" icon="pi pi-lock" title="Bloquear"
+                                        styleClass="rounded-button ui-button-warning" process="@this"
+                                        update=":deviceStatusDialog :messages" rendered="#{row.status == 'ACTIVE'}"
+                                        action="#{deviceBean.requestBlock(row)}"
+                                        oncomplete="PF('deviceStatusDialogWidget').show()">
+                                        <f:param name="row" value="#{row}" />
                                     </p:commandButton>
-                                    <p:commandButton id="blockButton" icon="pi pi-ban" title="Bloquear"
-                                                     update=":listForm :globalMessages" process="@this" styleClass="ml-1"
-                                                     rendered="#{device.status != 'BLOCKED'}"
-                                                     action="#{deviceBean.block(device)}">
-                                        <f:param name="device" value="#{device}" />
+                                    <p:commandButton id="activateButton" icon="pi pi-play" title="Activar"
+                                        styleClass="ml-1 rounded-button ui-button-success" process="@this"
+                                        update=":deviceStatusDialog :messages" rendered="#{row.status == 'BLOCKED'}"
+                                        action="#{deviceBean.requestActivate(row)}"
+                                        oncomplete="PF('deviceStatusDialogWidget').show()">
+                                        <f:param name="row" value="#{row}" />
                                     </p:commandButton>
-                                    <p:commandButton id="activateButton" icon="pi pi-check" title="Activar"
-                                                     update=":listForm :globalMessages" process="@this" styleClass="ml-1"
-                                                     rendered="#{device.status == 'BLOCKED'}"
-                                                     action="#{deviceBean.activate(device)}">
-                                        <f:param name="device" value="#{device}" />
+                                    <p:commandButton id="retireButton" icon="pi pi-ban" title="Retirar"
+                                        styleClass="ml-1 rounded-button ui-button-danger" process="@this"
+                                        update=":deviceStatusDialog :messages"
+                                        rendered="#{row.status == 'ACTIVE' or row.status == 'BLOCKED'}"
+                                        action="#{deviceBean.requestRetire(row)}"
+                                        oncomplete="PF('deviceStatusDialogWidget').show()">
+                                        <f:param name="row" value="#{row}" />
                                     </p:commandButton>
-                                    <p:commandButton id="retireButton" icon="pi pi-trash" title="Retirar"
-                                                     update=":listForm :globalMessages" process="@this" styleClass="ml-1"
-                                                     rendered="#{device.status != 'RETIRED'}"
-                                                     action="#{deviceBean.retire(device)}">
-                                        <f:param name="device" value="#{device}" />
+                                    <p:commandButton id="heartbeatButton" icon="pi pi-send" title="Registrar latido"
+                                        styleClass="ml-1 rounded-button ui-button-secondary" process="@this"
+                                        update=":messages" action="#{deviceBean.heartbeat(row)}">
+                                        <f:param name="row" value="#{row}" />
+                                    </p:commandButton>
+                                    <p:commandButton id="historyButton" icon="pi pi-history"
+                                        title="Historial de estados" styleClass="ml-1 rounded-button ui-button-info"
+                                        process="@this" update=":deviceHistoryDialog :messages"
+                                        action="#{deviceBean.openHistory(row)}"
+                                        oncomplete="PF('deviceHistoryDialogWidget').show()">
+                                        <f:param name="row" value="#{row}" />
                                     </p:commandButton>
                                 </p:column>
                             </p:dataTable>
                         </h:form>
+
+                        <p:dialog id="deviceDialog" widgetVar="deviceDialogWidget" header="Nuevo dispositivo"
+                            showEffect="fade" modal="true" responsive="true" style="max-width: 94vw">
+                            <h:form id="deviceForm">
+                                <p:outputPanel id="deviceFormContent" styleClass="ui-fluid"
+                                    style="max-height: 60vh; overflow-y: auto">
+                                    <div class="field">
+                                        <p:outputLabel for="installationId" value="Instalacion" />
+                                        <p:selectOneMenu id="installationId" value="#{deviceBean.installationId}"
+                                            required="true" requiredMessage="Seleccione una instalacion" filter="true"
+                                            styleClass="w-full">
+                                            <f:selectItem itemLabel="Seleccione la instalacion" itemValue=""
+                                                noSelectionOption="true" />
+                                            <f:selectItems value="#{deviceBean.activeInstallations()}" var="installation"
+                                                itemLabel="#{installation.tenantName} - #{installation.name}"
+                                                itemValue="#{installation.id}" />
+                                        </p:selectOneMenu>
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="deviceType" value="Tipo" />
+                                        <p:selectOneMenu id="deviceType" value="#{deviceBean.deviceType}"
+                                            styleClass="w-full">
+                                            <f:selectItems value="#{deviceBean.deviceTypes()}" var="type"
+                                                itemLabel="#{type}" itemValue="#{type}" />
+                                        </p:selectOneMenu>
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="identifier" value="Identificador" />
+                                        <p:inputText id="identifier" value="#{deviceBean.identifier}" required="true"
+                                            requiredMessage="El identificador es obligatorio" styleClass="w-full"
+                                            maxlength="100" />
+                                        <small class="text-color-secondary">El identificador es unico en la
+                                            plataforma.</small>
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="name" value="Nombre" />
+                                        <p:inputText id="name" value="#{deviceBean.name}" styleClass="w-full"
+                                            maxlength="100" />
+                                    </div>
+                                </p:outputPanel>
+
+                                <div class="flex justify-content-between mt-4">
+                                    <p:commandButton id="saveButton" value="Guardar" icon="pi pi-check" process="@form"
+                                        update="@form :listForm :messages" action="#{deviceBean.save}" />
+                                    <p:commandButton id="cancelButton" value="Cancelar" icon="pi pi-times" type="button"
+                                        styleClass="ui-button-secondary" onclick="PF('deviceDialogWidget').hide()" />
+                                </div>
+                            </h:form>
+                        </p:dialog>
+
+                        <p:dialog id="deviceStatusDialog" widgetVar="deviceStatusDialogWidget"
+                            header="#{deviceBean.statusActionLabel()} dispositivo" showEffect="fade" modal="true"
+                            responsive="true" style="max-width: 94vw">
+                            <h:form id="deviceStatusForm">
+                                <p:outputPanel id="deviceStatusFormContent" styleClass="ui-fluid"
+                                    style="max-height: 60vh; overflow-y: auto">
+                                    <div class="field">
+                                        <p:outputLabel for="statusInstallation" value="Instalacion" />
+                                        <h:outputText id="statusInstallation"
+                                            value="#{deviceBean.selected.installationName}"
+                                            styleClass="w-full surface-100 p-2 border-round" />
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="statusIdentifier" value="Identificador" />
+                                        <h:outputText id="statusIdentifier" value="#{deviceBean.selected.identifier}"
+                                            styleClass="w-full surface-100 p-2 border-round" />
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="statusCurrent" value="Estado actual" />
+                                        <h:outputText id="statusCurrent" value="#{deviceBean.selected.status}"
+                                            styleClass="w-full surface-100 p-2 border-round" />
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="statusReason" value="Motivo" />
+                                        <p:inputTextarea id="statusReason" value="#{deviceBean.statusReason}" rows="3"
+                                            required="true" styleClass="w-full"
+                                            requiredMessage="El motivo es obligatorio"
+                                            placeholder="Explique por que cambia el estado del dispositivo" />
+                                    </div>
+                                </p:outputPanel>
+
+                                <div class="flex justify-content-between mt-4">
+                                    <p:commandButton id="confirmButton" value="Confirmar" icon="pi pi-check"
+                                        process="@form" update="@form :listForm :deviceHistoryDialog :messages"
+                                        action="#{deviceBean.confirmStatusChange}" />
+                                    <p:commandButton id="cancelStatusButton" value="Cancelar" icon="pi pi-times"
+                                        type="button" styleClass="ui-button-secondary"
+                                        onclick="PF('deviceStatusDialogWidget').hide()" />
+                                </div>
+                            </h:form>
+                        </p:dialog>
+
+                        <p:dialog id="deviceHistoryDialog" widgetVar="deviceHistoryDialogWidget"
+                            header="Historial de estados" width="46rem" showEffect="fade" modal="true"
+                            responsive="true" style="max-width: 94vw">
+                            <h:form id="deviceHistoryForm">
+                                <p:outputPanel id="deviceHistoryFormContent" styleClass="ui-fluid"
+                                    style="max-height: 60vh; overflow-y: auto">
+                                    <div class="field">
+                                        <p:outputLabel for="historyInstallation" value="Instalacion" />
+                                        <h:outputText id="historyInstallation"
+                                            value="#{deviceBean.selected.installationName}"
+                                            styleClass="w-full surface-100 p-2 border-round" />
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="historyIdentifier" value="Identificador" />
+                                        <h:outputText id="historyIdentifier" value="#{deviceBean.selected.identifier}"
+                                            styleClass="w-full surface-100 p-2 border-round" />
+                                    </div>
+
+                                    <p:dataTable id="deviceHistoryTable" var="entry"
+                                        value="#{deviceBean.selectedHistory}" reflow="true"
+                                        emptyMessage="Sin cambios de estado registrados" styleClass="mt-3">
+                                        <p:column headerText="Transicion">
+                                            <h:outputText value="#{entry.transition()}" />
+                                        </p:column>
+                                        <p:column headerText="Motivo">
+                                            <h:outputText value="#{entry.reason}" />
+                                        </p:column>
+                                        <p:column headerText="Fecha y hora">
+                                            <h:outputText value="#{entry.changedAtText()}" />
+                                        </p:column>
+                                        <p:column headerText="Usuario">
+                                            <h:outputText value="#{entry.username}" />
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:outputPanel>
+
+                                <div class="flex justify-content-end mt-4">
+                                    <p:commandButton id="closeHistoryButton" value="Cerrar" icon="pi pi-times"
+                                        type="button" styleClass="ui-button-secondary"
+                                        onclick="PF('deviceHistoryDialogWidget').hide()" />
+                                </div>
+                            </h:form>
+                        </p:dialog>
                     </div>
                 </div>
             </div>

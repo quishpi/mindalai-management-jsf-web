@@ -45,8 +45,20 @@ public class AuditBean extends AbstractPageBean {
     private LocalDate from;
     private LocalDate to;
 
+    /** Evento abierto en el dialog de detalle. */
+    private AuditEntryDto detail;
+
+    /**
+     * Aplica los filtros desde la primera pagina. Sin este reset, cambiar un filtro con la
+     * vista en la ultima pagina devolvia una tabla vacia sin explicacion.
+     */
     public void load() {
+        page = 0;
         entries = search();
+    }
+
+    public int rowNumber(int rowIndex) {
+        return rowIndex + 1;
     }
 
     public List<AuditEntryDto> search() {
@@ -94,8 +106,24 @@ public class AuditBean extends AbstractPageBean {
         result = null;
         from = null;
         to = null;
-        page = 0;
         load();
+    }
+
+    public void requestDetail(AuditEntryDto entry) {
+        if (entry == null) {
+            error("Seleccione el evento a revisar");
+            return;
+        }
+        detail = entry;
+    }
+
+    public String resultSeverity(String result) {
+        return switch (result == null ? "" : result) {
+            case "SUCCESS" -> "success";
+            case "FAILURE" -> "danger";
+            case "DENIED" -> "warning";
+            default -> "secondary";
+        };
     }
 
     public int getPage() {

@@ -10,6 +10,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import lombok.Getter;
 import lombok.Setter;
+import org.primefaces.PrimeFaces;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -28,6 +29,8 @@ public class UsageBean extends AbstractPageBean {
 
     private static final long serialVersionUID = 1L;
 
+    private static final String USAGE_DIALOG = "usageDialogWidget";
+
     @Inject
     private PlatformRestClient restClient;
 
@@ -44,6 +47,22 @@ public class UsageBean extends AbstractPageBean {
     private UUID installationId;
     private String metricName;
     private BigDecimal metricValue;
+
+    public int rowNumber(int rowIndex) {
+        return rowIndex + 1;
+    }
+
+    /** Numeracion de la tabla de resumen, independiente de la de ultimos registros. */
+    public int summaryRowNumber(int rowIndex) {
+        return rowIndex + 1;
+    }
+
+    public void openNew() {
+        tenantId = tenantFilter;
+        installationId = null;
+        metricName = null;
+        metricValue = null;
+    }
 
     public void load() {
         String cid = correlationId();
@@ -64,7 +83,7 @@ public class UsageBean extends AbstractPageBean {
         installations = call(() -> restClient.installations(token, cid, tenantId), installations);
     }
 
-    public void record() {
+    public void save() {
         if (tenantId == null || metricName == null || metricName.isBlank() || metricValue == null) {
             error("Complete tenant, metrica y valor");
             return;
@@ -77,10 +96,33 @@ public class UsageBean extends AbstractPageBean {
                 () -> restClient.recordUsage(token, cid, tenantId, installationId, metric, value, null), null);
         if (recorded != null) {
             success("Consumo registrado");
-            metricName = null;
-            metricValue = null;
+            openNew();
+            hideDialog(USAGE_DIALOG);
             load();
         }
+    }
+
+    /** Recalcula el resumen con el rango de fechas del filtro. */
+    public void refreshSummary() {
+        Instant fromInstant = atStartOfDay(from);
+        Instant toInstant = atEndOfDay(to);
+        summary = call(() -> restClient.usageSummary(token(), correlationId(), fromInstant, toInstant), summary);
+    }
+
+    /** Nombre comercial del tenant de un registro de consumo. */
+    public String tenantName(UUID tenant) {
+        if (tenant == null) {
+            return "-";
+        }
+        return tenants.stream()
+                .filter(candidate -> tenant.equals(candidate.getId()))
+                .map(TenantDto::getTradeName)
+                .findFirst()
+                .orElseGet(() -> tenant.toString());
+    }
+
+    private void hideDialog(String widgetVar) {
+        PrimeFaces.current().executeScript("PF('" + widgetVar + "').hide();");
     }
 
     private Instant atStartOfDay(LocalDate date) {

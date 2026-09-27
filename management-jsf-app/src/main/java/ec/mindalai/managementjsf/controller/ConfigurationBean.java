@@ -7,6 +7,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import lombok.Getter;
 import lombok.Setter;
+import org.primefaces.PrimeFaces;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,12 +21,16 @@ public class ConfigurationBean extends AbstractPageBean {
 
     private static final long serialVersionUID = 1L;
 
+    private static final String CONFIG_DIALOG = "configDialogWidget";
+
     @Inject
     private PlatformRestClient restClient;
 
     private List<ConfigurationDto> entries = new ArrayList<>();
     private String categoryFilter;
-    private String editKey;
+
+    /** Parametro abierto en el dialog de edicion y valor propuesto. */
+    private ConfigurationDto editing;
     private String editValue;
 
     public void load() {
@@ -34,30 +39,48 @@ public class ConfigurationBean extends AbstractPageBean {
         entries = call(() -> restClient.configuration(token, cid, categoryFilter), entries);
     }
 
-    public void startEdit(ConfigurationDto entry) {
-        editKey = entry.getConfigKey();
+    public int rowNumber(int rowIndex) {
+        return rowIndex + 1;
+    }
+
+    public void requestEdit(ConfigurationDto entry) {
+        if (entry == null) {
+            error("Seleccione el parametro a editar");
+            return;
+        }
+        editing = entry;
         editValue = entry.getConfigValue();
     }
 
     public void cancelEdit() {
-        editKey = null;
+        editing = null;
         editValue = null;
     }
 
     public void save() {
-        if (editKey == null || editValue == null || editValue.isBlank()) {
+        if (editing == null) {
+            error("Seleccione el parametro a editar");
+            return;
+        }
+        if (editValue == null || editValue.isBlank()) {
             error("El valor no puede quedar vacio");
             return;
         }
         String cid = correlationId();
         String token = token();
-        String key = editKey;
+        String key = editing.getConfigKey();
         String value = editValue.trim();
         ConfigurationDto updated = call(() -> restClient.updateConfiguration(token, cid, key, value), null);
-        if (updated != null) {
-            success("Configuracion actualizada: " + key);
-            cancelEdit();
-            load();
+        if (updated == null) {
+            return;
         }
+        success("Configuracion actualizada: " + key);
+        cancelEdit();
+        hideDialog(CONFIG_DIALOG);
+        load();
+    }
+
+    private void hideDialog(String widgetVar) {
+        PrimeFaces.current().executeScript("PF('" + widgetVar + "').hide();");
     }
 }

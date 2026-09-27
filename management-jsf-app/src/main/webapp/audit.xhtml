@@ -1,6 +1,5 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core"
-                xmlns:ui="jakarta.faces.facelets" xmlns:p="http://primefaces.org/ui"
-                template="/WEB-INF/template/template.xhtml">
+    xmlns:ui="jakarta.faces.facelets" xmlns:p="http://primefaces.org/ui" template="/WEB-INF/template/template.xhtml">
     <f:metadata>
         <f:viewAction action="#{auditBean.load}" onPostBack="false" />
     </f:metadata>
@@ -10,107 +9,179 @@
 
     <ui:define name="content">
 
-        <div class="grid">
+        <p:growl id="messages" showDetail="false" life="7000" />
+
+        <div class="grid crud-demo">
             <div class="col-12">
                 <h1 class="text-3xl font-medium">Auditoria</h1>
-                <p class="text-color-secondary">Trazabilidad de las operaciones de plataforma</p>
+                <p class="text-color-secondary">Trazabilidad de acciones administrativas de la plataforma</p>
             </div>
 
             <div class="col-12">
                 <div class="card">
                     <div class="card-content">
                         <h:form id="filterForm">
-                            <p:messages id="formMessages" showDetail="true" closable="true" />
                             <div class="formgrid grid">
                                 <div class="field col-12 md:col-3">
                                     <p:outputLabel for="action" value="Accion" />
-                                    <p:inputText id="action" value="#{auditBean.action}" styleClass="w-full" />
+                                    <p:inputText id="action" value="#{auditBean.action}" styleClass="w-full"
+                                        maxlength="60" />
                                 </div>
                                 <div class="field col-12 md:col-3">
                                     <p:outputLabel for="resourceType" value="Recurso" />
-                                    <p:inputText id="resourceType" value="#{auditBean.resourceType}"
-                                                 styleClass="w-full" />
+                                    <p:inputText id="resourceType" value="#{auditBean.resourceType}" styleClass="w-full"
+                                        maxlength="60" />
                                 </div>
-                                <div class="field col-12 md:col-3">
+                                <div class="field col-12 md:col-2">
                                     <p:outputLabel for="result" value="Resultado" />
-                                    <p:inputText id="result" value="#{auditBean.result}" styleClass="w-full" />
+                                    <p:selectOneMenu id="result" value="#{auditBean.result}" styleClass="w-full">
+                                        <f:selectItem itemLabel="Todos" itemValue="" noSelectionOption="true" />
+                                        <f:selectItem itemLabel="SUCCESS" itemValue="SUCCESS" />
+                                        <f:selectItem itemLabel="FAILURE" itemValue="FAILURE" />
+                                        <f:selectItem itemLabel="DENIED" itemValue="DENIED" />
+                                    </p:selectOneMenu>
                                 </div>
-                                <div class="field col-12 md:col-3">
-                                    <p:outputLabel for="tenantId" value="Tenant (UUID)" />
-                                    <p:inputText id="tenantId" value="#{auditBean.tenantId}" styleClass="w-full" />
-                                </div>
-                                <div class="field col-6 md:col-2">
+                                <div class="field col-12 md:col-2">
                                     <p:outputLabel for="from" value="Desde" />
-                                    <p:datePicker id="from" value="#{auditBean.from}" dateFormat="dd/MM/yyyy"
-                                                  showIcon="true" styleClass="w-full" />
+                                    <p:datePicker id="from" value="#{auditBean.from}" styleClass="w-full"
+                                        dateFormat="dd/MM/yyyy" showIcon="true" />
                                 </div>
-                                <div class="field col-6 md:col-2">
+                                <div class="field col-12 md:col-2">
                                     <p:outputLabel for="to" value="Hasta" />
-                                    <p:datePicker id="to" value="#{auditBean.to}" dateFormat="dd/MM/yyyy"
-                                                  showIcon="true" styleClass="w-full" />
+                                    <p:datePicker id="to" value="#{auditBean.to}" styleClass="w-full"
+                                        dateFormat="dd/MM/yyyy" showIcon="true" />
                                 </div>
-                                <div class="field col-12 md:col-2 flex align-items-end">
-                                    <p:commandButton id="searchButton" value="Buscar" icon="pi pi-search"
-                                                     update="@form" process="@form"
-                                                     action="#{auditBean.search}" styleClass="w-full" />
+                                <div class="field col-12 md:col-3 flex align-items-end">
+                                    <p:commandButton id="filterButton" value="Filtrar" icon="pi pi-filter"
+                                        update=":listForm :messages" process="@form" action="#{auditBean.load}"
+                                        styleClass="w-full" />
                                 </div>
-                                <div class="field col-12 md:col-2 flex align-items-end">
-                                    <p:commandButton id="resetButton" value="Limpiar" severity="secondary"
-                                                     icon="pi pi-times" update="@form" process="@form"
-                                                     action="#{auditBean.reset}" styleClass="w-full" />
+                                <div class="field col-12 md:col-3 flex align-items-end">
+                                    <p:commandButton id="resetButton" value="Limpiar" icon="pi pi-filter-slash"
+                                        update=":filterForm :listForm :messages" process="@form"
+                                        action="#{auditBean.reset}" styleClass="w-full ui-button-secondary" />
                                 </div>
                             </div>
                         </h:form>
-                    </div>
-                </div>
-            </div>
 
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-content">
                         <h:form id="listForm">
-                            <p:messages id="formMessages" showDetail="true" closable="true" />
-                            <p:dataTable id="auditTable" value="#{auditBean.entries}" var="entry" paginator="true"
-                                         rows="20" lazy="false"
-                                         emptyMessage="No hay eventos de auditoria para los filtros indicados">
-                                <p:column headerText="Fecha">
-                                    <h:outputText value="#{entry.occurredAt}" />
+                            <p:toolbar styleClass="mb-4">
+                                <p:toolbarGroup>
+                                    <span class="text-color-secondary">
+                                        #{auditBean.totalElements} eventos encontrados</span>
+                                </p:toolbarGroup>
+                                <p:toolbarGroup align="right">
+                                    <p:commandButton id="exportPdf" value="PDF" icon="pi pi-file-pdf" process="@this"
+                                        update="@none" styleClass="ml-1 ui-button-danger">
+                                        <p:dataExporter type="pdf" target="auditTable" fileName="auditoria" />
+                                    </p:commandButton>
+                                    <p:commandButton id="exportExcel" value="Excel" icon="pi pi-file-excel"
+                                        process="@this" update="@none" styleClass="ml-1 ui-button-success">
+                                        <p:dataExporter type="xlsx" target="auditTable" fileName="auditoria" />
+                                    </p:commandButton>
+                                    <p:commandButton id="exportCsv" value="CSV" icon="pi pi-table" process="@this"
+                                        update="@none" styleClass="ml-1 ui-button-info">
+                                        <p:dataExporter type="csv" target="auditTable" fileName="auditoria" />
+                                    </p:commandButton>
+                                </p:toolbarGroup>
+                            </p:toolbar>
+
+                            <p:dataTable id="auditTable" widgetVar="auditTableWidget" var="row"
+                                value="#{auditBean.entries}" reflow="true" rowIndexVar="rowIdx"
+                                emptyMessage="No hay eventos de auditoria que coincidan con el filtro">
+                                <f:facet name="header">
+                                    <div class="products-table-header">
+                                        <span style="font-weight: bold">Gestionar Auditoria</span>
+                                        <span class="text-color-secondary">Pagina #{auditBean.page + 1} de
+                                            #{auditBean.totalPages == 0 ? 1 : auditBean.totalPages}</span>
+                                    </div>
+                                </f:facet>
+
+                                <p:column headerText="Nro." style="width:4rem">
+                                    <h:outputText value="#{auditBean.rowNumber(rowIdx)}" />
                                 </p:column>
                                 <p:column headerText="Usuario">
-                                    <h:outputText value="#{entry.username}" />
+                                    <h:outputText value="#{row.username}" />
                                 </p:column>
                                 <p:column headerText="Accion">
-                                    <h:outputText value="#{entry.action}" />
+                                    <h:outputText value="#{row.action}" />
                                 </p:column>
                                 <p:column headerText="Recurso">
-                                    <h:outputText value="#{entry.resourceType}" />
+                                    <h:outputText value="#{row.resourceType}" />
                                 </p:column>
-                                <p:column headerText="Resultado">
-                                    <p:tag value="#{entry.result}" severity="info" />
+                                <p:column headerText="Resultado" exportableValue="#{row.result}">
+                                    <p:tag value="#{row.result}" severity="#{auditBean.resultSeverity(row.result)}" />
                                 </p:column>
                                 <p:column headerText="IP">
-                                    <h:outputText value="#{entry.ipAddress}" />
+                                    <h:outputText value="#{row.ipAddress}" />
                                 </p:column>
-                                <p:column headerText="Metadata">
-                                    <h:outputText value="#{entry.metadata}" />
+                                <p:column headerText="Fecha y hora">
+                                    <h:outputText value="#{row.occurredAt}" />
+                                </p:column>
+                                <p:column headerText="Acciones" exportable="false" style="width:8rem">
+                                    <p:commandButton id="detailButton" icon="pi pi-search" title="Ver detalle"
+                                        styleClass="rounded-button ui-button-secondary" process="@this"
+                                        update=":detailDialog :messages"
+                                        action="#{auditBean.requestDetail(row)}"
+                                        oncomplete="PF('detailDialogWidget').show()">
+                                        <f:param name="row" value="#{row}" />
+                                    </p:commandButton>
                                 </p:column>
                             </p:dataTable>
 
-                            <div class="flex align-items-center justify-content-between mt-3">
+                            <div class="flex justify-content-between align-items-center mt-3">
                                 <p:commandButton id="previousButton" value="Anterior" icon="pi pi-chevron-left"
-                                                 severity="secondary" update="@form" process="@this"
-                                                 disabled="#{not auditBean.hasPrevious}"
-                                                 action="#{auditBean.previousPage}" />
-                                <span class="text-color-secondary">
-                                    Pagina #{auditBean.page + 1} de #{auditBean.totalPages}
-                                    (#{auditBean.totalElements} eventos)
-                                </span>
+                                    styleClass="ui-button-secondary" process="@this" update=":listForm :messages"
+                                    action="#{auditBean.previousPage}" disabled="#{not auditBean.hasPrevious}" />
                                 <p:commandButton id="nextButton" value="Siguiente" icon="pi pi-chevron-right"
-                                                 severity="secondary" update="@form" process="@this"
-                                                 disabled="#{not auditBean.hasNext}"
-                                                 action="#{auditBean.nextPage}" />
+                                    styleClass="ui-button-secondary" process="@this" update=":listForm :messages"
+                                    action="#{auditBean.nextPage}" disabled="#{not auditBean.hasNext}" />
                             </div>
                         </h:form>
+
+                        <p:dialog id="detailDialog" widgetVar="detailDialogWidget" header="Detalle del evento"
+                            showEffect="fade" modal="true" responsive="true" style="max-width: 94vw">
+                            <h:form id="detailForm">
+                                <p:outputPanel id="detailFormContent" styleClass="ui-fluid"
+                                    style="max-height: 60vh; overflow-y: auto">
+                                    <div class="field">
+                                        <p:outputLabel for="detailAction" value="Accion" />
+                                        <h:outputText id="detailAction" value="#{auditBean.detail.action}"
+                                            styleClass="w-full surface-100 p-2 border-round" />
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="detailUser" value="Usuario" />
+                                        <h:outputText id="detailUser" value="#{auditBean.detail.username}"
+                                            styleClass="w-full surface-100 p-2 border-round" />
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="detailResource" value="Recurso" />
+                                        <h:outputText id="detailResource" value="#{auditBean.detail.resourceType}"
+                                            styleClass="w-full surface-100 p-2 border-round" />
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="detailResourceId" value="Identificador del recurso" />
+                                        <h:outputText id="detailResourceId" value="#{auditBean.detail.resourceId}"
+                                            styleClass="w-full surface-100 p-2 border-round" />
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="detailMetadata" value="Metadatos" />
+                                        <p:inputTextarea id="detailMetadata" value="#{auditBean.detail.metadata}"
+                                            readonly="true" rows="6" styleClass="w-full" />
+                                    </div>
+                                </p:outputPanel>
+
+                                <div class="flex justify-content-end mt-4">
+                                    <p:commandButton id="closeDetailButton" value="Cerrar" icon="pi pi-times"
+                                        type="button" styleClass="ui-button-secondary"
+                                        onclick="PF('detailDialogWidget').hide()" />
+                                </div>
+                            </h:form>
+                        </p:dialog>
                     </div>
                 </div>
             </div>

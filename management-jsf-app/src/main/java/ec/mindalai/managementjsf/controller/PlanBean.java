@@ -1,5 +1,6 @@
 package ec.mindalai.managementjsf.controller;
 
+import ec.mindalai.managementjsf.client.PlatformApiException;
 import ec.mindalai.managementjsf.client.PlatformRestClient;
 import ec.mindalai.managementjsf.dto.FeatureDto;
 import ec.mindalai.managementjsf.dto.PlanDto;
@@ -8,6 +9,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import lombok.Getter;
 import lombok.Setter;
+import org.primefaces.PrimeFaces;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -15,8 +17,12 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-/** Planes comerciales y sus features. */
+/**
+ * Planes comerciales del catalogo. Un plan exige al menos una feature, asi que la asignacion
+ * se resuelve dentro del mismo dialog de alta/edicion y no como una accion aparte.
+ */
 @Named("planBean")
 @ViewScoped
 @Getter
@@ -25,16 +31,16 @@ public class PlanBean extends AbstractPageBean {
 
     private static final long serialVersionUID = 1L;
 
+    private static final String STATUS_ACTIVE = "ACTIVE";
+
+    private static final String PLAN_DIALOG = "planDialogWidget";
+
     @Inject
     private PlatformRestClient restClient;
 
     private List<PlanDto> plans = new ArrayList<>();
     private List<FeatureDto> features = new ArrayList<>();
     private Set<UUID> selectedFeatures = new LinkedHashSet<>();
-    private UUID selectedPlanId;
-
-    private UUID editingId;
-    private boolean editing;
 
     private String code;
     private String name;
@@ -45,6 +51,14 @@ public class PlanBean extends AbstractPageBean {
     private Integer maxInstallations;
     private Integer maxDocumentsPerMonth;
 
+    private UUID editingId;
+    private boolean editing;
+
+    /** Numero de orden de una fila, continuo entre paginas. */
+    public int rowNumber(int rowIndex) {
+        return rowIndex + 1;
+    }
+
     public void load() {
         String cid = correlationId();
         String token = token();
@@ -52,27 +66,10 @@ public class PlanBean extends AbstractPageBean {
         features = call(() -> restClient.features(token, cid), features);
     }
 
-    public void create() {
-        if (isBlank(code) || isBlank(name)) {
-            error("Codigo y nombre del plan son obligatorios");
-            return;
-        }
-        String cid = correlationId();
-        String token = token();
-        String planCode = code.trim();
-        String planName = name.trim();
-        String planDescription = blankToNull(description);
-        BigDecimal price = monthlyPrice == null ? BigDecimal.ZERO : monthlyPrice;
-        PlanDto created = call(() -> restClient.createPlan(token, cid, planCode, planName, planDescription,
-                price, maxUsers, maxDevices, maxInstallations, maxDocumentsPerMonth), null);
-        if (created != null) {
-            success("Plan " + created.getCode() + " creado");
-            clearForm();
-            load();
-        }
+    public void openNew() {
+        resetForm();
     }
 
-    /** Carga el plan en el formulario de la seccion "Nuevo plan" para editarlo. */
     public void edit(PlanDto plan) {
         editing = true;
         editingId = plan.getId();
@@ -84,9 +81,11 @@ public class PlanBean extends AbstractPageBean {
         maxDevices = plan.getMaxDevices();
         maxInstallations = plan.getMaxInstallations();
         maxDocumentsPerMonth = plan.getMaxDocumentsPerMonth();
+        selectedFeatures = plan.getFeatures() == null ? new LinkedHashSet<>()
+                : plan.getFeatures().stream().map(FeatureDto::getId)
+                        .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    /** Alternativa al create() cuando el formulario esta en modo edicion. */
     public void save() {
         if (editingId == null) {
             create();
@@ -96,75 +95,48 @@ public class PlanBean extends AbstractPageBean {
             error("El nombre del plan es obligatorio");
             return;
         }
+        if (selectedFeatures.isEmpty()) {
+            error("Seleccione al menos una feature del plan");
+            return;
+        }
         String cid = correlationId();
         String token = token();
+        UUID id = editingId;
         String planName = name.trim();
         String planDescription = blankToNull(description);
         BigDecimal price = monthlyPrice == null ? BigDecimal.ZERO : monthlyPrice;
-        PlanDto updated = call(() -> restClient.updatePlan(token, cid, editingId, planName, planDescription,
-                price, maxUsers, maxDevices, maxInstallations, maxDocumentsPerMonth), null);
-        if (updated != null) {
-            success("Plan " + updated.getCode() + " actualizado");
-            cancelEdit();
-            load();
+        Set<UUID> features = new LinkedHashSet<>(selectedFeatures);
+        PlanDto updated = call(() -> restClient.updatePlan(token, cid, id, planName, planDescription, price,
+                maxUsers, maxDevices, maxInstallations, maxDocumentsPerMonth, features), null, this::duplicatedMessage);
+        if (updated == null) {
+            return;
         }
-    }
-
-    public void cancelEdit() {
-        editing = false;
-        editingId = null;
-        clearForm();
+        success("Plan " + updated.getCode() + " actualizado");
+        replaceInPlace(updated);
+        resetForm();
+        hideDialog(PLAN_DIALOG);
     }
 
     public void activate(PlanDto plan) {
-        run(() -> {
-            restClient.activatePlan(token(), correlationId(), plan.getId());
-            success("Plan activado");
-            load();
-        });
+        changeStatus(plan, () -> restClient.activatePlan(token(), correlationId(), plan.getId()),
+                "Plan " + plan.getCode() + " activado");
     }
 
     public void deactivate(PlanDto plan) {
-        run(() -> {
-            restClient.deactivatePlan(token(), correlationId(), plan.getId());
-            success("Plan desactivado");
-            load();
-        });
+        changeStatus(plan, () -> restClient.deactivatePlan(token(), correlationId(), plan.getId()),
+                "Plan " + plan.getCode() + " desactivado");
     }
 
-    public void assignFeatures() {
-        PlanDto plan = selectedPlan();
-        if (plan == null) {
-            error("Seleccione el plan al que asignar las features");
-            return;
-        }
-        String cid = correlationId();
-        String token = token();
-        UUID planId = plan.getId();
-        Set<UUID> features = new LinkedHashSet<>(selectedFeatures);
-        PlanDto updated = call(() -> restClient.assignPlanFeatures(token, cid, planId, features), null);
-        if (updated != null) {
-            success("Features actualizadas para " + updated.getCode());
-            load();
-        }
+    public String statusSeverity(String status) {
+        return STATUS_ACTIVE.equals(status) ? "success" : "secondary";
     }
 
-    public void selectPlan() {
-        PlanDto plan = selectedPlan();
-        if (plan == null) {
-            selectedFeatures = new LinkedHashSet<>();
-            return;
-        }
-        selectedFeatures = plan.getFeatures() == null ? new LinkedHashSet<>()
-                : plan.getFeatures().stream().map(FeatureDto::getId)
-                .collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new));
+    public List<FeatureDto> featuresOf(PlanDto plan) {
+        return plan.getFeatures() == null ? List.of() : plan.getFeatures();
     }
 
-    private PlanDto selectedPlan() {
-        if (selectedPlanId == null) {
-            return null;
-        }
-        return plans.stream().filter(plan -> plan.getId().equals(selectedPlanId)).findFirst().orElse(null);
+    public boolean isFeatureSelected(FeatureDto feature) {
+        return selectedFeatures.contains(feature.getId());
     }
 
     public void toggleFeature(FeatureDto feature, boolean selected) {
@@ -175,15 +147,74 @@ public class PlanBean extends AbstractPageBean {
         }
     }
 
-    public boolean isFeatureSelected(FeatureDto feature) {
-        return selectedFeatures.contains(feature.getId());
+    /** Los limites sin tope se dejan vacios para no convertir un 0 en un bloqueo real. */
+    public int unbounded(Integer value) {
+        return value == null || value <= 0 ? 1 : 0;
     }
 
-    public List<FeatureDto> featuresOf(PlanDto plan) {
-        return plan.getFeatures() == null ? List.of() : plan.getFeatures();
+    private void create() {
+        if (isBlank(code) || isBlank(name)) {
+            error("Codigo y nombre del plan son obligatorios");
+            return;
+        }
+        if (selectedFeatures.isEmpty()) {
+            error("Seleccione al menos una feature del plan");
+            return;
+        }
+        String cid = correlationId();
+        String token = token();
+        String planCode = code.trim();
+        String planName = name.trim();
+        String planDescription = blankToNull(description);
+        BigDecimal price = monthlyPrice == null ? BigDecimal.ZERO : monthlyPrice;
+        Set<UUID> features = new LinkedHashSet<>(selectedFeatures);
+        PlanDto created = call(() -> restClient.createPlan(token, cid, planCode, planName, planDescription, price,
+                maxUsers, maxDevices, maxInstallations, maxDocumentsPerMonth, features), null,
+                this::duplicatedMessage);
+        if (created == null) {
+            return;
+        }
+        success("Plan " + created.getCode() + " creado");
+        resetForm();
+        hideDialog(PLAN_DIALOG);
+        load();
     }
 
-    private void clearForm() {
+    private void changeStatus(PlanDto plan, Runnable operation, String message) {
+        run(() -> {
+            operation.run();
+            success(message);
+            load();
+        });
+    }
+
+    /** Traduce el 409 del API a un mensaje que senale el dato duplicado concreto. */
+    private String duplicatedMessage(PlatformApiException ex) {
+        String detail = ex.getError().detailText();
+        if ("PLAN_DUPLICATED_CODE".equals(detail)) {
+            return "Ya existe un plan con el codigo " + code.trim() + ". Use otro codigo.";
+        }
+        if ("PLAN_DUPLICATED_NAME".equals(detail)) {
+            return "Ya existe un plan con el nombre " + name.trim() + ". Use otro nombre.";
+        }
+        return ex.getMessage();
+    }
+
+    private void replaceInPlace(PlanDto updated) {
+        for (int i = 0; i < plans.size(); i++) {
+            if (updated.getId().equals(plans.get(i).getId())) {
+                plans.set(i, updated);
+                return;
+            }
+        }
+        plans.add(0, updated);
+    }
+
+    private void hideDialog(String widgetVar) {
+        PrimeFaces.current().executeScript("PF('" + widgetVar + "').hide();");
+    }
+
+    private void resetForm() {
         editing = false;
         editingId = null;
         code = null;
@@ -195,7 +226,6 @@ public class PlanBean extends AbstractPageBean {
         maxInstallations = null;
         maxDocumentsPerMonth = null;
         selectedFeatures = new LinkedHashSet<>();
-        selectedPlanId = null;
     }
 
     private boolean isBlank(String value) {

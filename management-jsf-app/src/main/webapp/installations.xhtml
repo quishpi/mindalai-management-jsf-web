@@ -9,136 +9,301 @@
 
     <ui:define name="content">
 
-        <p:messages id="globalMessages" showSummary="false" showDetail="true" closable="true" />
+        <p:growl id="messages" showDetail="false" life="7000" />
 
-        <div class="grid">
+        <div class="grid crud-demo">
             <div class="col-12">
                 <h1 class="text-3xl font-medium">Instalaciones</h1>
-                <p class="text-color-secondary">Puntos de operacion por tenant</p>
+                <p class="text-color-secondary">Puntos de operacion de cada tenant</p>
             </div>
 
-            <div class="col-12 lg:col-4">
-                <div class="card">
-                    <div class="card-content">
-                        <h2 class="text-xl font-semibold mb-3" styleClass="formTitle">#{installationBean.editing ?
-                            'Editar instalacion' : 'Nueva instalacion'}</h2>
-                        <h:form id="installationForm">
-                            <div class="field">
-                                <p:outputLabel for="tenantId" value="Tenant *" />
-                                <p:selectOneMenu id="tenantId" value="#{installationBean.tenantId}" required="true"
-                                    requiredMessage="Seleccione un tenant" filter="true"
-                                    disabled="#{installationBean.editing}" styleClass="w-full">
-                                    <f:selectItem itemLabel="Seleccione un tenant" itemValue=""
-                                        noSelectionOption="true" />
-                                    <f:selectItems value="#{installationBean.tenants}" var="tenant"
-                                        itemLabel="#{tenant.displayName()} - #{tenant.ruc}" itemValue="#{tenant.id}" />
-                                </p:selectOneMenu>
-                                <h:message for="tenantId" styleClass="text-color-secondary text-sm"
-                                    rendered="#{installationBean.editing}" />
-                                <small class="text-color-secondary" rendered="#{installationBean.editing}">La
-                                    instalacion no cambia de tenant.</small>
-                            </div>
-
-                            <div class="field">
-                                <p:outputLabel for="name" value="Nombre *" />
-                                <p:inputText id="name" value="#{installationBean.name}" required="true"
-                                    requiredMessage="El nombre es obligatorio" styleClass="w-full" />
-                            </div>
-
-                            <div class="field">
-                                <p:outputLabel for="address" value="Direccion" />
-                                <p:inputText id="address" value="#{installationBean.address}" styleClass="w-full" />
-                            </div>
-
-                            <div class="field">
-                                <p:outputLabel for="contactName" value="Contacto" />
-                                <p:inputText id="contactName" value="#{installationBean.contactName}"
-                                    styleClass="w-full" />
-                            </div>
-
-                            <div class="flex justify-content-between mt-3">
-                                <p:commandButton id="createButton"
-                                    value="#{installationBean.editing ? 'Guardar cambios' : 'Registrar'}"
-                                    icon="pi pi-check" update=":installationForm :listForm :globalMessages"
-                                    process="@form" action="#{installationBean.save}" />
-
-                                <p:commandButton id="cancelButton" value="Cancelar" icon="pi pi-times"
-                                    severity="secondary" update=":installationForm :listForm :globalMessages"
-                                    process="@form" rendered="#{installationBean.editing}"
-                                    action="#{installationBean.cancelEdit}" />
-                            </div>
-                        </h:form>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-12 lg:col-8">
+            <div class="col-12">
                 <div class="card">
                     <div class="card-content">
                         <h:form id="filterForm">
                             <div class="formgrid grid">
-                                <div class="field col-12 md:col-8">
-                                    <p:outputLabel for="tenantFilter" value="Filtrar por tenant" />
+                                <div class="field col-12 md:col-4">
+                                    <p:outputLabel for="tenantFilter" value="Tenant" />
                                     <p:selectOneMenu id="tenantFilter" value="#{installationBean.tenantFilter}"
-                                        filter="true" styleClass="w-full">
-                                        <f:selectItem itemLabel="Todos los tenants" itemValue=""
-                                            noSelectionOption="true" />
-                                        <f:selectItems value="#{installationBean.tenants}" var="filterTenant"
-                                            itemLabel="#{filterTenant.displayName()}" itemValue="#{filterTenant.id}" />
+                                        styleClass="w-full" filter="true">
+                                        <f:selectItem itemLabel="Todos" itemValue="" noSelectionOption="true" />
+                                        <f:selectItems value="#{installationBean.tenants}" var="tenant"
+                                            itemLabel="#{tenant.displayName()}" itemValue="#{tenant.id}" />
+                                    </p:selectOneMenu>
+                                </div>
+                                <div class="field col-12 md:col-4">
+                                    <p:outputLabel for="statusFilter" value="Estado" />
+                                    <p:selectOneMenu id="statusFilter" value="#{installationBean.statusFilter}"
+                                        styleClass="w-full">
+                                        <f:selectItem itemLabel="Todos" itemValue="" noSelectionOption="true" />
+                                        <f:selectItem itemLabel="ACTIVA" itemValue="ACTIVE" />
+                                        <f:selectItem itemLabel="EN MANTENIMIENTO" itemValue="MAINTENANCE" />
+                                        <f:selectItem itemLabel="INACTIVA" itemValue="INACTIVE" />
                                     </p:selectOneMenu>
                                 </div>
                                 <div class="field col-12 md:col-4 flex align-items-end">
                                     <p:commandButton id="filterButton" value="Filtrar" icon="pi pi-filter"
-                                        update=":filterForm :listForm :globalMessages" process="@form"
+                                        update=":listForm :messages" process="@form"
                                         action="#{installationBean.load}" styleClass="w-full" />
                                 </div>
                             </div>
                         </h:form>
 
                         <h:form id="listForm">
-                            <p:dataTable id="installationsTable" value="#{installationBean.installations}"
-                                var="installation" paginator="true" rows="10"
-                                emptyMessage="No hay instalaciones registradas">
-                                <p:column headerText="Tenant">
-                                    <h:outputText value="#{installation.tenantName}" />
+                            <p:toolbar styleClass="mb-4">
+                                <p:toolbarGroup>
+                                    <p:commandButton id="newButton" value="Nueva instalacion" icon="pi pi-plus"
+                                        styleClass="ui-button-success" process="@this"
+                                        update=":installationDialog :messages" action="#{installationBean.openNew}"
+                                        oncomplete="PF('installationDialogWidget').show()" />
+                                </p:toolbarGroup>
+                                <p:toolbarGroup align="right">
+                                    <p:commandButton id="exportPdf" value="PDF" icon="pi pi-file-pdf" process="@this"
+                                        update="@none" styleClass="ml-1 ui-button-danger">
+                                        <p:dataExporter type="pdf" target="installationsTable"
+                                            fileName="installations" />
+                                    </p:commandButton>
+                                    <p:commandButton id="exportExcel" value="Excel" icon="pi pi-file-excel"
+                                        process="@this" update="@none" styleClass="ml-1 ui-button-success">
+                                        <p:dataExporter type="xlsx" target="installationsTable"
+                                            fileName="installations" />
+                                    </p:commandButton>
+                                    <p:commandButton id="exportCsv" value="CSV" icon="pi pi-table" process="@this"
+                                        update="@none" styleClass="ml-1 ui-button-info">
+                                        <p:dataExporter type="csv" target="installationsTable"
+                                            fileName="installations" />
+                                    </p:commandButton>
+                                </p:toolbarGroup>
+                            </p:toolbar>
+
+                            <p:dataTable id="installationsTable" widgetVar="installationsTableWidget" var="row"
+                                value="#{installationBean.visibleInstallations()}" reflow="true" rowIndexVar="rowIdx"
+                                paginator="true" rows="10" paginatorPosition="bottom"
+                                emptyMessage="No hay instalaciones que coincidan con el filtro">
+                                <f:facet name="header">
+                                    <div class="products-table-header">
+                                        <span style="font-weight: bold">Gestionar Instalaciones</span>
+                                        <span class="text-color-secondary">
+                                            #{installationBean.visibleInstallations().size()} instalaciones
+                                            listadas</span>
+                                    </div>
+                                </f:facet>
+
+                                <p:column headerText="Nro." style="width:4rem">
+                                    <h:outputText value="#{installationBean.rowNumber(rowIdx)}" />
                                 </p:column>
-                                <p:column headerText="Nombre">
-                                    <h:outputText value="#{installation.name}" />
+                                <p:column headerText="Tenant">
+                                    <h:outputText value="#{row.tenantName}" />
+                                </p:column>
+                                <p:column headerText="Instalacion">
+                                    <h:outputText value="#{row.name}" />
                                 </p:column>
                                 <p:column headerText="Direccion">
-                                    <h:outputText value="#{installation.address}" />
+                                    <h:outputText value="#{row.address}" />
                                 </p:column>
                                 <p:column headerText="Contacto">
-                                    <h:outputText value="#{installation.contactName}" />
+                                    <h:outputText value="#{row.contactName}" />
                                 </p:column>
                                 <p:column headerText="Dispositivos">
-                                    <h:outputText value="#{installation.deviceCount}" />
+                                    <h:outputText value="#{row.deviceCount}" />
                                 </p:column>
-                                <p:column headerText="Estado">
-                                    <p:tag value="#{installation.status}" severity="info" />
+                                <p:column headerText="Estado" exportableValue="#{row.status}">
+                                    <p:tag value="#{row.status}"
+                                        severity="#{installationBean.statusSeverity(row.status)}" />
                                 </p:column>
-                                <p:column headerText="Acciones" style="width:12rem">
+                                <p:column headerText="Acciones" exportable="false" style="width:18rem">
                                     <p:commandButton id="editButton" icon="pi pi-pencil" title="Editar"
-                                        update=":installationForm :listForm :globalMessages" process="@this"
-                                        styleClass="ml-1" action="#{installationBean.edit(installation)}">
-                                        <f:param name="installation" value="#{installation}" />
+                                        styleClass="rounded-button ui-button-secondary" process="@this"
+                                        update=":installationDialog :messages" action="#{installationBean.edit(row)}"
+                                        oncomplete="PF('installationDialogWidget').show()">
+                                        <f:param name="row" value="#{row}" />
                                     </p:commandButton>
-                                    <p:commandButton id="maintenanceButton" icon="pi pi-wrench"
-                                        title="#{installation.status == 'MAINTENANCE' ? 'Activar' : 'Mantenimiento'}"
-                                        update=":listForm :globalMessages" process="@this" styleClass="ml-1"
-                                        rendered="#{installation.status != 'INACTIVE'}"
-                                        action="#{installationBean.toggleMaintenance(installation, installation.status != 'MAINTENANCE')}">
-                                        <f:param name="installation" value="#{installation}" />
+                                    <p:commandButton id="maintenanceButton" icon="pi pi-wrench" title="Mantenimiento"
+                                        styleClass="ml-1 rounded-button ui-button-warning" process="@this"
+                                        update=":installationStatusDialog :messages"
+                                        rendered="#{row.status == 'ACTIVE'}"
+                                        action="#{installationBean.requestMaintenance(row)}"
+                                        oncomplete="PF('installationStatusDialogWidget').show()">
+                                        <f:param name="row" value="#{row}" />
+                                    </p:commandButton>
+                                    <p:commandButton id="resumeButton" icon="pi pi-play" title="Reanudar"
+                                        styleClass="ml-1 rounded-button ui-button-success" process="@this"
+                                        update=":installationStatusDialog :messages"
+                                        rendered="#{row.status == 'MAINTENANCE'}"
+                                        action="#{installationBean.requestResume(row)}"
+                                        oncomplete="PF('installationStatusDialogWidget').show()">
+                                        <f:param name="row" value="#{row}" />
+                                    </p:commandButton>
+                                    <p:commandButton id="activateButton" icon="pi pi-refresh" title="Activar"
+                                        styleClass="ml-1 rounded-button ui-button-success" process="@this"
+                                        update=":installationStatusDialog :messages"
+                                        rendered="#{row.status == 'INACTIVE'}"
+                                        action="#{installationBean.requestActivate(row)}"
+                                        oncomplete="PF('installationStatusDialogWidget').show()">
+                                        <f:param name="row" value="#{row}" />
                                     </p:commandButton>
                                     <p:commandButton id="deactivateButton" icon="pi pi-ban" title="Desactivar"
-                                        update=":listForm :globalMessages" process="@this" styleClass="ml-1"
-                                        rendered="#{installation.status != 'INACTIVE'}"
-                                        action="#{installationBean.deactivate(installation)}">
-                                        <f:param name="installation" value="#{installation}" />
+                                        styleClass="ml-1 rounded-button ui-button-danger" process="@this"
+                                        update=":installationStatusDialog :messages"
+                                        rendered="#{row.status == 'ACTIVE' or row.status == 'MAINTENANCE'}"
+                                        action="#{installationBean.requestDeactivate(row)}"
+                                        oncomplete="PF('installationStatusDialogWidget').show()">
+                                        <f:param name="row" value="#{row}" />
+                                    </p:commandButton>
+                                    <p:commandButton id="historyButton" icon="pi pi-history"
+                                        title="Historial de estados" styleClass="ml-1 rounded-button ui-button-info"
+                                        process="@this" update=":installationHistoryDialog :messages"
+                                        action="#{installationBean.openHistory(row)}"
+                                        oncomplete="PF('installationHistoryDialogWidget').show()">
+                                        <f:param name="row" value="#{row}" />
                                     </p:commandButton>
                                 </p:column>
                             </p:dataTable>
                         </h:form>
+
+                        <p:dialog id="installationDialog" widgetVar="installationDialogWidget"
+                            header="#{installationBean.editing ? 'Editar instalacion' : 'Nueva instalacion'}"
+                            showEffect="fade" modal="true" responsive="true" style="max-width: 94vw">
+                            <h:form id="installationForm">
+                                <p:outputPanel id="installationFormContent" styleClass="ui-fluid"
+                                    style="max-height: 60vh; overflow-y: auto">
+                                    <div class="field">
+                                        <p:outputLabel for="tenantId" value="Tenant" />
+                                        <p:selectOneMenu id="tenantId" value="#{installationBean.tenantId}" required="true"
+                                            requiredMessage="Seleccione un tenant" filter="true" styleClass="w-full"
+                                            disabled="#{installationBean.editing}">
+                                            <f:selectItem itemLabel="Seleccione un tenant" itemValue=""
+                                                noSelectionOption="true" />
+                                            <f:selectItems value="#{installationBean.tenants}" var="tenant"
+                                                itemLabel="#{tenant.displayName()} - #{tenant.ruc}"
+                                                itemValue="#{tenant.id}" />
+                                        </p:selectOneMenu>
+                                        <small class="text-color-secondary" rendered="#{installationBean.editing}">
+                                            La instalacion no cambia de tenant.</small>
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="name" value="Nombre" />
+                                        <p:inputText id="name" value="#{installationBean.name}" required="true"
+                                            requiredMessage="El nombre es obligatorio" styleClass="w-full"
+                                            maxlength="100" />
+                                        <small class="text-color-secondary">El nombre es unico dentro del
+                                            tenant.</small>
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="address" value="Direccion" />
+                                        <p:inputText id="address" value="#{installationBean.address}"
+                                            styleClass="w-full" maxlength="200" />
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="contactName" value="Contacto" />
+                                        <p:inputText id="contactName" value="#{installationBean.contactName}"
+                                            styleClass="w-full" maxlength="100" />
+                                    </div>
+                                </p:outputPanel>
+
+                                <div class="flex justify-content-between mt-4">
+                                    <p:commandButton id="saveButton" value="Guardar" icon="pi pi-check"
+                                        process="@form" update="@form :listForm :messages"
+                                        action="#{installationBean.save}" />
+                                    <p:commandButton id="cancelButton" value="Cancelar" icon="pi pi-times" type="button"
+                                        styleClass="ui-button-secondary"
+                                        onclick="PF('installationDialogWidget').hide()" />
+                                </div>
+                            </h:form>
+                        </p:dialog>
+
+                        <p:dialog id="installationStatusDialog" widgetVar="installationStatusDialogWidget"
+                            header="#{installationBean.statusActionLabel()} instalacion" showEffect="fade" modal="true"
+                            responsive="true" style="max-width: 94vw">
+                            <h:form id="installationStatusForm">
+                                <p:outputPanel id="installationStatusFormContent" styleClass="ui-fluid"
+                                    style="max-height: 60vh; overflow-y: auto">
+                                    <div class="field">
+                                        <p:outputLabel for="statusTenant" value="Tenant" />
+                                        <h:outputText id="statusTenant"
+                                            value="#{installationBean.selected.tenantName}"
+                                            styleClass="w-full surface-100 p-2 border-round" />
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="statusName" value="Instalacion" />
+                                        <h:outputText id="statusName" value="#{installationBean.selected.name}"
+                                            styleClass="w-full surface-100 p-2 border-round" />
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="statusCurrent" value="Estado actual" />
+                                        <h:outputText id="statusCurrent" value="#{installationBean.selected.status}"
+                                            styleClass="w-full surface-100 p-2 border-round" />
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="statusReason" value="Motivo" />
+                                        <p:inputTextarea id="statusReason" value="#{installationBean.statusReason}" rows="3"
+                                            required="true" styleClass="w-full"
+                                            requiredMessage="El motivo es obligatorio"
+                                            placeholder="Explique por que cambia el estado de la instalacion" />
+                                    </div>
+                                </p:outputPanel>
+
+                                <div class="flex justify-content-between mt-4">
+                                    <p:commandButton id="confirmButton" value="Confirmar" icon="pi pi-check"
+                                        process="@form" update="@form :listForm :installationHistoryDialog :messages"
+                                        action="#{installationBean.confirmStatusChange}" />
+                                    <p:commandButton id="cancelStatusButton" value="Cancelar" icon="pi pi-times"
+                                        type="button" styleClass="ui-button-secondary"
+                                        onclick="PF('installationStatusDialogWidget').hide()" />
+                                </div>
+                            </h:form>
+                        </p:dialog>
+
+                        <p:dialog id="installationHistoryDialog" widgetVar="installationHistoryDialogWidget"
+                            header="Historial de estados" width="46rem" showEffect="fade" modal="true"
+                            responsive="true" style="max-width: 94vw">
+                            <h:form id="installationHistoryForm">
+                                <p:outputPanel id="installationHistoryFormContent" styleClass="ui-fluid"
+                                    style="max-height: 60vh; overflow-y: auto">
+                                    <div class="field">
+                                        <p:outputLabel for="historyTenant" value="Tenant" />
+                                        <h:outputText id="historyTenant"
+                                            value="#{installationBean.selected.tenantName}"
+                                            styleClass="w-full surface-100 p-2 border-round" />
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="historyName" value="Instalacion" />
+                                        <h:outputText id="historyName" value="#{installationBean.selected.name}"
+                                            styleClass="w-full surface-100 p-2 border-round" />
+                                    </div>
+
+                                    <p:dataTable id="installationHistoryTable" var="entry"
+                                        value="#{installationBean.selectedHistory}" reflow="true"
+                                        emptyMessage="Sin cambios de estado registrados" styleClass="mt-3">
+                                        <p:column headerText="Transicion">
+                                            <h:outputText value="#{entry.transition()}" />
+                                        </p:column>
+                                        <p:column headerText="Motivo">
+                                            <h:outputText value="#{entry.reason}" />
+                                        </p:column>
+                                        <p:column headerText="Fecha y hora">
+                                            <h:outputText value="#{entry.changedAtText()}" />
+                                        </p:column>
+                                        <p:column headerText="Usuario">
+                                            <h:outputText value="#{entry.username}" />
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:outputPanel>
+
+                                <div class="flex justify-content-end mt-4">
+                                    <p:commandButton id="closeHistoryButton" value="Cerrar" icon="pi pi-times"
+                                        type="button" styleClass="ui-button-secondary"
+                                        onclick="PF('installationHistoryDialogWidget').hide()" />
+                                </div>
+                            </h:form>
+                        </p:dialog>
                     </div>
                 </div>
             </div>

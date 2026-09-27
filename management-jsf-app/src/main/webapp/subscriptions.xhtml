@@ -1,6 +1,5 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core"
-                xmlns:ui="jakarta.faces.facelets" xmlns:p="http://primefaces.org/ui"
-                template="/WEB-INF/template/template.xhtml">
+    xmlns:ui="jakarta.faces.facelets" xmlns:p="http://primefaces.org/ui" template="/WEB-INF/template/template.xhtml">
     <f:metadata>
         <f:viewAction action="#{subscriptionBean.load}" onPostBack="false" />
     </f:metadata>
@@ -10,168 +9,229 @@
 
     <ui:define name="content">
 
-        <p:messages id="globalMessages" showSummary="false" showDetail="true" closable="true" />
+        <p:growl id="messages" showDetail="false" life="7000" />
 
-        <div class="grid">
+        <div class="grid crud-demo">
             <div class="col-12">
                 <h1 class="text-3xl font-medium">Suscripciones</h1>
                 <p class="text-color-secondary">Vigencia comercial de cada tenant</p>
             </div>
 
-            <div class="col-12 lg:col-4">
-                <div class="card">
-                    <div class="card-content">
-                        <h2 class="text-xl font-semibold mb-3">Nueva suscripcion</h2>
-                        <h:form id="subscriptionForm">
-                            <div class="field">
-                                <p:outputLabel for="tenantId" value="Tenant *" />
-                                <p:selectOneMenu id="tenantId" value="#{subscriptionBean.tenantId}" required="true"
-                                                 requiredMessage="Seleccione un tenant" filter="true"
-                                                 styleClass="w-full">
-                                    <f:selectItem itemLabel="Seleccione un tenant" itemValue=""
-                                                  noSelectionOption="true" />
-                                    <f:selectItems value="#{subscriptionBean.tenants}" var="tenant"
-                                                   itemLabel="#{tenant.displayName()} - #{tenant.ruc}"
-                                                   itemValue="#{tenant.id}" />
-                                </p:selectOneMenu>
-                            </div>
-
-                            <div class="field">
-                                <p:outputLabel for="planId" value="Plan *" />
-                                <p:selectOneMenu id="planId" value="#{subscriptionBean.planId}" required="true"
-                                                 requiredMessage="Seleccione un plan" styleClass="w-full">
-                                    <f:selectItem itemLabel="Seleccione un plan" itemValue=""
-                                                  noSelectionOption="true" />
-                                    <f:selectItems value="#{subscriptionBean.activePlans()}" var="plan"
-                                                   itemLabel="#{plan.code} - #{plan.name}"
-                                                   itemValue="#{plan.id}" />
-                                </p:selectOneMenu>
-                            </div>
-
-                            <div class="formgrid grid">
-                                <div class="field col-6">
-                                    <p:outputLabel for="validFrom" value="Vigencia desde" />
-                                    <p:datePicker id="validFrom" value="#{subscriptionBean.validFrom}"
-                                                  dateFormat="dd/MM/yyyy" showIcon="true" styleClass="w-full" />
-                                </div>
-                                <div class="field col-6">
-                                    <p:outputLabel for="validUntil" value="Vigencia hasta" />
-                                    <p:datePicker id="validUntil" value="#{subscriptionBean.validUntil}"
-                                                  dateFormat="dd/MM/yyyy" showIcon="true" styleClass="w-full" />
-                                </div>
-                            </div>
-
-                            <div class="field">
-                                <p:outputLabel for="notes" value="Notas" />
-                                <p:inputTextarea id="notes" value="#{subscriptionBean.notes}" rows="3"
-                                                 styleClass="w-full" />
-                            </div>
-
-                            <p:commandButton id="createButton" value="Crear suscripcion" icon="pi pi-plus"
-                                             update=":subscriptionForm :listForm :globalMessages" process="@form"
-                                             action="#{subscriptionBean.create}" styleClass="mt-3" />
-                        </h:form>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-12 lg:col-8">
+            <div class="col-12">
                 <div class="card">
                     <div class="card-content">
                         <h:form id="filterForm">
                             <div class="formgrid grid">
-                                <div class="field col-12 md:col-8">
-                                    <p:outputLabel for="tenantFilter" value="Filtrar por tenant" />
+                                <div class="field col-12 md:col-4">
+                                    <p:outputLabel for="tenantFilter" value="Tenant" />
                                     <p:selectOneMenu id="tenantFilter" value="#{subscriptionBean.tenantFilter}"
-                                                     filter="true" styleClass="w-full">
-                                        <f:selectItem itemLabel="Todos los tenants" itemValue=""
-                                                      noSelectionOption="true" />
-                                        <f:selectItems value="#{subscriptionBean.tenants}" var="filterTenant"
-                                                       itemLabel="#{filterTenant.displayName()}"
-                                                       itemValue="#{filterTenant.id}" />
+                                        styleClass="w-full" filter="true">
+                                        <f:selectItem itemLabel="Todos" itemValue="" noSelectionOption="true" />
+                                        <f:selectItems value="#{subscriptionBean.tenants}" var="tenant"
+                                            itemLabel="#{tenant.displayName()}" itemValue="#{tenant.id}" />
+                                    </p:selectOneMenu>
+                                </div>
+                                <div class="field col-12 md:col-4">
+                                    <p:outputLabel for="statusFilter" value="Estado" />
+                                    <p:selectOneMenu id="statusFilter" value="#{subscriptionBean.statusFilter}"
+                                        styleClass="w-full">
+                                        <f:selectItem itemLabel="Todos" itemValue="" noSelectionOption="true" />
+                                        <f:selectItem itemLabel="ACTIVA" itemValue="ACTIVE" />
+                                        <f:selectItem itemLabel="SUSPENDIDA" itemValue="SUSPENDED" />
+                                        <f:selectItem itemLabel="CANCELADA" itemValue="CANCELLED" />
+                                        <f:selectItem itemLabel="VENCIDA" itemValue="EXPIRED" />
                                     </p:selectOneMenu>
                                 </div>
                                 <div class="field col-12 md:col-4 flex align-items-end">
                                     <p:commandButton id="filterButton" value="Filtrar" icon="pi pi-filter"
-                                                     update=":filterForm :listForm :globalMessages" process="@form"
-                                                     action="#{subscriptionBean.filterByTenant}" styleClass="w-full" />
+                                        update=":listForm :messages" process="@form" action="#{subscriptionBean.load}"
+                                        styleClass="w-full" />
                                 </div>
                             </div>
                         </h:form>
 
                         <h:form id="listForm">
-                            <p:dataTable id="subscriptionsTable" value="#{subscriptionBean.subscriptions}"
-                                         var="subscription" paginator="true" rows="10"
-                                         emptyMessage="No hay suscripciones registradas">
+                            <p:toolbar styleClass="mb-4">
+                                <p:toolbarGroup>
+                                    <p:commandButton id="newButton" value="Nueva suscripcion" icon="pi pi-plus"
+                                        styleClass="ui-button-success" process="@this"
+                                        update=":subscriptionDialog :messages" action="#{subscriptionBean.openNew}"
+                                        oncomplete="PF('subscriptionDialogWidget').show()" />
+                                </p:toolbarGroup>
+                                <p:toolbarGroup align="right">
+                                    <p:commandButton id="exportPdf" value="PDF" icon="pi pi-file-pdf" process="@this"
+                                        update="@none" styleClass="ml-1 ui-button-danger">
+                                        <p:dataExporter type="pdf" target="subscriptionsTable"
+                                            fileName="subscriptions" />
+                                    </p:commandButton>
+                                    <p:commandButton id="exportExcel" value="Excel" icon="pi pi-file-excel"
+                                        process="@this" update="@none" styleClass="ml-1 ui-button-success">
+                                        <p:dataExporter type="xlsx" target="subscriptionsTable"
+                                            fileName="subscriptions" />
+                                    </p:commandButton>
+                                    <p:commandButton id="exportCsv" value="CSV" icon="pi pi-table" process="@this"
+                                        update="@none" styleClass="ml-1 ui-button-info">
+                                        <p:dataExporter type="csv" target="subscriptionsTable"
+                                            fileName="subscriptions" />
+                                    </p:commandButton>
+                                </p:toolbarGroup>
+                            </p:toolbar>
+
+                            <p:dataTable id="subscriptionsTable" widgetVar="subscriptionsTableWidget" var="row"
+                                value="#{subscriptionBean.visibleSubscriptions()}" reflow="true" rowIndexVar="rowIdx"
+                                paginator="true" rows="10" paginatorPosition="bottom"
+                                emptyMessage="No hay suscripciones que coincidan con el filtro">
+                                <f:facet name="header">
+                                    <div class="products-table-header">
+                                        <span style="font-weight: bold">Gestionar Suscripciones</span>
+                                        <span class="text-color-secondary">
+                                            #{subscriptionBean.visibleSubscriptions().size()} suscripciones
+                                            listadas</span>
+                                    </div>
+                                </f:facet>
+
+                                <p:column headerText="Nro." style="width:4rem">
+                                    <h:outputText value="#{subscriptionBean.rowNumber(rowIdx)}" />
+                                </p:column>
                                 <p:column headerText="Tenant">
-                                    <h:outputText value="#{subscription.tenantName}" />
+                                    <h:outputText value="#{row.tenantName}" />
                                 </p:column>
                                 <p:column headerText="Plan">
-                                    <h:outputText value="#{subscription.planCode}" />
-                                </p:column>
-                                <p:column headerText="Estado">
-                                    <p:tag value="#{subscription.status}" severity="info" />
+                                    <h:outputText value="#{row.planName} (#{row.planCode})" />
                                 </p:column>
                                 <p:column headerText="Desde">
-                                    <h:outputText value="#{subscription.validFrom}" />
+                                    <h:outputText value="#{row.validFrom}" />
                                 </p:column>
                                 <p:column headerText="Hasta">
-                                    <h:outputText value="#{subscription.validUntil}" />
+                                    <h:outputText value="#{row.validUntil}" />
                                 </p:column>
                                 <p:column headerText="Notas">
-                                    <h:outputText value="#{subscription.notes}" />
+                                    <h:outputText value="#{row.notes}" />
                                 </p:column>
-                                <p:column headerText="Acciones" style="width:16rem">
+                                <p:column headerText="Estado" exportableValue="#{row.status}">
+                                    <p:tag value="#{row.status}"
+                                        severity="#{subscriptionBean.statusSeverity(row.status)}" />
+                                </p:column>
+                                <p:column headerText="Acciones" exportable="false" style="width:12rem">
                                     <p:commandButton id="suspendButton" icon="pi pi-pause" title="Suspender"
-                                                     update=":listForm :globalMessages" process="@this"
-                                                     rendered="#{subscription.status == 'ACTIVE'}"
-                                                     action="#{subscriptionBean.suspend(subscription)}">
-                                        <f:param name="subscription" value="#{subscription}" />
-                                    </p:commandButton>
-                                    <p:commandButton id="renewButton" icon="pi pi-calendar-plus" title="Renovar"
-                                                     update=":renewPanelWrapper :listForm :globalMessages" process="@this" styleClass="ml-1"
-                                                     rendered="#{subscription.status != 'CANCELLED'}"
-                                                     action="#{subscriptionBean.prepareRenew(subscription)}">
-                                        <f:param name="subscription" value="#{subscription}" />
+                                        styleClass="rounded-button ui-button-warning" process="@this"
+                                        update=":messages" rendered="#{row.status == 'ACTIVE'}"
+                                        action="#{subscriptionBean.suspend(row)}">
+                                        <f:param name="row" value="#{row}" />
                                     </p:commandButton>
                                     <p:commandButton id="cancelButton" icon="pi pi-times" title="Cancelar"
-                                                     update=":listForm :globalMessages" process="@this" styleClass="ml-1"
-                                                     rendered="#{subscription.status == 'ACTIVE'}"
-                                                     action="#{subscriptionBean.cancel(subscription)}">
-                                        <f:param name="subscription" value="#{subscription}" />
+                                        styleClass="ml-1 rounded-button ui-button-danger" process="@this"
+                                        update=":messages"
+                                        rendered="#{row.status == 'ACTIVE' or row.status == 'SUSPENDED'}"
+                                        action="#{subscriptionBean.cancel(row)}">
+                                        <f:param name="row" value="#{row}" />
+                                    </p:commandButton>
+                                    <p:commandButton id="renewButton" icon="pi pi-refresh" title="Renovar"
+                                        styleClass="ml-1 rounded-button ui-button-success" process="@this"
+                                        update=":renewDialog :messages" action="#{subscriptionBean.requestRenew(row)}"
+                                        oncomplete="PF('renewDialogWidget').show()">
+                                        <f:param name="row" value="#{row}" />
                                     </p:commandButton>
                                 </p:column>
                             </p:dataTable>
                         </h:form>
 
-                        <h:panelGroup id="renewPanelWrapper" layout="block">
-                                                    <h:panelGroup id="renewPanel" layout="block"
-                                                                  rendered="#{subscriptionBean.renewingId != null}"
-                                                                  styleClass="card mt-3">
-                                                        <h:form id="renewForm">
-                                                            <div class="card-content">
-                                                                <h3 class="text-lg font-medium">Renovar suscripcion</h3>
-                                                                <div class="formgrid grid">
-                                                                    <div class="field col-12 md:col-4">
-                                                                        <p:outputLabel for="renewUntil" value="Nueva vigencia hasta *" />
-                                                                        <p:datePicker id="renewUntil" value="#{subscriptionBean.renewUntil}"
-                                                                                      dateFormat="dd/MM/yyyy" showIcon="true"
-                                                                                      styleClass="w-full" />
-                                                                    </div>
-                                                                    <div class="field col-12 md:col-8 flex align-items-end">
-                                                                        <p:commandButton id="confirmRenewButton" value="Confirmar renovacion"
-                                                                                         icon="pi pi-check" update=":renewPanelWrapper :listForm :globalMessages" process="@form"
-                                                                                         action="#{subscriptionBean.renew}" />
-                                                                        <p:commandButton id="cancelRenewButton" value="Cancelar"
-                                                                                         severity="secondary" icon="pi pi-times"
-                                                                                         update=":renewPanelWrapper :listForm :globalMessages" process="@form" styleClass="ml-2"
-                                                                                         action="#{subscriptionBean.cancelRenew}" />
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </h:form>
-                                                    </h:panelGroup>
-                        </h:panelGroup>
+                        <p:dialog id="subscriptionDialog" widgetVar="subscriptionDialogWidget" header="Nueva suscripcion"
+                            showEffect="fade" modal="true" responsive="true" style="max-width: 94vw">
+                            <h:form id="subscriptionForm">
+                                <p:outputPanel id="subscriptionFormContent" styleClass="ui-fluid"
+                                    style="max-height: 60vh; overflow-y: auto">
+                                    <div class="field">
+                                        <p:outputLabel for="tenantId" value="Tenant" />
+                                        <p:selectOneMenu id="tenantId" value="#{subscriptionBean.tenantId}" required="true"
+                                            requiredMessage="Seleccione un tenant" filter="true" styleClass="w-full">
+                                            <f:selectItem itemLabel="Seleccione un tenant" itemValue=""
+                                                noSelectionOption="true" />
+                                            <f:selectItems value="#{subscriptionBean.tenants}" var="tenant"
+                                                itemLabel="#{tenant.displayName()} - #{tenant.ruc}"
+                                                itemValue="#{tenant.id}" />
+                                        </p:selectOneMenu>
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="planId" value="Plan" />
+                                        <p:selectOneMenu id="planId" value="#{subscriptionBean.planId}" required="true"
+                                            requiredMessage="Seleccione un plan" filter="true" styleClass="w-full">
+                                            <f:selectItem itemLabel="Seleccione un plan" itemValue=""
+                                                noSelectionOption="true" />
+                                            <f:selectItems value="#{subscriptionBean.activePlans()}" var="plan"
+                                                itemLabel="#{plan.name} (#{plan.code})" itemValue="#{plan.id}" />
+                                        </p:selectOneMenu>
+                                    </div>
+
+                                    <div class="formgrid grid">
+                                        <div class="field col-12 md:col-6">
+                                            <p:outputLabel for="validFrom" value="Vigencia desde" />
+                                            <p:datePicker id="validFrom" value="#{subscriptionBean.validFrom}"
+                                                styleClass="w-full" dateFormat="dd/MM/yyyy" showIcon="true" />
+                                        </div>
+                                        <div class="field col-12 md:col-6">
+                                            <p:outputLabel for="validUntil" value="Vigencia hasta" />
+                                            <p:datePicker id="validUntil" value="#{subscriptionBean.validUntil}"
+                                                styleClass="w-full" dateFormat="dd/MM/yyyy" showIcon="true" />
+                                        </div>
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="notes" value="Notas" />
+                                        <p:inputTextarea id="notes" value="#{subscriptionBean.notes}" rows="2"
+                                            maxlength="300" styleClass="w-full" />
+                                    </div>
+                                </p:outputPanel>
+
+                                <div class="flex justify-content-between mt-4">
+                                    <p:commandButton id="saveButton" value="Guardar" icon="pi pi-check"
+                                        process="@form" update="@form :listForm :messages"
+                                        action="#{subscriptionBean.save}" />
+                                    <p:commandButton id="cancelButton" value="Cancelar" icon="pi pi-times" type="button"
+                                        styleClass="ui-button-secondary"
+                                        onclick="PF('subscriptionDialogWidget').hide()" />
+                                </div>
+                            </h:form>
+                        </p:dialog>
+
+                        <p:dialog id="renewDialog" widgetVar="renewDialogWidget" header="Renovar suscripcion"
+                            showEffect="fade" modal="true" responsive="true" style="max-width: 94vw">
+                            <h:form id="renewForm">
+                                <p:outputPanel id="renewFormContent" styleClass="ui-fluid"
+                                    style="max-height: 60vh; overflow-y: auto">
+                                    <div class="field">
+                                        <p:outputLabel for="renewTenant" value="Tenant" />
+                                        <h:outputText id="renewTenant"
+                                            value="#{subscriptionBean.renewing.tenantName}"
+                                            styleClass="w-full surface-100 p-2 border-round" />
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="renewPlan" value="Plan" />
+                                        <h:outputText id="renewPlan"
+                                            value="#{subscriptionBean.renewing.planName}"
+                                            styleClass="w-full surface-100 p-2 border-round" />
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="renewUntil" value="Nueva vigencia hasta" />
+                                        <p:datePicker id="renewUntil" value="#{subscriptionBean.renewUntil}" required="true"
+                                            requiredMessage="Indique la nueva fecha de vigencia" styleClass="w-full"
+                                            dateFormat="dd/MM/yyyy" showIcon="true" />
+                                    </div>
+                                </p:outputPanel>
+
+                                <div class="flex justify-content-between mt-4">
+                                    <p:commandButton id="confirmButton" value="Renovar" icon="pi pi-check"
+                                        process="@form" update="@form :listForm :messages"
+                                        action="#{subscriptionBean.confirmRenew}" />
+                                    <p:commandButton id="cancelRenewButton" value="Cancelar" icon="pi pi-times"
+                                        type="button" styleClass="ui-button-secondary"
+                                        onclick="PF('renewDialogWidget').hide()" />
+                                </div>
+                            </h:form>
+                        </p:dialog>
                     </div>
                 </div>
             </div>
