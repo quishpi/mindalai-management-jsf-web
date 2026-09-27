@@ -47,6 +47,13 @@ public class DeviceBean extends AbstractPageBean {
         installations = call(() -> restClient.installations(token, cid, null), installations);
     }
 
+    /** El selector de instalacion solo ofrece instalaciones activas. */
+    public List<InstallationDto> activeInstallations() {
+        return installations.stream()
+                .filter(installation -> "ACTIVE".equals(installation.getStatus()))
+                .toList();
+    }
+
     public void register() {
         if (installationId == null || identifier == null || identifier.isBlank()) {
             error("Seleccione instalacion e indique el identificador del dispositivo");

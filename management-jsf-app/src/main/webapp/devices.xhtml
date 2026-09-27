@@ -10,6 +10,8 @@
 
     <ui:define name="content">
 
+        <p:messages id="globalMessages" showSummary="false" showDetail="true" closable="true" />
+
         <div class="grid">
             <div class="col-12">
                 <h1 class="text-3xl font-medium">Dispositivos</h1>
@@ -21,7 +23,6 @@
                     <div class="card-content">
                         <h2 class="text-xl font-semibold mb-3">Registrar dispositivo</h2>
                         <h:form id="deviceForm">
-                            <p:messages id="formMessages" showDetail="true" closable="true" />
                             <div class="field">
                                 <p:outputLabel for="installationId" value="Instalacion *" />
                                 <p:selectOneMenu id="installationId" value="#{deviceBean.installationId}"
@@ -29,7 +30,7 @@
                                                  filter="true" styleClass="w-full">
                                     <f:selectItem itemLabel="Seleccione una instalacion" itemValue=""
                                                   noSelectionOption="true" />
-                                    <f:selectItems value="#{deviceBean.installations}" var="installation"
+                                    <f:selectItems value="#{deviceBean.activeInstallations()}" var="installation"
                                                    itemLabel="#{installation.tenantName} - #{installation.name}"
                                                    itemValue="#{installation.id}" />
                                 </p:selectOneMenu>
@@ -56,7 +57,7 @@
                             </div>
 
                             <p:commandButton id="registerButton" value="Registrar" icon="pi pi-plus"
-                                             update="@form" process="@form" action="#{deviceBean.register}"
+                                             update=":deviceForm :listForm :globalMessages" process="@form" action="#{deviceBean.register}"
                                              styleClass="mt-3" />
                         </h:form>
                     </div>
@@ -67,7 +68,6 @@
                 <div class="card">
                     <div class="card-content">
                         <h:form id="filterForm">
-                            <p:messages id="formMessages" showDetail="true" closable="true" />
                             <div class="formgrid grid">
                                 <div class="field col-12 md:col-8">
                                     <p:outputLabel for="installationFilter" value="Filtrar por instalacion" />
@@ -75,21 +75,20 @@
                                                      filter="true" styleClass="w-full">
                                         <f:selectItem itemLabel="Todas las instalaciones" itemValue=""
                                                       noSelectionOption="true" />
-                                        <f:selectItems value="#{deviceBean.installations}" var="filterInstallation"
+                                        <f:selectItems value="#{deviceBean.activeInstallations()}" var="filterInstallation"
                                                        itemLabel="#{filterInstallation.tenantName} - #{filterInstallation.name}"
                                                        itemValue="#{filterInstallation.id}" />
                                     </p:selectOneMenu>
                                 </div>
                                 <div class="field col-12 md:col-4 flex align-items-end">
                                     <p:commandButton id="filterButton" value="Filtrar" icon="pi pi-filter"
-                                                     update="@form" process="@form" action="#{deviceBean.load}"
+                                                     update=":filterForm :listForm :globalMessages" process="@form" action="#{deviceBean.load}"
                                                      styleClass="w-full" />
                                 </div>
                             </div>
                         </h:form>
 
                         <h:form id="listForm">
-                            <p:messages id="formMessages" showDetail="true" closable="true" />
                             <p:dataTable id="devicesTable" value="#{deviceBean.devices}" var="device"
                                          paginator="true" rows="10" emptyMessage="No hay dispositivos registrados">
                                 <p:column headerText="Identificador">
@@ -112,24 +111,24 @@
                                 </p:column>
                                 <p:column headerText="Acciones" style="width:14rem">
                                     <p:commandButton id="heartbeatButton" icon="pi pi-send" title="Heartbeat"
-                                                     update="@form" process="@this"
+                                                     update=":listForm :globalMessages" process="@this"
                                                      action="#{deviceBean.heartbeat(device)}">
                                         <f:param name="device" value="#{device}" />
                                     </p:commandButton>
                                     <p:commandButton id="blockButton" icon="pi pi-ban" title="Bloquear"
-                                                     update="@form" process="@this" styleClass="ml-1"
+                                                     update=":listForm :globalMessages" process="@this" styleClass="ml-1"
                                                      rendered="#{device.status != 'BLOCKED'}"
                                                      action="#{deviceBean.block(device)}">
                                         <f:param name="device" value="#{device}" />
                                     </p:commandButton>
                                     <p:commandButton id="activateButton" icon="pi pi-check" title="Activar"
-                                                     update="@form" process="@this" styleClass="ml-1"
+                                                     update=":listForm :globalMessages" process="@this" styleClass="ml-1"
                                                      rendered="#{device.status == 'BLOCKED'}"
                                                      action="#{deviceBean.activate(device)}">
                                         <f:param name="device" value="#{device}" />
                                     </p:commandButton>
                                     <p:commandButton id="retireButton" icon="pi pi-trash" title="Retirar"
-                                                     update="@form" process="@this" styleClass="ml-1"
+                                                     update=":listForm :globalMessages" process="@this" styleClass="ml-1"
                                                      rendered="#{device.status != 'RETIRED'}"
                                                      action="#{deviceBean.retire(device)}">
                                         <f:param name="device" value="#{device}" />

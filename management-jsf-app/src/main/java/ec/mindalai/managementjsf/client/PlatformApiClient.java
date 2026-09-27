@@ -90,6 +90,16 @@ public class PlatformApiClient {
         return call("POST", path, token, correlationId, Map.of(), body, type);
     }
 
+    /**
+     * POST con parametros de query y sin cuerpo. Lo exigen los endpoints del API que declaran
+     * {@code @RequestParam} en lugar de {@code @RequestBody} (por ejemplo
+     * {@code /installations/{id}/maintenance?value=} o {@code /support/tickets/{id}/assign?operatorId=}).
+     */
+    public <T> T postWithQuery(String path, String token, String correlationId, Map<String, Object> query,
+                               Class<T> type) {
+        return call("POST", path, token, correlationId, query, null, type);
+    }
+
     public <T> T put(String path, String token, String correlationId, Object body, Class<T> type) {
         return call("PUT", path, token, correlationId, Map.of(), body, type);
     }
@@ -161,6 +171,9 @@ public class PlatformApiClient {
                 }
             });
         }
-        return uriBuilder.build(true).toUri();
+        // build(true) exige valores ya codificados y falla con IllegalArgumentException ante
+        // texto libre (por ejemplo la resolucion de un ticket: "Invalid character ' ' for
+        // QUERY_PARAM"). Se construye sin marcar y se codifica la query.
+        return uriBuilder.build().encode().toUri();
     }
 }

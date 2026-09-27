@@ -10,6 +10,8 @@
 
     <ui:define name="content">
 
+        <p:messages id="globalMessages" showSummary="false" showDetail="true" closable="true" />
+
         <div class="grid">
             <div class="col-12">
                 <h1 class="text-3xl font-medium">Tenants</h1>
@@ -23,7 +25,6 @@
                             styleClass="formTitle">#{tenantBean.editing ? 'Editar tenant' : 'Nuevo tenant'}</h2>
 
                         <h:form id="tenantForm">
-                            <p:messages id="formMessages" showDetail="true" closable="true" />
                             <div class="field">
                                 <p:outputLabel for="legalName" value="Razon social *" />
                                 <p:inputText id="legalName" value="#{tenantBean.legalName}" required="true"
@@ -55,11 +56,11 @@
                             <div class="flex justify-content-between mt-4">
                                 <p:commandButton id="saveButton" type="submit"
                                                  value="#{tenantBean.editing ? 'Guardar cambios' : 'Registrar tenant'}"
-                                                 icon="pi pi-check" update="@form"
+                                                 icon="pi pi-check" update=":tenantForm :listForm :globalMessages"
                                                  process="@form" action="#{tenantBean.save}" />
 
                                 <p:commandButton id="cancelButton" value="Cancelar" icon="pi pi-times"
-                                                 severity="secondary" update="@form" process="@form"
+                                                 severity="secondary" update=":tenantForm :listForm :globalMessages" process="@form"
                                                  rendered="#{tenantBean.editing}"
                                                  action="#{tenantBean.cancelEdit}" />
                             </div>
@@ -72,7 +73,6 @@
                 <div class="card">
                     <div class="card-content">
                         <h:form id="filterForm">
-                            <p:messages id="formMessages" showDetail="true" closable="true" />
                             <div class="formgrid grid">
                                 <div class="field col-12 md:col-5">
                                     <p:outputLabel for="statusFilter" value="Estado" />
@@ -90,14 +90,13 @@
                                 </div>
                                 <div class="field col-12 md:col-2 flex align-items-end">
                                     <p:commandButton id="filterButton" value="Filtrar" icon="pi pi-filter"
-                                                     update="@form" process="@form"
+                                                     update=":filterForm :listForm :globalMessages" process="@form"
                                                      action="#{tenantBean.load}" styleClass="w-full" />
                                 </div>
                             </div>
                         </h:form>
 
                         <h:form id="listForm">
-                            <p:messages id="formMessages" showDetail="true" closable="true" />
                         <p:dataTable id="tenantsTable" value="#{tenantBean.tenants}" var="tenant" paginator="true"
                                      rows="10" emptyMessage="No hay tenants que coincidan con el filtro"
                                      styleClass="mt-3">
@@ -115,24 +114,24 @@
                             </p:column>
                             <p:column headerText="Acciones" style="width:14rem">
                                 <p:commandButton id="editButton" icon="pi pi-pencil" title="Editar"
-                                                 update=":tenantForm :filterForm :tenantsTable" process="@form"
+                                                 update=":tenantForm :listForm :globalMessages" process="@form"
                                                  action="#{tenantBean.edit(tenant)}">
                                     <f:param name="tenant" value="#{tenant}" />
                                 </p:commandButton>
                                 <p:commandButton id="suspendButton" icon="pi pi-pause" title="Suspender"
-                                                 update=":tenantForm :filterForm :tenantsTable" process="@this" styleClass="ml-1"
+                                                 update=":tenantForm :listForm :globalMessages" process="@this" styleClass="ml-1"
                                                  rendered="#{tenant.status == 'ACTIVE'}"
                                                  action="#{tenantBean.suspend(tenant)}">
                                     <f:param name="tenant" value="#{tenant}" />
                                 </p:commandButton>
                                 <p:commandButton id="reactivateButton" icon="pi pi-play" title="Reactivar"
-                                                 update=":tenantForm :filterForm :tenantsTable" process="@this" styleClass="ml-1"
+                                                 update=":tenantForm :listForm :globalMessages" process="@this" styleClass="ml-1"
                                                  rendered="#{tenant.status == 'SUSPENDED'}"
                                                  action="#{tenantBean.reactivate(tenant)}">
                                     <f:param name="tenant" value="#{tenant}" />
                                 </p:commandButton>
                                 <p:commandButton id="deactivateButton" icon="pi pi-ban" title="Desactivar"
-                                                 update=":tenantForm :filterForm :tenantsTable" process="@this" styleClass="ml-1"
+                                                 update=":tenantForm :listForm :globalMessages" process="@this" styleClass="ml-1"
                                                  rendered="#{tenant.status != 'INACTIVE'}"
                                                  action="#{tenantBean.deactivate(tenant)}">
                                     <f:param name="tenant" value="#{tenant}" />

@@ -10,6 +10,8 @@
 
     <ui:define name="content">
 
+        <p:messages id="globalMessages" showSummary="false" showDetail="true" closable="true" />
+
         <div class="grid">
             <div class="col-12">
                 <h1 class="text-3xl font-medium">Licencias</h1>
@@ -21,7 +23,6 @@
                     <div class="card-content">
                         <h2 class="text-xl font-semibold mb-3">Emitir licencia</h2>
                         <h:form id="licenseForm">
-                            <p:messages id="formMessages" showDetail="true" closable="true" />
                             <div class="field">
                                 <p:outputLabel for="tenantId" value="Tenant *" />
                                 <p:selectOneMenu id="tenantId" value="#{licenseBean.tenantId}" required="true"
@@ -29,10 +30,10 @@
                                                  styleClass="w-full">
                                     <f:selectItem itemLabel="Seleccione un tenant" itemValue=""
                                                   noSelectionOption="true" />
-                                    <f:selectItems value="#{licenseBean.tenants}" var="tenant"
+                                    <f:selectItems value="#{licenseBean.activeTenants()}" var="tenant"
                                                    itemLabel="#{tenant.displayName()} - #{tenant.ruc}"
                                                    itemValue="#{tenant.id}" />
-                                    <p:ajax listener="#{licenseBean.onTenantChange}" update="subscriptionsPanel" />
+                                    <p:ajax listener="#{licenseBean.onTenantChange}" update="subscriptionsPanel :globalMessages" />
                                 </p:selectOneMenu>
                             </div>
 
@@ -43,7 +44,7 @@
                                                      required="true" styleClass="w-full">
                                         <f:selectItem itemLabel="Seleccione una suscripcion" itemValue=""
                                                       noSelectionOption="true" />
-                                        <f:selectItems value="#{licenseBean.subscriptions}" var="subscription"
+                                        <f:selectItems value="#{licenseBean.activeSubscriptions()}" var="subscription"
                                                        itemLabel="#{subscription.planCode} - #{subscription.status}"
                                                        itemValue="#{subscription.id}" />
                                     </p:selectOneMenu>
@@ -63,7 +64,7 @@
                                 </div>
                             </div>
 
-                            <p:commandButton id="issueButton" value="Emitir" icon="pi pi-key" update="@form"
+                            <p:commandButton id="issueButton" value="Emitir" icon="pi pi-key" update=":licenseForm :listForm :globalMessages"
                                              process="@form" action="#{licenseBean.issue}" styleClass="mt-3" />
                         </h:form>
                     </div>
@@ -74,7 +75,6 @@
                 <div class="card">
                     <div class="card-content">
                         <h:form id="filterForm">
-                            <p:messages id="formMessages" showDetail="true" closable="true" />
                             <div class="formgrid grid">
                                 <div class="field col-12 md:col-8">
                                     <p:outputLabel for="tenantFilter" value="Filtrar por tenant" />
@@ -82,21 +82,20 @@
                                                      filter="true" styleClass="w-full">
                                         <f:selectItem itemLabel="Todos los tenants" itemValue=""
                                                       noSelectionOption="true" />
-                                        <f:selectItems value="#{licenseBean.tenants}" var="filterTenant"
+                                        <f:selectItems value="#{licenseBean.activeTenants()}" var="filterTenant"
                                                        itemLabel="#{filterTenant.displayName()}"
                                                        itemValue="#{filterTenant.id}" />
                                     </p:selectOneMenu>
                                 </div>
                                 <div class="field col-12 md:col-4 flex align-items-end">
                                     <p:commandButton id="filterButton" value="Filtrar" icon="pi pi-filter"
-                                                     update="@form" process="@form"
+                                                     update=":filterForm :listForm :globalMessages" process="@form"
                                                      action="#{licenseBean.load}" styleClass="w-full" />
                                 </div>
                             </div>
                         </h:form>
 
                         <h:form id="listForm">
-                            <p:messages id="formMessages" showDetail="true" closable="true" />
                             <p:dataTable id="licensesTable" value="#{licenseBean.licenses}" var="license"
                                          paginator="true" rows="10" emptyMessage="No hay licencias emitidas">
                                 <p:column headerText="Clave">
@@ -113,7 +112,7 @@
                                 </p:column>
                                 <p:column headerText="Acciones" style="width:8rem">
                                     <p:commandButton id="revokeButton" icon="pi pi-ban" title="Revocar"
-                                                     update="@form" process="@this"
+                                                     update=":revokePanelWrapper :listForm :globalMessages" process="@this"
                                                      rendered="#{license.status != 'REVOKED'}"
                                                      action="#{licenseBean.prepareRevoke(license)}">
                                         <f:param name="license" value="#{license}" />
@@ -122,26 +121,27 @@
                             </p:dataTable>
                         </h:form>
 
-                        <h:panelGroup id="revokePanel" layout="block"
-                                      rendered="#{licenseBean.revokingId != null}" styleClass="card mt-3">
-                            <h:form id="revokeForm">
-                                <p:messages id="formMessages" showDetail="true" closable="true" />
-                                <div class="card-content">
-                                    <h3 class="text-lg font-medium">Revocar licencia</h3>
-                                    <div class="field">
-                                        <p:outputLabel for="revokeReason" value="Motivo" />
-                                        <p:inputTextarea id="revokeReason" value="#{licenseBean.revokeReason}"
-                                                         rows="2" styleClass="w-full" />
-                                    </div>
-                                    <p:commandButton id="confirmRevokeButton" value="Confirmar revocacion"
-                                                     severity="danger" icon="pi pi-ban" update="@form" process="@form"
-                                                     action="#{licenseBean.revoke}" />
-                                    <p:commandButton id="cancelRevokeButton" value="Cancelar"
-                                                     severity="secondary" icon="pi pi-times" update="@form"
-                                                     process="@form" styleClass="ml-2"
-                                                     action="#{licenseBean.cancelRevoke}" />
-                                </div>
-                            </h:form>
+                        <h:panelGroup id="revokePanelWrapper" layout="block">
+                                                    <h:panelGroup id="revokePanel" layout="block"
+                                                                  rendered="#{licenseBean.revokingId != null}" styleClass="card mt-3">
+                                                        <h:form id="revokeForm">
+                                                            <div class="card-content">
+                                                                <h3 class="text-lg font-medium">Revocar licencia</h3>
+                                                                <div class="field">
+                                                                    <p:outputLabel for="revokeReason" value="Motivo" />
+                                                                    <p:inputTextarea id="revokeReason" value="#{licenseBean.revokeReason}"
+                                                                                     rows="2" styleClass="w-full" />
+                                                                </div>
+                                                                <p:commandButton id="confirmRevokeButton" value="Confirmar revocacion"
+                                                                                 severity="danger" icon="pi pi-ban" update=":revokePanelWrapper :listForm :globalMessages" process="@form"
+                                                                                 action="#{licenseBean.revoke}" />
+                                                                <p:commandButton id="cancelRevokeButton" value="Cancelar"
+                                                                                 severity="secondary" icon="pi pi-times" update=":revokePanelWrapper :listForm :globalMessages"
+                                                                                 process="@form" styleClass="ml-2"
+                                                                                 action="#{licenseBean.cancelRevoke}" />
+                                                            </div>
+                                                        </h:form>
+                                                    </h:panelGroup>
                         </h:panelGroup>
                     </div>
                 </div>

@@ -69,6 +69,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC).permitAll()
                         .anyRequest().authenticated())
+                .exceptionHandling(handling -> handling
+                        // Sin sesion (o caducada) la respuesta por defecto de Spring es 403:
+                        // el operador debe volver al login, no ver una pagina de error.
+                        .defaultAuthenticationEntryPointFor(new LoginEntryPoint(),
+                                MATCHER.matcher("/**")))
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                         .ignoringRequestMatchers(CSRF_EXEMPT))

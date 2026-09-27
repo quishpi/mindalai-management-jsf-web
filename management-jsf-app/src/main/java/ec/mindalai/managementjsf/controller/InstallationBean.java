@@ -34,11 +34,41 @@ public class InstallationBean extends AbstractPageBean {
     private String address;
     private String contactName;
 
+    private UUID editingId;
+    private boolean editing;
+
     public void load() {
         String cid = correlationId();
         String token = token();
         installations = call(() -> restClient.installations(token, cid, tenantFilter), installations);
         tenants = call(() -> restClient.tenants(token, cid, "ACTIVE", null, null), tenants);
+    }
+
+    /** Carga la instalacion en el formulario para editarla. */
+    public void edit(InstallationDto installation) {
+        editing = true;
+        editingId = installation.getId();
+        tenantId = installation.getTenantId();
+        name = installation.getName();
+        address = installation.getAddress();
+        contactName = installation.getContactName();
+    }
+
+    public void cancelEdit() {
+        editing = false;
+        editingId = null;
+        tenantId = null;
+        name = null;
+        address = null;
+        contactName = null;
+    }
+
+    public void save() {
+        if (editingId != null) {
+            update();
+            return;
+        }
+        create();
     }
 
     public void create() {
@@ -56,9 +86,28 @@ public class InstallationBean extends AbstractPageBean {
                 null);
         if (created != null) {
             success("Instalacion registrada");
-            name = null;
-            address = null;
-            contactName = null;
+            cancelEdit();
+            load();
+        }
+    }
+
+    private void update() {
+        if (name == null || name.isBlank()) {
+            error("El nombre de la instalacion es obligatorio");
+            return;
+        }
+        String cid = correlationId();
+        String token = token();
+        UUID id = editingId;
+        String installationName = name.trim();
+        String installationAddress = blankToNull(address);
+        String contact = blankToNull(contactName);
+        InstallationDto updated = call(
+                () -> restClient.updateInstallation(token, cid, id, installationName, installationAddress, contact),
+                null);
+        if (updated != null) {
+            success("Instalacion actualizada");
+            cancelEdit();
             load();
         }
     }

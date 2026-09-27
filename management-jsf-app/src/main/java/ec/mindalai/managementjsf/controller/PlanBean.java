@@ -33,6 +33,9 @@ public class PlanBean extends AbstractPageBean {
     private Set<UUID> selectedFeatures = new LinkedHashSet<>();
     private UUID selectedPlanId;
 
+    private UUID editingId;
+    private boolean editing;
+
     private String code;
     private String name;
     private String description;
@@ -67,6 +70,50 @@ public class PlanBean extends AbstractPageBean {
             clearForm();
             load();
         }
+    }
+
+    /** Carga el plan en el formulario de la seccion "Nuevo plan" para editarlo. */
+    public void edit(PlanDto plan) {
+        editing = true;
+        editingId = plan.getId();
+        code = plan.getCode();
+        name = plan.getName();
+        description = plan.getDescription();
+        monthlyPrice = plan.getMonthlyPrice();
+        maxUsers = plan.getMaxUsers();
+        maxDevices = plan.getMaxDevices();
+        maxInstallations = plan.getMaxInstallations();
+        maxDocumentsPerMonth = plan.getMaxDocumentsPerMonth();
+    }
+
+    /** Alternativa al create() cuando el formulario esta en modo edicion. */
+    public void save() {
+        if (editingId == null) {
+            create();
+            return;
+        }
+        if (isBlank(name)) {
+            error("El nombre del plan es obligatorio");
+            return;
+        }
+        String cid = correlationId();
+        String token = token();
+        String planName = name.trim();
+        String planDescription = blankToNull(description);
+        BigDecimal price = monthlyPrice == null ? BigDecimal.ZERO : monthlyPrice;
+        PlanDto updated = call(() -> restClient.updatePlan(token, cid, editingId, planName, planDescription,
+                price, maxUsers, maxDevices, maxInstallations, maxDocumentsPerMonth), null);
+        if (updated != null) {
+            success("Plan " + updated.getCode() + " actualizado");
+            cancelEdit();
+            load();
+        }
+    }
+
+    public void cancelEdit() {
+        editing = false;
+        editingId = null;
+        clearForm();
     }
 
     public void activate(PlanDto plan) {
@@ -137,6 +184,8 @@ public class PlanBean extends AbstractPageBean {
     }
 
     private void clearForm() {
+        editing = false;
+        editingId = null;
         code = null;
         name = null;
         description = null;

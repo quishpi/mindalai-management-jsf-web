@@ -2,6 +2,7 @@ package ec.mindalai.managementjsf.controller;
 
 import ec.mindalai.managementjsf.client.PlatformRestClient;
 import ec.mindalai.managementjsf.dto.InstallationDto;
+import ec.mindalai.managementjsf.dto.PlatformUserDto;
 import ec.mindalai.managementjsf.dto.SupportTicketDto;
 import ec.mindalai.managementjsf.dto.TenantDto;
 import jakarta.faces.view.ViewScoped;
@@ -32,6 +33,7 @@ public class SupportBean extends AbstractPageBean {
     private List<SupportTicketDto> tickets = new ArrayList<>();
     private List<TenantDto> tenants = new ArrayList<>();
     private List<InstallationDto> installations = new ArrayList<>();
+    private List<PlatformUserDto> operators = new ArrayList<>();
 
     private UUID tenantFilter;
     private UUID tenantId;
@@ -39,7 +41,10 @@ public class SupportBean extends AbstractPageBean {
     private String subject;
     private String description;
     private String priority = "MEDIUM";
-    private String assignTo;
+    private UUID assignTo;
+
+    private UUID resolvingId;
+    private String resolution;
 
     public String[] priorities() {
         return PRIORITIES.clone();
@@ -54,9 +59,17 @@ public class SupportBean extends AbstractPageBean {
         String token = token();
         tickets = call(() -> restClient.tickets(token, cid, tenantFilter), tickets);
         tenants = call(() -> restClient.tenants(token, cid, null, null, null), tenants);
+        operators = call(() -> restClient.users(token, cid), operators);
         if (tenantId != null) {
             installations = call(() -> restClient.installations(token, cid, tenantId), installations);
         }
+    }
+
+    /** Solo operadores activos pueden recibir tickets. */
+    public List<PlatformUserDto> activeOperators() {
+        return operators.stream()
+                .filter(operator -> "ACTIVE".equals(operator.getStatus()))
+                .toList();
     }
 
     public void onTenantChange() {
@@ -86,25 +99,18 @@ public class SupportBean extends AbstractPageBean {
     }
 
     /**
-     * Asigna el ticket a un operador. El API expone solo el UUID del responsable
-     * ({@code assignedTo}), por lo que la vista solicita ese identificador en lugar de
-     * inventar un mapeo por nombre de usuario.
+     * Asigna el ticket al operador elegido en el selector. El API expone el UUID del
+     * responsable ({@code operatorId}); la vista lo obtiene de {@code GET /users} para que
+     * el operador no tenga que escribir el UUID a mano.
      */
     public void assign(SupportTicketDto ticket) {
-        if (assignTo == null || assignTo.isBlank()) {
-            error("Indique el UUID del operador responsable");
-            return;
-        }
-        UUID operator;
-        try {
-            operator = UUID.fromString(assignTo.trim());
-        } catch (IllegalArgumentException ex) {
-            error("El UUID del responsable no es valido");
+        if (assignTo == null) {
+            error("Seleccione el operador responsable");
             return;
         }
         String cid = correlationId();
         String token = token();
-        SupportTicketDto assigned = call(() -> restClient.assignTicket(token, cid, ticket.getId(), operator), null);
+        SupportTicketDto assigned = call(() -> restClient.assignTicket(token, cid, ticket.getId(), assignTo), null);
         if (assigned != null) {
             success("Ticket asignado");
             assignTo = null;
@@ -112,12 +118,36 @@ public class SupportBean extends AbstractPageBean {
         }
     }
 
-    public void resolve(SupportTicketDto ticket) {
-        run(() -> {
-            restClient.resolveTicket(token(), correlationId(), ticket.getId());
+    /** Abre la confirmacion de resolucion: el API exige el texto de resolucion. */
+    public void prepareResolve(SupportTicketDto ticket) {
+        resolvingId = ticket.getId();
+        resolution = null;
+    }
+
+    public void cancelResolve() {
+        resolvingId = null;
+        resolution = null;
+    }
+
+    public void resolve() {
+        if (resolvingId == null) {
+            error("Seleccione el ticket a resolver");
+            return;
+        }
+        if (resolution == null || resolution.isBlank()) {
+            error("Indique la resolucion del ticket");
+            return;
+        }
+        String cid = correlationId();
+        String token = token();
+        UUID id = resolvingId;
+        String text = resolution.trim();
+        SupportTicketDto resolved = call(() -> restClient.resolveTicket(token, cid, id, text), null);
+        if (resolved != null) {
             success("Ticket resuelto");
+            cancelResolve();
             load();
-        });
+        }
     }
 
     public void close(SupportTicketDto ticket) {

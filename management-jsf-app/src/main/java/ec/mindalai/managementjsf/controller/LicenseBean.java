@@ -46,15 +46,22 @@ public class LicenseBean extends AbstractPageBean {
         String cid = correlationId();
         String token = token();
         licenses = call(() -> restClient.licenses(token, cid, tenantFilter), licenses);
-        tenants = call(() -> restClient.tenants(token, cid, null, null, null), tenants);
+        tenants = call(() -> restClient.tenants(token, cid, "ACTIVE", null, null), tenants);
         subscriptions = call(() -> restClient.subscriptions(token, cid, tenantId), subscriptions);
+    }
+
+    /** Los selectores solo ofrecen tenants y suscripciones activos. */
+    public List<TenantDto> activeTenants() {
+        return tenants.stream().filter(tenant -> "ACTIVE".equals(tenant.getStatus())).toList();
+    }
+
+    public List<SubscriptionDto> activeSubscriptions() {
+        return subscriptions.stream().filter(subscription -> "ACTIVE".equals(subscription.getStatus())).toList();
     }
 
     public void onTenantChange() {
         subscriptions = call(() -> restClient.subscriptions(token(), correlationId(), tenantId), subscriptions);
-        if (!subscriptions.isEmpty()) {
-            subscriptionId = subscriptions.get(0).getId();
-        }
+        subscriptionId = activeSubscriptions().stream().findFirst().map(SubscriptionDto::getId).orElse(null);
     }
 
     public void issue() {

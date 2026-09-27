@@ -10,6 +10,8 @@
 
     <ui:define name="content">
 
+        <p:messages id="globalMessages" showSummary="false" showDetail="true" closable="true" />
+
         <div class="grid">
             <div class="col-12">
                 <h1 class="text-3xl font-medium">Soporte</h1>
@@ -21,7 +23,6 @@
                     <div class="card-content">
                         <h2 class="text-xl font-semibold mb-3">Abrir ticket</h2>
                         <h:form id="ticketForm">
-                            <p:messages id="formMessages" showDetail="true" closable="true" />
                             <div class="field">
                                 <p:outputLabel for="tenantId" value="Tenant *" />
                                 <p:selectOneMenu id="tenantId" value="#{supportBean.tenantId}" required="true"
@@ -32,7 +33,7 @@
                                     <f:selectItems value="#{supportBean.tenants}" var="tenant"
                                                    itemLabel="#{tenant.displayName()} - #{tenant.ruc}"
                                                    itemValue="#{tenant.id}" />
-                                    <p:ajax listener="#{supportBean.onTenantChange}" update="installationsPanel" />
+                                    <p:ajax listener="#{supportBean.onTenantChange}" update="installationsPanel :globalMessages" />
                                 </p:selectOneMenu>
                             </div>
 
@@ -71,7 +72,7 @@
                                                  styleClass="w-full" />
                             </div>
 
-                            <p:commandButton id="openButton" value="Abrir ticket" icon="pi pi-plus" update="@form"
+                            <p:commandButton id="openButton" value="Abrir ticket" icon="pi pi-plus" update=":ticketForm :listForm :globalMessages"
                                              process="@form" action="#{supportBean.openTicket}"
                                              styleClass="mt-3" />
                         </h:form>
@@ -83,7 +84,6 @@
                 <div class="card">
                     <div class="card-content">
                         <h:form id="filterForm">
-                            <p:messages id="formMessages" showDetail="true" closable="true" />
                             <div class="formgrid grid">
                                 <div class="field col-12 md:col-8">
                                     <p:outputLabel for="tenantFilter" value="Filtrar por tenant" />
@@ -98,14 +98,26 @@
                                 </div>
                                 <div class="field col-12 md:col-4 flex align-items-end">
                                     <p:commandButton id="filterButton" value="Filtrar" icon="pi pi-filter"
-                                                     update="@form" process="@form" action="#{supportBean.load}"
+                                                     update=":filterForm :listForm :globalMessages" process="@form" action="#{supportBean.load}"
                                                      styleClass="w-full" />
                                 </div>
                             </div>
                         </h:form>
 
                         <h:form id="listForm">
-                            <p:messages id="formMessages" showDetail="true" closable="true" />
+                            <div class="field mb-3">
+                                <p:outputLabel for="assignTo"
+                                               value="Operador responsable para el ticket seleccionado" />
+                                <p:selectOneMenu id="assignTo" value="#{supportBean.assignTo}" filter="true"
+                                                 styleClass="w-full">
+                                    <f:selectItem itemLabel="Seleccione un operador" itemValue=""
+                                                  noSelectionOption="true" />
+                                    <f:selectItems value="#{supportBean.activeOperators()}" var="operator"
+                                                   itemLabel="#{operator.displayName()} - #{operator.username}"
+                                                   itemValue="#{operator.id}" />
+                                </p:selectOneMenu>
+                                <small class="text-color-secondary">Solo tickets OPEN pueden asignarse; al asignar, el ticket pasa a IN_PROGRESS.</small>
+                            </div>
                             <p:dataTable id="ticketsTable" value="#{supportBean.tickets}" var="ticket"
                                          paginator="true" rows="10" emptyMessage="No hay tickets registrados">
                                 <p:column headerText="Asunto">
@@ -113,6 +125,12 @@
                                 </p:column>
                                 <p:column headerText="Tenant">
                                     <h:outputText value="#{ticket.tenantName}" />
+                                </p:column>
+                                <p:column headerText="Instalacion">
+                                    <h:outputText value="#{empty ticket.installationId ? 'Sin instalacion' : ticket.installationId}" />
+                                </p:column>
+                                <p:column headerText="Descripcion">
+                                    <h:outputText value="#{ticket.description}" />
                                 </p:column>
                                 <p:column headerText="Prioridad">
                                     <p:tag value="#{ticket.priority}" severity="info" />
@@ -128,19 +146,19 @@
                                 </p:column>
                                 <p:column headerText="Acciones" style="width:16rem">
                                     <p:commandButton id="assignButton" icon="pi pi-user-plus" title="Asignar"
-                                                     update="@form" process="@this"
-                                                     rendered="#{ticket.status != 'CLOSED'}"
+                                                     update=":ticketForm :listForm :globalMessages" process="@form"
+                                                     rendered="#{ticket.status == 'OPEN'}"
                                                      action="#{supportBean.assign(ticket)}">
                                         <f:param name="ticket" value="#{ticket}" />
                                     </p:commandButton>
                                     <p:commandButton id="resolveButton" icon="pi pi-check" title="Resolver"
-                                                     update="@form" process="@this" styleClass="ml-1"
-                                                     rendered="#{ticket.status == 'OPEN' or ticket.status == 'IN_PROGRESS'}"
-                                                     action="#{supportBean.resolve(ticket)}">
+                                                     update=":resolvePanelWrapper :listForm :globalMessages" process="@this" styleClass="ml-1"
+                                                     rendered="#{ticket.status == 'IN_PROGRESS'}"
+                                                     action="#{supportBean.prepareResolve(ticket)}">
                                         <f:param name="ticket" value="#{ticket}" />
                                     </p:commandButton>
                                     <p:commandButton id="closeButton" icon="pi pi-lock" title="Cerrar"
-                                                     update="@form" process="@this" styleClass="ml-1"
+                                                     update=":listForm :globalMessages" process="@this" styleClass="ml-1"
                                                      rendered="#{ticket.status == 'RESOLVED'}"
                                                      action="#{supportBean.close(ticket)}">
                                         <f:param name="ticket" value="#{ticket}" />
@@ -149,15 +167,32 @@
                             </p:dataTable>
                         </h:form>
 
-                        <h:form id="assignForm">
-                            <p:messages id="formMessages" showDetail="true" closable="true" />
-                            <div class="field mt-3">
-                                <p:outputLabel for="assignTo"
-                                                   value="UUID del operador responsable para el ticket seleccionado" />
-                                <p:inputText id="assignTo" value="#{supportBean.assignTo}" styleClass="w-full"
-                                             placeholder="00000000-0000-0000-0000-000000000000" />
-                            </div>
-                        </h:form>
+
+                        <h:panelGroup id="resolvePanelWrapper" layout="block">
+                                                    <h:panelGroup id="resolvePanel" layout="block"
+                                                                  rendered="#{supportBean.resolvingId != null}"
+                                                                  styleClass="card mt-3">
+                                                        <h:form id="resolveForm">
+                                                            <div class="card-content">
+                                                                <h3 class="text-lg font-medium">Resolver ticket</h3>
+                                                                <div class="field">
+                                                                    <p:outputLabel for="resolution" value="Resolucion *" />
+                                                                    <p:inputTextarea id="resolution" value="#{supportBean.resolution}"
+                                                                                     required="true" rows="3" styleClass="w-full"
+                                                                                     requiredMessage="Indique la resolucion del ticket" />
+                                                                </div>
+                                                                <div class="flex justify-content-between">
+                                                                    <p:commandButton id="confirmResolveButton" value="Confirmar resolucion"
+                                                                                     icon="pi pi-check" update=":resolvePanelWrapper :listForm :globalMessages"
+                                                                                     process="@form" action="#{supportBean.resolve}" />
+                                                                    <p:commandButton id="cancelResolveButton" value="Cancelar" icon="pi pi-times"
+                                                                                     severity="secondary" update=":resolvePanelWrapper :listForm :globalMessages"
+                                                                                     process="@form" action="#{supportBean.cancelResolve}" />
+                                                                </div>
+                                                            </div>
+                                                        </h:form>
+                                                    </h:panelGroup>
+                        </h:panelGroup>
                     </div>
                 </div>
             </div>

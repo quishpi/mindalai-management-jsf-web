@@ -9,6 +9,7 @@ import ec.mindalai.managementjsf.dto.InstallationDto;
 import ec.mindalai.managementjsf.dto.LicenseDto;
 import ec.mindalai.managementjsf.dto.PageResult;
 import ec.mindalai.managementjsf.dto.PlanDto;
+import ec.mindalai.managementjsf.dto.PlatformUserDto;
 import ec.mindalai.managementjsf.dto.SubscriptionDto;
 import ec.mindalai.managementjsf.dto.SupportTicketDto;
 import ec.mindalai.managementjsf.dto.TenantDto;
@@ -93,6 +94,16 @@ public class PlatformRestClient {
                 "maxDocumentsPerMonth", maxDocumentsPerMonth), PlanDto.class);
     }
 
+    public PlanDto updatePlan(String token, String cid, UUID id, String name, String description,
+                              BigDecimal monthlyPrice, int maxUsers, int maxDevices, Integer maxInstallations,
+                              Integer maxDocumentsPerMonth) {
+        // PlanUpdateRequest no admite code: el codigo del plan es inmutable.
+        return api.put(path("/plans/" + id), token, cid, PlatformApiClient.body(
+                "name", name, "description", description, "monthlyPrice", monthlyPrice,
+                "maxUsers", maxUsers, "maxDevices", maxDevices, "maxInstallations", maxInstallations,
+                "maxDocumentsPerMonth", maxDocumentsPerMonth), PlanDto.class);
+    }
+
     public PlanDto activatePlan(String token, String cid, UUID id) {
         return api.post(path("/plans/" + id + "/activate"), token, cid, null, PlanDto.class);
     }
@@ -166,9 +177,17 @@ public class PlatformRestClient {
                 "contactName", contactName), InstallationDto.class);
     }
 
+    public InstallationDto updateInstallation(String token, String cid, UUID id, String name,
+                                              String address, String contactName) {
+        // InstallationUpdateRequest no admite tenantId: la instalacion no cambia de tenant.
+        return api.put(path("/installations/" + id), token, cid, PlatformApiClient.body(
+                "name", name, "address", address, "contactName", contactName), InstallationDto.class);
+    }
+
     public InstallationDto setInstallationMaintenance(String token, String cid, UUID id, boolean maintenance) {
-        return api.post(path("/installations/" + id + "/maintenance"), token, cid,
-                PlatformApiClient.body("maintenance", maintenance), InstallationDto.class);
+        // El API declara @RequestParam boolean value: debe viajar como query param, no como cuerpo.
+        return api.postWithQuery(path("/installations/" + id + "/maintenance"), token, cid,
+                PlatformApiClient.body("value", maintenance), InstallationDto.class);
     }
 
     public InstallationDto deactivateInstallation(String token, String cid, UUID id) {
@@ -243,13 +262,16 @@ public class PlatformRestClient {
                 "description", description, "priority", priority), SupportTicketDto.class);
     }
 
-    public SupportTicketDto assignTicket(String token, String cid, UUID id, UUID assignedTo) {
-        return api.post(path("/support/tickets/" + id + "/assign"), token, cid,
-                PlatformApiClient.body("assignedTo", assignedTo), SupportTicketDto.class);
+    public SupportTicketDto assignTicket(String token, String cid, UUID id, UUID operatorId) {
+        // El API declara @RequestParam UUID operatorId.
+        return api.postWithQuery(path("/support/tickets/" + id + "/assign"), token, cid,
+                PlatformApiClient.body("operatorId", operatorId), SupportTicketDto.class);
     }
 
-    public SupportTicketDto resolveTicket(String token, String cid, UUID id) {
-        return api.post(path("/support/tickets/" + id + "/resolve"), token, cid, null, SupportTicketDto.class);
+    public SupportTicketDto resolveTicket(String token, String cid, UUID id, String resolution) {
+        // El API declara @RequestParam String resolution y la resolucion es obligatoria.
+        return api.postWithQuery(path("/support/tickets/" + id + "/resolve"), token, cid,
+                PlatformApiClient.body("resolution", resolution), SupportTicketDto.class);
     }
 
     public SupportTicketDto closeTicket(String token, String cid, UUID id) {
@@ -274,6 +296,13 @@ public class PlatformRestClient {
         return api.get(path("/audit"), token, cid,
                 new ParameterizedTypeReference<PageResult<AuditEntryDto>>() {
                 }, query);
+    }
+
+    // ------------------------------------------------------------------- users
+
+    /** Operadores de plataforma; alimenta el selector de responsable de un ticket. */
+    public List<PlatformUserDto> users(String token, String cid) {
+        return api.getList(path("/users"), token, cid, PlatformUserDto[].class, Map.of());
     }
 
     private static String path(String suffix) {

@@ -50,6 +50,24 @@ public class SubscriptionBean extends AbstractPageBean {
         plans = call(() -> restClient.plans(token, cid), plans);
     }
 
+    /** El selector de plan solo ofrece planes activos. */
+    public List<PlanDto> activePlans() {
+        return plans.stream().filter(PlanDto::isActive).toList();
+    }
+
+    /**
+     * Un tenant admite varias suscripciones, pero solo una ACTIVE. Avisa antes de llamar al
+     * API para explicar la regla sin esperar el 409.
+     */
+    public boolean tenantHasActivePlan(UUID tenant) {
+        if (tenant == null) {
+            return false;
+        }
+        return subscriptions.stream()
+                .anyMatch(subscription -> "ACTIVE".equals(subscription.getStatus())
+                        && tenant.equals(subscription.getTenantId()));
+    }
+
     public void filterByTenant() {
         load();
     }
@@ -57,6 +75,10 @@ public class SubscriptionBean extends AbstractPageBean {
     public void create() {
         if (tenantId == null || planId == null) {
             error("Seleccione tenant y plan");
+            return;
+        }
+        if (tenantHasActivePlan(tenantId)) {
+            error("El tenant ya tiene un plan activo: suspenda o cancele la suscripcion vigente antes de crear otra");
             return;
         }
         String cid = correlationId();
