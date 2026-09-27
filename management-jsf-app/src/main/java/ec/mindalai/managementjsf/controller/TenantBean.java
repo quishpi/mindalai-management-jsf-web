@@ -10,7 +10,6 @@ import jakarta.inject.Named;
 import lombok.Getter;
 import lombok.Setter;
 import org.primefaces.PrimeFaces;
-import org.primefaces.event.ToggleEvent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -64,11 +63,20 @@ public class TenantBean extends AbstractPageBean {
     private String statusAction;
     private String statusReason;
 
+    /** Historial ya consultado, por tenant, para no repetir la llamada al abrir el dialog. */
     private final Map<UUID, List<TenantStatusHistoryDto>> historyByTenant = new HashMap<>();
     private List<TenantStatusHistoryDto> selectedHistory = new ArrayList<>();
 
     public String[] getStatuses() {
         return STATUSES.clone();
+    }
+
+    /**
+     * Numero de orden de una fila. {@code rowIndexVar} de la tabla entrega el indice global de
+     * la fila, de modo que la numeracion continua entre paginas sin depender del bean.
+     */
+    public int rowNumber(int rowIndex) {
+        return rowIndex + 1;
     }
 
     public void load() {
@@ -164,17 +172,6 @@ public class TenantBean extends AbstractPageBean {
         }
         selectedTenant = tenant;
         refreshHistory(tenant);
-    }
-
-    /** La fila expandible pide el historial del tenant la primera vez que se despliega. */
-    public void onRowToggle(ToggleEvent event) {
-        if (event != null && event.getData() instanceof TenantDto tenant) {
-            refreshHistory(tenant);
-        }
-    }
-
-    public List<TenantStatusHistoryDto> historyOf(TenantDto tenant) {
-        return tenant == null ? List.of() : historyByTenant.getOrDefault(tenant.getId(), List.of());
     }
 
     /** Severidad del tag de estado: SUSPENDED se muestra sobre fondo rojo. */

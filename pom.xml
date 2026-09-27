@@ -26,5 +26,8 @@
         <joinfaces.version>6.1.0</joinfaces.version>
         <primefaces.version>14.0.8</primefaces.version>
         <lombok.version>1.18.42</lombok.version>
+        <!-- Versiones que usa el showcase de Harmony para sus exportadores. -->
+        <poi.version>5.0.0</poi.version>
+        <openpdf.version>2.0.3</openpdf.version>
     </properties>
 </project>
