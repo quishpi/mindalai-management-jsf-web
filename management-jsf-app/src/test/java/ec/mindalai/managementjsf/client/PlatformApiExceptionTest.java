@@ -34,6 +34,27 @@ class PlatformApiExceptionTest {
     }
 
     @Test
+    void detectsConflictByStatusOrCode() {
+        assertThat(exception(409, "CONFLICT").isConflict()).isTrue();
+        assertThat(exception(0, "CONFLICT").isConflict()).isTrue();
+        assertThat(exception(400, "VALIDATION_ERROR").isConflict()).isFalse();
+    }
+
+    @Test
+    void conflictKeepsDetailCodeSentAsText() {
+        PlatformApiException ex = new PlatformApiException(ApiError.builder()
+                .status(409)
+                .code("CONFLICT")
+                .message("Ya existe un tenant con el RUC 1790012345001")
+                .details("TENANT_DUPLICATED_RUC")
+                .build());
+
+        assertThat(ex.isConflict()).isTrue();
+        assertThat(ex.getError().hasDetails()).isTrue();
+        assertThat(ex.getError().detailText()).isEqualTo("TENANT_DUPLICATED_RUC");
+    }
+
+    @Test
     void keepsCorrelationIdForSupport() {
         PlatformApiException ex = new PlatformApiException(ApiError.builder()
                 .status(409)

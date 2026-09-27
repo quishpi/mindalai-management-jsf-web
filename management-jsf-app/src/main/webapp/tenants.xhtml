@@ -12,69 +12,18 @@
 
         <p:messages id="globalMessages" showSummary="false" showDetail="true" closable="true" />
 
-        <div class="grid">
+        <div class="grid crud-demo">
             <div class="col-12">
                 <h1 class="text-3xl font-medium">Tenants</h1>
                 <p class="text-color-secondary">Empresas cliente de la plataforma</p>
             </div>
 
-            <div class="col-12 lg:col-4">
-                <div class="card">
-                    <div class="card-content">
-                        <h2 class="text-xl font-semibold mb-3"
-                            styleClass="formTitle">#{tenantBean.editing ? 'Editar tenant' : 'Nuevo tenant'}</h2>
-
-                        <h:form id="tenantForm">
-                            <div class="field">
-                                <p:outputLabel for="legalName" value="Razon social *" />
-                                <p:inputText id="legalName" value="#{tenantBean.legalName}" required="true"
-                                             requiredMessage="La razon social es obligatoria" styleClass="w-full" />
-                            </div>
-
-                            <div class="field">
-                                <p:outputLabel for="ruc" value="RUC (13 digitos) *" />
-                                <p:inputText id="ruc" value="#{tenantBean.ruc}" required="true"
-                                             requiredMessage="El RUC es obligatorio" styleClass="w-full"
-                                             maxlength="13" />
-                            </div>
-
-                            <div class="field">
-                                <p:outputLabel for="tradeName" value="Nombre comercial" />
-                                <p:inputText id="tradeName" value="#{tenantBean.tradeName}" styleClass="w-full" />
-                            </div>
-
-                            <div class="field">
-                                <p:outputLabel for="email" value="Correo" />
-                                <p:inputText id="email" value="#{tenantBean.email}" styleClass="w-full" />
-                            </div>
-
-                            <div class="field">
-                                <p:outputLabel for="phone" value="Telefono" />
-                                <p:inputText id="phone" value="#{tenantBean.phone}" styleClass="w-full" />
-                            </div>
-
-                            <div class="flex justify-content-between mt-4">
-                                <p:commandButton id="saveButton" type="submit"
-                                                 value="#{tenantBean.editing ? 'Guardar cambios' : 'Registrar tenant'}"
-                                                 icon="pi pi-check" update=":tenantForm :listForm :globalMessages"
-                                                 process="@form" action="#{tenantBean.save}" />
-
-                                <p:commandButton id="cancelButton" value="Cancelar" icon="pi pi-times"
-                                                 severity="secondary" update=":tenantForm :listForm :globalMessages" process="@form"
-                                                 rendered="#{tenantBean.editing}"
-                                                 action="#{tenantBean.cancelEdit}" />
-                            </div>
-                        </h:form>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-12 lg:col-8">
+            <div class="col-12">
                 <div class="card">
                     <div class="card-content">
                         <h:form id="filterForm">
                             <div class="formgrid grid">
-                                <div class="field col-12 md:col-5">
+                                <div class="field col-12 md:col-4">
                                     <p:outputLabel for="statusFilter" value="Estado" />
                                     <p:selectOneMenu id="statusFilter" value="#{tenantBean.statusFilter}"
                                                      styleClass="w-full">
@@ -83,7 +32,7 @@
                                                        itemLabel="#{status}" itemValue="#{status}" />
                                     </p:selectOneMenu>
                                 </div>
-                                <div class="field col-12 md:col-5">
+                                <div class="field col-12 md:col-6">
                                     <p:outputLabel for="search" value="Buscar" />
                                     <p:inputText id="search" value="#{tenantBean.search}" styleClass="w-full"
                                                  placeholder="RUC, razon social o correo" />
@@ -97,48 +46,238 @@
                         </h:form>
 
                         <h:form id="listForm">
-                        <p:dataTable id="tenantsTable" value="#{tenantBean.tenants}" var="tenant" paginator="true"
-                                     rows="10" emptyMessage="No hay tenants que coincidan con el filtro"
-                                     styleClass="mt-3">
-                            <p:column headerText="RUC">
-                                <h:outputText value="#{tenant.ruc}" />
-                            </p:column>
-                            <p:column headerText="Razon social">
-                                <h:outputText value="#{tenant.legalName}" />
-                            </p:column>
-                            <p:column headerText="Comercial">
-                                <h:outputText value="#{tenant.tradeName}" />
-                            </p:column>
-                            <p:column headerText="Estado">
-                                <p:tag value="#{tenant.status}" severity="info" />
-                            </p:column>
-                            <p:column headerText="Acciones" style="width:14rem">
-                                <p:commandButton id="editButton" icon="pi pi-pencil" title="Editar"
-                                                 update=":tenantForm :listForm :globalMessages" process="@form"
-                                                 action="#{tenantBean.edit(tenant)}">
-                                    <f:param name="tenant" value="#{tenant}" />
-                                </p:commandButton>
-                                <p:commandButton id="suspendButton" icon="pi pi-pause" title="Suspender"
-                                                 update=":tenantForm :listForm :globalMessages" process="@this" styleClass="ml-1"
-                                                 rendered="#{tenant.status == 'ACTIVE'}"
-                                                 action="#{tenantBean.suspend(tenant)}">
-                                    <f:param name="tenant" value="#{tenant}" />
-                                </p:commandButton>
-                                <p:commandButton id="reactivateButton" icon="pi pi-play" title="Reactivar"
-                                                 update=":tenantForm :listForm :globalMessages" process="@this" styleClass="ml-1"
-                                                 rendered="#{tenant.status == 'SUSPENDED'}"
-                                                 action="#{tenantBean.reactivate(tenant)}">
-                                    <f:param name="tenant" value="#{tenant}" />
-                                </p:commandButton>
-                                <p:commandButton id="deactivateButton" icon="pi pi-ban" title="Desactivar"
-                                                 update=":tenantForm :listForm :globalMessages" process="@this" styleClass="ml-1"
-                                                 rendered="#{tenant.status != 'INACTIVE'}"
-                                                 action="#{tenantBean.deactivate(tenant)}">
-                                    <f:param name="tenant" value="#{tenant}" />
-                                </p:commandButton>
-                            </p:column>
-                        </p:dataTable>
+                            <p:toolbar styleClass="mb-4">
+                                <p:toolbarGroup>
+                                    <p:commandButton id="newButton" value="Nuevo tenant" icon="pi pi-plus"
+                                                     styleClass="ui-button-success" process="@this"
+                                                     update=":tenantForm :globalMessages"
+                                                     action="#{tenantBean.openNew}"
+                                                     oncomplete="PF('tenantDialogWidget').show()" />
+                                </p:toolbarGroup>
+                                <p:toolbarGroup align="right">
+                                    <span class="text-color-secondary text-sm">#{tenantBean.tenants.size()} tenants
+                                        listados</span>
+                                </p:toolbarGroup>
+                            </p:toolbar>
+
+                            <p:dataTable id="tenantsTable" widgetVar="tenantsTableWidget" var="tenant"
+                                         value="#{tenantBean.tenants}" rowKey="#{tenant.id}" reflow="true"
+                                         paginator="true" rows="10" paginatorPosition="bottom"
+                                         emptyMessage="No hay tenants que coincidan con el filtro">
+                                <p:ajax event="rowToggle" listener="#{tenantBean.onRowToggle}" />
+
+                                <f:facet name="header">
+                                    <div class="products-table-header">
+                                        <span style="font-weight: bold">Gestionar Tenants</span>
+                                        <span class="text-color-secondary">Despliegue la fila para ver el
+                                            historial de estados</span>
+                                    </div>
+                                </f:facet>
+
+                                <p:column style="width:2rem">
+                                    <p:rowToggler />
+                                </p:column>
+                                <p:column headerText="RUC">
+                                    <h:outputText value="#{tenant.ruc}" />
+                                </p:column>
+                                <p:column headerText="Razon social">
+                                    <h:outputText value="#{tenant.legalName}" />
+                                </p:column>
+                                <p:column headerText="Comercial">
+                                    <h:outputText value="#{tenant.tradeName}" />
+                                </p:column>
+                                <p:column headerText="Correo">
+                                    <h:outputText value="#{tenant.email}" />
+                                </p:column>
+                                <p:column headerText="Estado">
+                                    <p:tag value="#{tenant.status}"
+                                           severity="#{tenantBean.statusSeverity(tenant.status)}" />
+                                </p:column>
+                                <p:column headerText="Acciones" style="width:12rem">
+                                    <p:commandButton id="editButton" icon="pi pi-pencil" title="Editar"
+                                                     styleClass="edit-button rounded-button ui-button-success"
+                                                     process="@this" update=":tenantForm :globalMessages"
+                                                     action="#{tenantBean.edit(tenant)}"
+                                                     oncomplete="PF('tenantDialogWidget').show()">
+                                        <f:param name="tenant" value="#{tenant}" />
+                                    </p:commandButton>
+                                    <p:commandButton id="suspendButton" icon="pi pi-pause" title="Suspender"
+                                                     styleClass="ml-1" process="@this" update=":statusForm :globalMessages"
+                                                     rendered="#{tenant.status == 'ACTIVE'}"
+                                                     action="#{tenantBean.requestSuspend(tenant)}"
+                                                     oncomplete="PF('statusDialogWidget').show()">
+                                        <f:param name="tenant" value="#{tenant}" />
+                                    </p:commandButton>
+                                    <p:commandButton id="reactivateButton" icon="pi pi-play" title="Reactivar"
+                                                     styleClass="ml-1" process="@this" update=":statusForm :globalMessages"
+                                                     rendered="#{tenant.status == 'SUSPENDED'}"
+                                                     action="#{tenantBean.requestReactivate(tenant)}"
+                                                     oncomplete="PF('statusDialogWidget').show()">
+                                        <f:param name="tenant" value="#{tenant}" />
+                                    </p:commandButton>
+                                    <p:commandButton id="historyButton" icon="pi pi-history" title="Historial de estados"
+                                                     styleClass="ml-1" process="@this" update=":historyForm :globalMessages"
+                                                     action="#{tenantBean.openHistory(tenant)}"
+                                                     oncomplete="PF('historyDialogWidget').show()">
+                                        <f:param name="tenant" value="#{tenant}" />
+                                    </p:commandButton>
+                                </p:column>
+
+                                <p:rowExpansion>
+                                    <div class="p-3">
+                                        <h5>Historial de estados de #{tenant.ruc}</h5>
+                                        <p:dataTable var="entry" value="#{tenantBean.historyOf(tenant)}" reflow="true"
+                                                     emptyMessage="Sin cambios de estado registrados">
+                                            <p:column headerText="Transicion">
+                                                <h:outputText value="#{entry.transition()}" />
+                                            </p:column>
+                                            <p:column headerText="Motivo">
+                                                <h:outputText value="#{entry.reason}" />
+                                            </p:column>
+                                            <p:column headerText="Fecha y hora">
+                                                <h:outputText value="#{entry.changedAtText()}" />
+                                            </p:column>
+                                            <p:column headerText="Usuario">
+                                                <h:outputText value="#{entry.username}" />
+                                            </p:column>
+                                        </p:dataTable>
+                                    </div>
+                                </p:rowExpansion>
+                            </p:dataTable>
                         </h:form>
+
+                        <p:dialog id="tenantDialog" widgetVar="tenantDialogWidget" header="#{tenantBean.editing ? 'Editar tenant' : 'Nuevo tenant'}"
+                                  showEffect="fade" modal="true" responsive="true">
+                            <h:form id="tenantForm">
+                                <p:outputPanel id="tenantFormContent" styleClass="ui-fluid">
+                                    <p:messages id="tenantDialogMessages" showDetail="true" closable="true" />
+
+                                    <div class="field">
+                                        <p:outputLabel for="legalName" value="Razon social *" />
+                                        <p:inputText id="legalName" value="#{tenantBean.legalName}" required="true"
+                                                     requiredMessage="La razon social es obligatoria" styleClass="w-full" />
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="ruc" value="RUC (13 digitos) *" />
+                                        <p:inputText id="ruc" value="#{tenantBean.ruc}" required="true"
+                                                     requiredMessage="El RUC es obligatorio" styleClass="w-full"
+                                                     maxlength="13" disabled="#{tenantBean.editing}" />
+                                        <small class="text-color-secondary" rendered="#{tenantBean.editing}">El RUC no
+                                            se puede modificar.</small>
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="tradeName" value="Nombre comercial" />
+                                        <p:inputText id="tradeName" value="#{tenantBean.tradeName}" styleClass="w-full" />
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="email" value="Correo" />
+                                        <p:inputText id="email" value="#{tenantBean.email}" styleClass="w-full" />
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="phone" value="Telefono" />
+                                        <p:inputText id="phone" value="#{tenantBean.phone}" styleClass="w-full" />
+                                    </div>
+                                </p:outputPanel>
+
+                                <div class="flex justify-content-between mt-4">
+                                    <p:commandButton id="saveButton" value="Guardar" icon="pi pi-check"
+                                                     process="@form" update="@form :listForm :globalMessages"
+                                                     action="#{tenantBean.save}" />
+                                    <p:commandButton id="cancelButton" value="Cancelar" icon="pi pi-times"
+                                                     type="button" styleClass="ui-button-secondary"
+                                                     onclick="PF('tenantDialogWidget').hide()" />
+                                </div>
+                            </h:form>
+                        </p:dialog>
+
+                        <p:dialog id="statusDialog" widgetVar="statusDialogWidget"
+                                  header="#{tenantBean.statusAction == 'REACTIVATE' ? 'Reactivar tenant' : 'Suspender tenant'}"
+                                  showEffect="fade" modal="true" responsive="true">
+                            <h:form id="statusForm">
+                                <p:outputPanel id="statusFormContent" styleClass="ui-fluid">
+                                    <p:messages id="statusDialogMessages" showDetail="true" closable="true" />
+
+                                    <div class="field">
+                                        <p:outputLabel for="statusRuc" value="RUC" />
+                                        <p:inputText id="statusRuc" value="#{tenantBean.selectedTenant.ruc}"
+                                                     readonly="true" styleClass="w-full" />
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="statusLegalName" value="Razon social" />
+                                        <p:inputText id="statusLegalName" value="#{tenantBean.selectedTenant.legalName}"
+                                                     readonly="true" styleClass="w-full" />
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="statusReason" value="Motivo *" />
+                                        <p:inputTextarea id="statusReason" value="#{tenantBean.statusReason}" rows="3"
+                                                         required="true" styleClass="w-full"
+                                                         requiredMessage="El motivo es obligatorio"
+                                                         placeholder="Explique por que se cambia el estado del tenant" />
+                                    </div>
+                                </p:outputPanel>
+
+                                <div class="flex justify-content-between mt-4">
+                                    <p:commandButton id="confirmButton" value="Confirmar" icon="pi pi-check"
+                                                     process="@form"
+                                                     update="@form :historyForm :listForm :globalMessages"
+                                                     action="#{tenantBean.confirmStatusChange}" />
+                                    <p:commandButton id="cancelStatusButton" value="Cancelar" icon="pi pi-times"
+                                                     type="button" styleClass="ui-button-secondary"
+                                                     onclick="PF('statusDialogWidget').hide()" />
+                                </div>
+                            </h:form>
+                        </p:dialog>
+
+                        <p:dialog id="historyDialog" widgetVar="historyDialogWidget" header="Historial de estados"
+                                  showEffect="fade" modal="true" responsive="true">
+                            <h:form id="historyForm">
+                                <p:outputPanel id="historyFormContent" styleClass="ui-fluid">
+                                    <p:messages id="historyDialogMessages" showDetail="true" closable="true" />
+
+                                    <div class="field">
+                                        <p:outputLabel for="historyRuc" value="RUC" />
+                                        <p:inputText id="historyRuc" value="#{tenantBean.selectedTenant.ruc}"
+                                                     readonly="true" styleClass="w-full" />
+                                    </div>
+
+                                    <div class="field">
+                                        <p:outputLabel for="historyLegalName" value="Razon social" />
+                                        <p:inputText id="historyLegalName"
+                                                     value="#{tenantBean.selectedTenant.legalName}" readonly="true"
+                                                     styleClass="w-full" />
+                                    </div>
+
+                                    <p:dataTable id="historyTable" var="entry" value="#{tenantBean.selectedHistory}"
+                                                 reflow="true" emptyMessage="Sin cambios de estado registrados"
+                                                 styleClass="mt-3">
+                                        <p:column headerText="Transicion">
+                                            <h:outputText value="#{entry.transition()}" />
+                                        </p:column>
+                                        <p:column headerText="Motivo">
+                                            <h:outputText value="#{entry.reason}" />
+                                        </p:column>
+                                        <p:column headerText="Fecha y hora">
+                                            <h:outputText value="#{entry.changedAtText()}" />
+                                        </p:column>
+                                        <p:column headerText="Usuario">
+                                            <h:outputText value="#{entry.username}" />
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:outputPanel>
+
+                                <div class="flex justify-content-end mt-4">
+                                    <p:commandButton id="closeHistoryButton" value="Cerrar" icon="pi pi-times"
+                                                     type="button" styleClass="ui-button-secondary"
+                                                     onclick="PF('historyDialogWidget').hide()" />
+                                </div>
+                            </h:form>
+                        </p:dialog>
                     </div>
                 </div>
             </div>

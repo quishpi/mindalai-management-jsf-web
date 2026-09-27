@@ -42,4 +42,8 @@ public class PlatformApiException extends RuntimeException {
     public boolean isForbidden() {
         return error.getStatus() == 403 || "FORBIDDEN".equals(error.getCode());
     }
+
+    public boolean isConflict() {
+        return error.getStatus() == 409 || "CONFLICT".equals(error.getCode());
+    }
 }

@@ -13,6 +13,7 @@ import ec.mindalai.managementjsf.dto.PlatformUserDto;
 import ec.mindalai.managementjsf.dto.SubscriptionDto;
 import ec.mindalai.managementjsf.dto.SupportTicketDto;
 import ec.mindalai.managementjsf.dto.TenantDto;
+import ec.mindalai.managementjsf.dto.TenantStatusHistoryDto;
 import ec.mindalai.managementjsf.dto.UsageDto;
 import ec.mindalai.managementjsf.dto.UsageSummaryDto;
 import lombok.RequiredArgsConstructor;
@@ -63,16 +64,19 @@ public class PlatformRestClient {
                 "legalName", legalName, "tradeName", tradeName, "email", email, "phone", phone), TenantDto.class);
     }
 
-    public TenantDto suspendTenant(String token, String cid, UUID id) {
-        return api.post(path("/tenants/" + id + "/suspend"), token, cid, null, TenantDto.class);
+    public TenantDto suspendTenant(String token, String cid, UUID id, String reason) {
+        return api.post(path("/tenants/" + id + "/suspend"), token, cid,
+                PlatformApiClient.body("reason", reason), TenantDto.class);
     }
 
-    public TenantDto reactivateTenant(String token, String cid, UUID id) {
-        return api.post(path("/tenants/" + id + "/reactivate"), token, cid, null, TenantDto.class);
+    public TenantDto reactivateTenant(String token, String cid, UUID id, String reason) {
+        return api.post(path("/tenants/" + id + "/reactivate"), token, cid,
+                PlatformApiClient.body("reason", reason), TenantDto.class);
     }
 
-    public TenantDto deactivateTenant(String token, String cid, UUID id) {
-        return api.delete(path("/tenants/" + id), token, cid, TenantDto.class);
+    public List<TenantStatusHistoryDto> tenantStatusHistory(String token, String cid, UUID id) {
+        return api.getList(path("/tenants/" + id + "/status-history"), token, cid, TenantStatusHistoryDto[].class,
+                Map.of());
     }
 
     // -------------------------------------------------------------------- plans

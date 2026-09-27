@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -41,6 +42,24 @@ public abstract class AbstractPageBean implements Serializable {
         try {
             return operation.get();
         } catch (PlatformApiException ex) {
+            handle(ex);
+            return fallback;
+        }
+    }
+
+    /**
+     * Igual que {@link #call(Supplier, Object)} pero permite reformular el mensaje de los conflictos
+     * (HTTP 409), que el backend expresa con un codigo de detalle y un texto pensados para el API.
+     * Cualquier otro error sigue el camino comun, incluida la expiracion de sesion.
+     */
+    protected <T> T call(Supplier<T> operation, T fallback, Function<PlatformApiException, String> conflictMessage) {
+        try {
+            return operation.get();
+        } catch (PlatformApiException ex) {
+            if (ex.isConflict()) {
+                addMessage(FacesMessage.SEVERITY_ERROR, conflictMessage.apply(ex));
+                return fallback;
+            }
             handle(ex);
             return fallback;
         }
