@@ -115,13 +115,13 @@
                                 <p:column headerText="Acciones" exportable="false" style="width:12rem">
                                     <p:commandButton id="suspendButton" icon="pi pi-pause" title="Suspender"
                                         styleClass="rounded-button ui-button-warning" process="@this"
-                                        update=":messages" rendered="#{row.status == 'ACTIVE'}"
+                                        update=":messages :listForm" rendered="#{row.status == 'ACTIVE'}"
                                         action="#{subscriptionBean.suspend(row)}">
                                         <f:param name="row" value="#{row}" />
                                     </p:commandButton>
                                     <p:commandButton id="cancelButton" icon="pi pi-times" title="Cancelar"
                                         styleClass="ml-1 rounded-button ui-button-danger" process="@this"
-                                        update=":messages"
+                                        update=":messages :listForm"
                                         rendered="#{row.status == 'ACTIVE' or row.status == 'SUSPENDED'}"
                                         action="#{subscriptionBean.cancel(row)}">
                                         <f:param name="row" value="#{row}" />

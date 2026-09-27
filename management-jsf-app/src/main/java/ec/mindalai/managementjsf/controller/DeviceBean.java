@@ -165,11 +165,15 @@ public class DeviceBean extends AbstractPageBean {
     }
 
     public void heartbeat(DeviceDto device) {
-        run(() -> {
-            restClient.deviceHeartbeat(token(), correlationId(), device.getId());
-            success("Latido de " + device.getIdentifier() + " registrado");
-            load();
-        });
+        String cid = correlationId();
+        String token = token();
+        UUID id = device.getId();
+        DeviceDto updated = call(() -> restClient.deviceHeartbeat(token, cid, id), null);
+        if (updated == null) {
+            return;
+        }
+        success("Latido de " + updated.getIdentifier() + " registrado");
+        replaceInPlace(updated);
     }
 
     public String statusSeverity(String status) {

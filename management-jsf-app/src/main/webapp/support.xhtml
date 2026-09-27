@@ -134,7 +134,7 @@
                                     </p:commandButton>
                                     <p:commandButton id="closeButton" icon="pi pi-inbox" title="Cerrar"
                                         styleClass="ml-1 rounded-button ui-button-secondary" process="@this"
-                                        update=":messages"
+                                        update=":messages :listForm"
                                         rendered="#{row.status == 'OPEN' or row.status == 'IN_PROGRESS' or row.status == 'RESOLVED'}"
                                         action="#{supportBean.close(row)}">
                                         <f:param name="row" value="#{row}" />

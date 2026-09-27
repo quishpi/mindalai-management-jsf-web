@@ -120,19 +120,38 @@ public class SubscriptionBean extends AbstractPageBean {
     }
 
     public void suspend(SubscriptionDto subscription) {
-        run(() -> {
-            restClient.suspendSubscription(token(), correlationId(), subscription.getId());
-            success("Suscripcion suspendida");
-            load();
-        });
+        changeStatus(subscription, true);
     }
 
     public void cancel(SubscriptionDto subscription) {
-        run(() -> {
-            restClient.cancelSubscription(token(), correlationId(), subscription.getId());
-            success("Suscripcion cancelada");
-            load();
-        });
+        changeStatus(subscription, false);
+    }
+
+    /**
+     * Suspende o cancela la suscripcion y sustituye la fila por la version devuelta por el API,
+     * de modo que la tabla refleje el estado nuevo sin recargarse ni reordenarse.
+     */
+    private void changeStatus(SubscriptionDto subscription, boolean suspend) {
+        String cid = correlationId();
+        String token = token();
+        UUID id = subscription.getId();
+        SubscriptionDto updated = call(() -> suspend ? restClient.suspendSubscription(token, cid, id)
+                : restClient.cancelSubscription(token, cid, id), null);
+        if (updated == null) {
+            return;
+        }
+        success("Suscripcion " + (suspend ? "suspendida" : "cancelada") + " para " + updated.getTenantName());
+        replaceInPlace(updated);
+    }
+
+    private void replaceInPlace(SubscriptionDto updated) {
+        for (int i = 0; i < subscriptions.size(); i++) {
+            if (updated.getId().equals(subscriptions.get(i).getId())) {
+                subscriptions.set(i, updated);
+                return;
+            }
+        }
+        subscriptions.add(0, updated);
     }
 
     public void requestRenew(SubscriptionDto subscription) {
@@ -156,10 +175,10 @@ public class SubscriptionBean extends AbstractPageBean {
             return;
         }
         success("Suscripcion renovada hasta el " + renewUntil);
+        replaceInPlace(renewed);
         renewing = null;
         renewUntil = null;
         hideDialog(RENEW_DIALOG);
-        load();
     }
 
     /** El selector de plan solo ofrece planes activos. */

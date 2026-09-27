@@ -171,10 +171,10 @@ public class SupportBean extends AbstractPageBean {
             return;
         }
         success("Ticket asignado a " + operatorName(operator));
+        replaceInPlace(assigned);
         assigning = null;
         assignTo = null;
         hideDialog(ASSIGN_DIALOG);
-        load();
     }
 
     /** Abre el dialog de resolucion: el API exige el texto de resolucion. */
@@ -205,18 +205,32 @@ public class SupportBean extends AbstractPageBean {
             return;
         }
         success("Ticket resuelto");
+        replaceInPlace(resolved);
         resolving = null;
         resolution = null;
         hideDialog(RESOLVE_DIALOG);
-        load();
     }
 
     public void close(SupportTicketDto ticket) {
-        run(() -> {
-            restClient.closeTicket(token(), correlationId(), ticket.getId());
-            success("Ticket cerrado");
-            load();
-        });
+        String cid = correlationId();
+        String token = token();
+        UUID id = ticket.getId();
+        SupportTicketDto closed = call(() -> restClient.closeTicket(token, cid, id), null);
+        if (closed == null) {
+            return;
+        }
+        success("Ticket " + closed.getSubject() + " cerrado");
+        replaceInPlace(closed);
+    }
+
+    private void replaceInPlace(SupportTicketDto updated) {
+        for (int i = 0; i < tickets.size(); i++) {
+            if (updated.getId().equals(tickets.get(i).getId())) {
+                tickets.set(i, updated);
+                return;
+            }
+        }
+        tickets.add(0, updated);
     }
 
     public String statusSeverity(String status) {

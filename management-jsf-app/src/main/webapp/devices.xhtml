@@ -121,7 +121,7 @@
                                     </p:commandButton>
                                     <p:commandButton id="heartbeatButton" icon="pi pi-send" title="Registrar latido"
                                         styleClass="ml-1 rounded-button ui-button-secondary" process="@this"
-                                        update=":messages" action="#{deviceBean.heartbeat(row)}">
+                                        update=":messages :listForm" action="#{deviceBean.heartbeat(row)}">
                                         <f:param name="row" value="#{row}" />
                                     </p:commandButton>
                                     <p:commandButton id="historyButton" icon="pi pi-history"

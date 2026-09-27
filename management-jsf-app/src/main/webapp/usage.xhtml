@@ -34,7 +34,7 @@
                                 </div>
                                 <div class="field col-12 md:col-4 flex align-items-end">
                                     <p:commandButton id="summaryButton" value="Recalcular resumen" icon="pi pi-refresh"
-                                        update=":summaryTable :messages" process="@form"
+                                        update="summaryForm:summaryTable :messages" process="@form"
                                         action="#{usageBean.refreshSummary}" styleClass="w-full" />
                                 </div>
                             </div>

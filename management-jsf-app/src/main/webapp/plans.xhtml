@@ -92,13 +92,13 @@
                                     </p:commandButton>
                                     <p:commandButton id="activateButton" icon="pi pi-play" title="Activar"
                                         styleClass="ml-1 rounded-button ui-button-success" process="@this"
-                                        update=":messages" rendered="#{not plan.active}"
+                                        update=":messages :listForm" rendered="#{not plan.active}"
                                         action="#{planBean.activate(plan)}">
                                         <f:param name="plan" value="#{plan}" />
                                     </p:commandButton>
                                     <p:commandButton id="deactivateButton" icon="pi pi-pause" title="Desactivar"
                                         styleClass="ml-1 rounded-button ui-button-warning" process="@this"
-                                        update=":messages" rendered="#{plan.active}"
+                                        update=":messages :listForm" rendered="#{plan.active}"
                                         action="#{planBean.deactivate(plan)}">
                                         <f:param name="plan" value="#{plan}" />
                                     </p:commandButton>
@@ -107,8 +107,8 @@
                         </h:form>
 
                         <p:dialog id="planDialog" widgetVar="planDialogWidget"
-                            header="#{planBean.editing ? 'Editar plan' : 'Nuevo plan'}" showEffect="fade"
-                            modal="true" responsive="true" style="max-width: 94vw">
+                            header="#{planBean.editing ? 'Editar plan' : 'Nuevo plan'}" showEffect="fade" modal="true"
+                            responsive="true" style="max-width: 94vw">
                             <h:form id="planForm">
                                 <p:outputPanel id="planFormContent" styleClass="ui-fluid"
                                     style="max-height: 60vh; overflow-y: auto">
@@ -158,28 +158,36 @@
                                         </div>
                                         <div class="field col-12 md:col-6">
                                             <p:outputLabel for="maxDocuments" value="Comprobantes por mes" />
-                                            <p:inputNumber id="maxDocuments"
-                                                value="#{planBean.maxDocumentsPerMonth}" styleClass="w-full"
-                                                minValue="0" placeholder="Sin limite" />
+                                            <p:inputNumber id="maxDocuments" value="#{planBean.maxDocumentsPerMonth}"
+                                                styleClass="w-full" minValue="0" placeholder="Sin limite" />
                                         </div>
                                     </div>
 
                                     <div class="field mt-3">
-                                        <p:outputLabel for="featureList" value="Features del plan" />
-                                        <p:selectManyMenu id="featureList" value="#{planBean.selectedFeatures}"
-                                            styleClass="w-full" style="height:14rem"
-                                            label="#{planBean.features.size()} features disponibles">
-                                            <f:selectItems value="#{planBean.features}" var="feature"
-                                                itemLabel="#{feature.name} (#{feature.code})" itemValue="#{feature.id}" />
-                                        </p:selectManyMenu>
-                                        <small class="text-color-secondary">Un plan debe incluir al menos una
-                                            feature.</small>
+                                        <p:outputLabel for="featureBoxes" value="Features del plan" />
+                                        <p:outputPanel id="featureBoxes" styleClass="surface-100 p-3 border-round"
+                                            style="max-height: 16rem; overflow-y: auto">
+                                            <div class="formgrid grid">
+                                                <ui:repeat value="#{planBean.featureOptions}" var="option">
+                                                    <div class="field col-12 md:col-6">
+                                                        <p:selectBooleanCheckbox itemLabel="#{option.label()}"
+                                                            value="#{option.selected}" />
+                                                    </div>
+                                                </ui:repeat>
+                                            </div>
+                                            <h:outputText id="noFeatures" styleClass="text-color-secondary"
+                                                rendered="#{empty planBean.featureOptions}"
+                                                value="No hay features en el catalogo" />
+                                        </p:outputPanel>
+                                        <small class="text-color-secondary">
+                                            #{planBean.featureOptions.size()} features disponibles. Un plan debe
+                                            incluir al menos una feature.</small>
                                     </div>
                                 </p:outputPanel>
 
                                 <div class="flex justify-content-between mt-4">
-                                    <p:commandButton id="saveButton" value="Guardar" icon="pi pi-check"
-                                        process="@form" update="@form :listForm :messages" action="#{planBean.save}" />
+                                    <p:commandButton id="saveButton" value="Guardar" icon="pi pi-check" process="@form"
+                                        update="@form :listForm :messages" action="#{planBean.save}" />
                                     <p:commandButton id="cancelButton" value="Cancelar" icon="pi pi-times" type="button"
                                         styleClass="ui-button-secondary" onclick="PF('planDialogWidget').hide()" />
                                 </div>
